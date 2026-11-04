@@ -17,10 +17,11 @@ h1 { margin: 6px 0 0; font-size: clamp(34px, 4vw, 48px); letter-spacing: .04em; 
 button { font: inherit; cursor: pointer; }
 .point { position: relative; margin: 0; border: 0; padding: 0; border-radius: 50%; background: none; touch-action: manipulation; }
 .point:focus-visible { outline: 2px solid #146e50; outline-offset: -2px; }
-.point[data-stone]::before, .sample { border-radius: 50%; }
+#board, .players { color-scheme: only light; }
+.point[data-stone]::before, .sample { border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat; forced-color-adjust: none; }
 .point[data-stone]::before { content: ""; position: absolute; inset: 6%; box-shadow: 0 2px 3px #42321b55; }
-.point[data-stone="黑"]::before, .black { background: radial-gradient(circle at 34% 27%, #5c6260, #202423 68%, #101412); }
-.point[data-stone="白"]::before, .white { background: radial-gradient(circle at 34% 27%, #fff, #f4f1e7 62%, #c6c2b4); border: 1px solid #b9b5a8; }
+.point[data-stone="黑"]::before, .black { background-image: url("./stone-black.svg"); }
+.point[data-stone="白"]::before, .white { background-image: url("./stone-white.svg"); }
 .point.last::after { content: ""; position: absolute; inset: 43%; border-radius: 50%; background: #c17140; }
 .point.win::before { outline: 2px solid #a14622; }
 @media (hover:hover) { .point:not([data-stone]):not([aria-disabled="true"]):hover { background: #50765640; } }
