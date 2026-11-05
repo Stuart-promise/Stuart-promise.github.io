@@ -67,14 +67,15 @@ function render() {
   statusLine.textContent = won ? `${stones[winningLine[0]]}棋获胜！` : full ? "和棋，本局结束" : `轮到${nextColor()}棋落子`;
   const online = !localMode;
   const ready = !online || room.phase === "playing";
-  const myTurn = ready && (!online || nextColor() === room.color);
+  const myTurn = ready && !room.pending && (!online || nextColor() === room.color);
   if (online) {
     if (!ready) statusLine.textContent = room.phase === "closed" ? "房间已断开" : "等待双人就位";
     else if (!won && !full) statusLine.textContent = myTurn ? `轮到你落子（${room.color}棋）` : "等待对方落子";
   }
+  if (online && room.pending) statusLine.textContent = "正在同步棋步…";
   undo.hidden = online;
   undo.disabled = !moves.length;
-  restart.disabled = online ? !ready || !moves.length || room.mineAgain : !moves.length;
+  restart.disabled = online ? !ready || !moves.length || room.mineAgain || room.pending : !moves.length;
   restart.textContent = online ? (room.mineAgain ? "等待对方同意" : room.theirAgain ? "同意重新开局" : "申请重新开局") : "重新开局";
   points.forEach((point, i) => {
     if (stones[i]) point.dataset.stone = stones[i];

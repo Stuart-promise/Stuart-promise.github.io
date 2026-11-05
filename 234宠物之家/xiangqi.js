@@ -13,7 +13,7 @@ let selected = null;
 let focusCell = 85;
 const names = {rK: "帅", rA: "仕", rE: "相", rH: "马", rR: "车", rC: "炮", rP: "兵", bK: "将", bA: "士", bE: "象", bH: "马", bR: "车", bC: "炮", bP: "卒"};
 const nextColor = () => chess.turn === "r" ? "红" : "黑";
-const canPlay = () => !chess.result && (localMode || room.phase === "playing" && room.color === nextColor());
+const canPlay = () => !chess.result && (localMode || room.phase === "playing" && !room.pending && room.color === nextColor());
 
 function drawGrid() {
   const ns = "http://www.w3.org/2000/svg";
@@ -57,9 +57,10 @@ function render() {
     const turn = online ? (active ? `轮到你走棋（${room.color}方）` : "等待对方走棋") : `轮到${nextColor()}方走棋`;
     statusLine.textContent = turn + (checked ? " · 将军！" : "");
   }
+  if (online && room.pending) statusLine.textContent = "正在同步棋步…";
   undo.hidden = online;
   undo.disabled = !moves.length;
-  restart.disabled = online ? !ready || !moves.length || room.mineAgain : !moves.length;
+  restart.disabled = online ? !ready || !moves.length || room.mineAgain || room.pending : !moves.length;
   restart.textContent = online ? (room.mineAgain ? "等待对方同意" : room.theirAgain ? "同意重新开局" : "申请重新开局") : "重新开局";
   const targets = selected === null ? [] : chess.targets(selected);
   const last = moves.at(-1);
