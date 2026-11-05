@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>俄罗斯方块 · 234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./blocks.css?v=blocks1">
+<script defer src="./blocks-engine.js?v=blocks1"></script><script defer src="./blocks.js?v=blocks1"></script></head>
+<body class="blocks-page">
+<header><a class="brand" href="./?v=blocks1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" href="./?v=blocks1">← 游戏主界面</a></header>
+<main><div class="intro"><span class="eyebrow">让每一块，各就其位 <i></i> 10</span><h1>俄罗斯方块</h1><p>旋转、落下、消除，挑战不断加快的节奏。</p></div>
+<div class="blocks-layout">
+<section class="blocks-play">
+<div class="blocks-stats"><span>得分<strong id="score">0</strong></span><span>最高<strong id="best">0</strong></span><span>等级<strong id="level">1</strong></span><span>消行<strong id="lines">0</strong></span></div>
+<div class="blocks-top"><button id="play">开始游戏</button><button id="restart">重新开始</button><span class="badge">单人游戏</span></div>
+<div class="blocks-arena">
+<canvas id="blocks-canvas" width="300" height="600" tabindex="0" role="application" aria-label="俄罗斯方块游戏区，左右键移动，上键旋转，下键软降，空格直接落下">请使用支持 Canvas 的浏览器。</canvas>
+<div class="preview-rail"><h2>下一块</h2><canvas id="next-0" width="100" height="80" role="img" aria-label="下一块预览"></canvas><canvas id="next-1" width="100" height="80" role="img" aria-label="第二块预览"></canvas><canvas id="next-2" width="100" height="80" role="img" aria-label="第三块预览"></canvas><h2>暂存</h2><canvas id="held-canvas" width="100" height="80" role="img" aria-label="暂存方块"></canvas></div>
+</div>
+<div class="touch-controls" aria-label="移动与旋转控制"><button data-action="left" aria-label="左移">←</button><button data-action="rotate" aria-label="顺时针旋转">↻</button><button data-action="right" aria-label="右移">→</button><button data-action="down" aria-label="加速下降">↓</button><button class="hold-control" data-action="hold">暂存 C</button><button class="drop-control" data-action="drop">直接落下 ⤓</button></div>
+<p id="blocks-status" role="status"></p>
+</section>
+<aside><h2>按键与玩法</h2><dl class="blocks-keys"><dt>← →</dt><dd>移动方块</dd><dt>↑ / X</dt><dd>顺时针旋转</dd><dt>Z</dt><dd>逆时针旋转</dd><dt>↓</dt><dd>加速下降</dd><dt>空格</dt><dd>直接落下并固定</dd><dt>C / Shift</dt><dd>暂存／换回方块</dd><dt>P / Esc</dt><dd>暂停或继续</dd></dl>
+<section class="rules"><h2>消行与升级</h2><p>填满一整行即可消除。一次消除 1／2／3／4 行，分别获得 100／300／500／800 × 当前等级的分数。每累计消除 10 行升一级，下落速度随等级加快。</p><p>软降每格 1 分，直接落下每格 2 分。轮廓方块提示落点。每块方块落定前只能暂存一次。方块堆到顶部时本局结束。</p><p>手机按住左右或下降按钮可连续操作。切换标签页或窗口会自动暂停。最高分保存在当前浏览器，刷新后本局重新开始。</p></section>
+</aside></div></main></body></html>
