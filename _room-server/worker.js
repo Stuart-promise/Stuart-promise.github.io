@@ -1,3 +1,4 @@
+import {newFlight, rollFlight, moveFlight} from "../234宠物之家/flight-engine.mjs";
 import { DurableObject } from "cloudflare:workers";
 
 const json = (body, status = 200) => Response.json(body, {status, headers: {"Cache-Control": "no-store"}});
@@ -18,7 +19,7 @@ export default {
     };
     if (request.method === "OPTIONS") return new Response(null, {status: 204, headers: cors});
     const url = new URL(request.url);
-    const match = url.pathname.match(/^\/v1\/rooms\/(gomoku|xiangqi)\/([0-9]{6})$/);
+    const match = url.pathname.match(/^\/v1\/rooms\/(gomoku|xiangqi|flight)\/([0-9]{6})$/);
     let response;
     if (url.pathname === "/health") response = json({ok: true, version: 1});
     else if (!match || !["GET", "POST"].includes(request.method)) response = fail("接口不存在", 404);
@@ -65,6 +66,7 @@ export class GameRoom extends DurableObject {
         }
       }
       if (!state || state.expires <= Date.now()) return fail("找不到房间，或房间已过期", 404);
+      if (state.game === "flight") return this.flightRequest(state, token, message);
       let seat = state.tokens.indexOf(token);
       if (action === "join" && seat < 0) {
         if (state.closed) return fail("房间已关闭，请重新开房", 410);
@@ -122,5 +124,63 @@ export class GameRoom extends DurableObject {
     });
   }
 
+
+  async flightRequest(state, token, message) {
+    const action=message?.action;
+    if (!state.flightVersion) {
+      state.tokens=[state.tokens[0],null,null,null];
+      state.flightVersion=1;
+      state.started=false;
+      state.flight=null;
+      state.recent=[];
+    }
+    let seat=state.tokens.indexOf(token);
+    if (action==="join" && seat<0) {
+      if(state.closed) return fail("房间已关闭",410);
+      if(state.started) return fail("游戏已经开始，请等待下一局或另开房间",409);
+      seat=state.tokens.indexOf(null);
+      if(seat<0)return fail("房间已经坐满，最多四人",409);
+      state.tokens[seat]=token;
+      state.version++;
+    }
+    if(seat<0)return fail("房间凭证无效",401);
+    if (message && !["create","join"].includes(action)) {
+      if(state.closed)return fail("房间已关闭",410);
+      if(typeof message.id!=="string" || message.id.length>80)return fail("操作编号无效",400);
+      if(state.recent.includes(message.id))return this.flightSnapshot(state,seat);
+      if (message.version!==state.version) return fail("棋盘已更新，请重试",409);
+      if(action==="start"){
+        if(seat!==0)return fail("请等待房主开始",403);
+        if(state.started && state.flight?.winner===null)return fail("游戏正在进行",409);
+        const players=state.tokens.flatMap((t,i)=>t?[i]:[]);
+        if(players.length<2)return fail("至少两人才能开始",409);
+        state.flight=newFlight(players);state.started=true;
+      } else if(action==="roll" || action==="plane"){
+        if(!state.started || state.flight.winner!==null)return fail("游戏尚未开始或已经结束",409);
+        if(state.flight.players[state.flight.turn]!==seat)return fail("请等待其他玩家操作",409);
+        const valid=action==="roll" ? rollFlight(state.flight, randomDie()) : moveFlight(state.flight,message.pawn);
+        if(!valid)return fail("当前不能进行此操作",409);
+      } else if(action==="leave"){
+        if(seat===0 || state.started)state.closed=true;
+        else state.tokens[seat]=null;
+      } else return fail("操作无效",400);
+      state.recent.push(message.id);
+      state.recent=state.recent.slice(-24);
+      state.version++;
+    }
+    if(message) await this.ctx.storage.put("room",state);
+    return this.flightSnapshot(state,seat);
+  }
+
+  flightSnapshot(state, seat) {
+    return json({seat,version:state.version,phase:state.closed?"closed":state.started?"playing":"waiting",players:state.tokens.map(Boolean),flight:state.flight});
+  }
+
   async alarm() { await this.ctx.storage.deleteAll(); }
+}
+
+function randomDie() {
+  const n=new Uint32Array(1);
+  do {crypto.getRandomValues(n);} while(n[0]>=4294967292);
+  return n[0]%6+1;
 }

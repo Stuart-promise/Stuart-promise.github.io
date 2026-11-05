@@ -1,0 +1,15 @@
+#entry,#tools:not([hidden]){display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+#code{width:8em}
+#players{list-style:none;padding:0;margin:18px 0}
+#players li{padding:7px 10px;margin:5px 0;border-radius:8px;border:1px solid var(--line);font-size:14px}
+.dice{text-align:center;font-size:55px;line-height:1.4;color:#263d33;background:#f4eddd;border:1px solid #d3c9b4;border-radius:12px;margin:12px auto;width:90px;color-scheme:only light}
+#plane-controls{display:flex;flex-wrap:wrap;gap:8px}
+#plane-controls button{padding:8px 12px;background:#e5eede;border:1px solid #7b9679;border-radius:8px;color:#263d33}
+#log{font-size:14px;color:var(--muted);min-height:40px}
+#flight-board{display:block;width:100%;height:auto;color-scheme:only light}
+#flight-board .plane{cursor:pointer}
+#flight-board .plane.available{filter:drop-shadow(0 0 4px #14663e)}
+#flight-board .plane:focus-visible{outline:3px solid #14663e}
+.flight-card{background:#e0edf0}
+.flight-art{font-size:70px;gap:14px;color:#2f7899}
+.flight-art span:nth-child(2){color:#b94535}
