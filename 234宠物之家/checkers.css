@@ -1,0 +1,13 @@
+.checkers-page main{max-width:1260px}
+.checkers-page .layout{grid-template-columns:minmax(0,1fr) 300px;gap:22px}
+.checkers-page .board-card{padding:8px;background:#dfe8d8;border-color:#afc1a4;box-shadow:0 5px 20px #263d3315}
+#checkers-board{width:100%;height:auto;display:block;color-scheme:only light}
+.checker-hole{cursor:pointer}
+.checker-hole:focus-visible{outline:none;filter:drop-shadow(0 0 4px #146139)}
+.blue-side{color:#176caa}
+.checkers-card{background:#e7e5f1}
+.checkers-art{gap:28px;font-size:24px;text-align:center;color:#aa3b3b}
+.checkers-art b{font-size:65px;color:#7c8397}
+.checkers-art span:last-child{color:#267caa}
+@media(max-width:950px){.checkers-page .layout{grid-template-columns:1fr}.checkers-page .board-card,.checkers-page aside{max-width:800px;width:100%}}
+@media(max-width:710px){.checkers-page main{padding-left:5px;padding-right:5px}.checkers-page .board-card{padding:2px}.checkers-page .intro,.checkers-page .lobby{margin-left:7px;margin-right:7px}}

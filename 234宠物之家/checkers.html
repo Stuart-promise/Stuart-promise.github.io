@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>跳棋 · 234宠物之家</title>
+  <link rel="stylesheet" href="./style.css?v=peer1">
+  <script defer src="./vendor/peerjs-1.5.5.min.js"></script>
+  <script defer src="./checkers-engine.js?v=checkers1"></script>
+  <script defer src="./checkers.js?v=checkers1"></script>
+  <script defer src="./rooms.js?v=checkers1"></script>
+<link rel="stylesheet" href="./checkers.css?v=checkers1">
+</head>
+<body data-game="checkers" class="checkers-page">
+  <header><a class="brand" href="./?v=checkers1" data-home><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a class="back-home" href="./?v=checkers1" data-home>← 游戏主界面</a><span class="room">宠物游戏室</span></header>
+  <main>
+    <div class="intro"><span class="eyebrow">桌游角 <i></i> 04</span><h1>跳棋</h1><p>上下相对，各执十子。先把全部棋子送进对面营地。</p></div>
+    <section class="lobby" aria-labelledby="room-title">
+      <div class="panel-head"><h2 id="room-title">对战房间</h2><button type="button" class="subtle" id="switch-mode">切换为同屏</button></div>
+      <div id="entry">
+        <p>创建房间后，把邀请码发给朋友。收到邀请码后，输入房间码即可加入。</p>
+        <form id="join-form">
+          <button type="button" class="primary" id="create">创建房间</button>
+          <input id="room-code" aria-label="六位房间码" placeholder="六位房间码" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="off" required>
+          <button type="submit">加入房间</button>
+        </form>
+      </div>
+      <div id="room-tools" hidden><strong id="code-display"></strong><button type="button" id="invite" hidden>复制邀请链接</button><button type="button" id="leave">退出房间</button></div>
+      <p id="room-note" role="status">房主执红，好友执蓝。</p>
+    </section>
+    <div class="layout">
+      <section class="board-card"><svg id="checkers-board" viewBox="0 0 720 760" role="group" aria-label="六角星双人跳棋棋盘，上方蓝方，下方红方"></svg></section>
+      <aside>
+        <div class="panel-head"><h2>本局对弈</h2><span class="badge" id="mode-badge">在线双人</span></div>
+        <p class="status" id="status" role="status"></p>
+        <div class="players"><div><i class="chess-sample red-side">●</i>红方 <small>先手</small></div><div><i class="chess-sample blue-side">●</i>蓝方 <small>后手</small></div></div>
+        <div class="detail">已走步数 <strong id="count">0</strong></div>
+        <div class="controls"><button id="undo" type="button">↶ 悔棋</button><button id="restart" type="button">重新开局</button></div>
+        <div class="detail">红方入营 <strong id="red-progress">0 / 10</strong></div>
+        <div class="detail">蓝方入营 <strong id="blue-progress">0 / 10</strong></div>
+        <section class="rules"><h2>玩法</h2><p>红方先行。每回合可向相邻空位走一步，或隔一枚相邻棋子跳到其正后的空位，可连续跳跃。跳过棋子不吃子。点击己方棋子后，所有可到达位置会用绿色标记，点击终点即可完成整段移动。</p><p>双方各十枚棋子，上下相对摆放。先把全部棋子移入对面十个营地的一方获胜。棋子进入目标营地后只能在该营地内移动。</p></section>
+        <p id="move-hint" role="status">点击己方棋子，绿色标记为可到达位置。</p>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

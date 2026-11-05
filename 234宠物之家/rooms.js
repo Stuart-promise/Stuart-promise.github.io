@@ -6,9 +6,10 @@ const room = {
   round: 1, mineAgain: false, theirAgain: false
 };
 const chessRoom = document.body.dataset.game === "xiangqi";
-const prefix = chessRoom ? "234-pet-xiangqi-v1-" : "234-pet-gomoku-v1-";
-const firstColor = chessRoom ? "红" : "黑";
-const secondColor = chessRoom ? "黑" : "白";
+const checkersRoom = document.body.dataset.game === "checkers";
+const prefix = checkersRoom ? "234-pet-checkers-v1-" : chessRoom ? "234-pet-xiangqi-v1-" : "234-pet-gomoku-v1-";
+const firstColor = chessRoom || checkersRoom ? "红" : "黑";
+const secondColor = checkersRoom ? "蓝" : chessRoom ? "黑" : "白";
 const seatingNote = `房主执${firstColor}，好友执${secondColor}。`;
 const validCode = code => /^[0-9]{6}$/.test(code);
 const note = message => { byId("room-note").textContent = message; };
@@ -180,7 +181,7 @@ byId("join-form").onsubmit = event => {
 byId("invite").onclick = async () => {
   const url = new URL(location.pathname, location.href);
   url.searchParams.set("room", room.code);
-  url.searchParams.set("v", "peer1");
+  url.searchParams.set("v", checkersRoom ? "checkers1" : "peer1");
   try {
     await navigator.clipboard.writeText(url.href);
     note("邀请链接已复制，可以发给好友了。");
