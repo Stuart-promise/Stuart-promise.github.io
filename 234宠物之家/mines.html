@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>扫雷 · 234宠物之家</title><link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./solo.css?v=solo1">
+<script defer src="./mines-engine.js?v=solo1"></script><script defer src="./mines.js?v=solo1"></script></head>
+<body class="solo-page mines-page"><header><a class="brand" href="./?v=solo1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" href="./?v=solo1">← 游戏主界面</a></header><main>
+<div class="intro"><span class="eyebrow">一个人的挑战 <i></i> 05</span><h1>扫雷</h1><p>从第一格开始，仔细推理每一颗地雷。</p></div>
+<section class="solo-toolbar"><label>难度 <select id="difficulty"><option value="easy">简单</option><option value="medium">中等</option><option value="hard">困难</option></select></label><button id="new-game">重新开始</button><span class="badge">单人游戏</span></section>
+<div class="solo-layout">
+<section class="solo-panel">
+  <div class="stats"><span>剩余雷数 <strong id="mine-left">10</strong></span><span>用时 <strong id="timer">00:00</strong></span></div>
+  <div class="mine-scroll" role="region" aria-label="扫雷棋盘，可横向滚动" tabindex="0"><div id="mine-board" class="mine-board" role="group"></div></div>
+  <p class="subtext">中等和困难棋盘较大，可在棋盘区域横向滑动查看。</p>
+</section>
+<aside><h2>排雷记录</h2><p class="status" id="solo-status" role="status"></p><p id="mine-size"></p><button id="flag-mode" class="wide-button" aria-pressed="false">⚑ 标旗模式</button>
+<section class="rules"><h2>玩法</h2><p>数字表示周围八格的地雷数量。打开所有安全格即可获胜，踩中地雷则本局结束。首次打开的格子及其周围八格安全。</p><p>电脑右键或键盘 F 可标旗。手机点击「标旗模式」后再点格子。标旗数量与已展开数字相同时，点击该数字可快速展开周围格，错误标旗可能触雷。</p><p>简单 9 × 9，10 雷；中等 16 × 16，40 雷；困难 16 × 30，99 雷。棋盘随机生成，可能需要猜测。</p></section>
+</aside></div></main></body></html>

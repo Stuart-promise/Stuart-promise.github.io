@@ -1,0 +1,36 @@
+.solo-page main{max-width:1140px}
+.solo-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 20px;margin-bottom:20px;background:#fcfdf7;border:1px solid var(--line);border-radius:14px}
+.solo-toolbar .badge{margin-left:auto}
+.solo-toolbar select,.solo-toolbar button,.wide-button,.tool-grid button,#number-pad button{font:inherit;color:var(--ink);background:#fbfcf6;border:1px solid #aabcaa;border-radius:8px;padding:9px 13px;cursor:pointer}
+.solo-toolbar label{display:flex;align-items:center;gap:10px}
+.solo-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+.solo-panel{min-width:0;background:#fcfdf8;border:1px solid var(--line);border-radius:16px;padding:20px}
+.stats{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px;font-size:14px;color:var(--muted)}
+.stats strong{color:var(--ink);font-size:18px;font-variant-numeric:tabular-nums}
+.subtext{font-size:13px;color:var(--muted);margin:12px 0 0}
+.solo-page aside .status{font-size:14px;line-height:1.6}
+.solo-page button:disabled{opacity:.45;cursor:default}
+.solo-page button[aria-pressed="true"]{background:#2d5b44;color:#fff}
+.wide-button{width:100%;margin-top:12px}
+.mine-scroll{overflow:auto;max-width:100%;border:1px solid #adbaa6;border-radius:5px;background:#b4bfae;padding:4px}
+.mine-board{display:grid;grid-template-columns:repeat(var(--mine-cols),32px);gap:2px;width:max-content;color-scheme:only light}
+.mine-cell{width:32px;height:32px;padding:0;border:1px solid #a9b6a0;border-top-color:#fff;border-left-color:#fff;background:#e4eadb;font:700 18px/1 system-ui;touch-action:manipulation;color:#785621;border-radius:3px}
+.mine-cell.open{background:#f5f5ed;border-color:#c9d2c0}
+.mine-cell[data-number="1"].open{color:#216bb2}.mine-cell[data-number="2"].open{color:#257341}.mine-cell[data-number="3"].open{color:#b33a30}.mine-cell[data-number="4"].open{color:#6c46a2}.mine-cell[data-number="5"].open{color:#8c392c}.mine-cell[data-number="6"].open{color:#187b7c}
+.mine-cell.mine{background:#efc2b5;color:#86302c}.mine-cell.wrong-flag{background:#f3d99e;color:#a5392f}
+#sudoku-board{display:grid;grid-template-columns:repeat(9,1fr);width:100%;max-width:560px;margin:auto;border:3px solid #526a5a;border-radius:4px;overflow:hidden;color-scheme:only light}
+.sudoku-cell{aspect-ratio:1;min-width:0;padding:0;border:0;border-right:1px solid #d0d9c8;border-bottom:1px solid #d0d9c8;background:#fffef7;color:#237ab1;font:500 clamp(20px,3vw,32px)/1 system-ui;touch-action:manipulation}
+.sudoku-cell.given{color:#273d33;font-weight:700}.sudoku-cell.related{background:#f1f4e9}.sudoku-cell.same{background:#e2ebd9}
+.sudoku-cell.selected{background:#d1e9dc;box-shadow:inset 0 0 0 2px #2c7957}
+.sudoku-cell.error{color:#af2f36;background:#ffe6df}
+.pencil-grid{display:grid;grid-template-columns:repeat(3,1fr);width:100%;height:100%;font-size:clamp(8px,1.2vw,12px);color:#657761;align-items:center}
+#number-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+#number-pad button{font-size:25px;background:#e5edde}
+.tool-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:12px}
+.tool-grid button{font-size:14px;padding:8px}
+.solo-art{gap:14px;font-size:40px;font-weight:700}
+.solo-art span{display:grid;place-items:center;width:64px;height:64px;border:1px solid #a3b59b;border-radius:10px;background:#f8fbef}
+.mines-card{background:#e8edd9}.sudoku-card{background:#e4edf1}
+.mines-art span:nth-child(2){color:#a36e27}.sudoku-art{color:#397b9b}
+@media(max-width:850px){.solo-layout{grid-template-columns:1fr}.solo-page aside{max-width:650px;width:100%}.solo-panel{max-width:100%}}
+@media(max-width:450px){.solo-page main{padding-left:8px;padding-right:8px}.solo-panel{padding:12px}.solo-toolbar{padding:12px;gap:8px}.solo-toolbar button,.solo-toolbar select{padding:7px 9px}}

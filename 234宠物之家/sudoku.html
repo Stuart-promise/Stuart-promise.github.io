@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>数独 · 234宠物之家</title><link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./solo.css?v=solo1">
+<script defer src="./sudoku-engine.js?v=solo1"></script><script defer src="./sudoku.js?v=solo1"></script></head>
+<body class="solo-page sudoku-page"><header><a class="brand" href="./?v=solo1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" href="./?v=solo1">← 游戏主界面</a></header><main>
+<div class="intro"><span class="eyebrow">一个人的挑战 <i></i> 06</span><h1>数独</h1><p>一行一列，找回每个数字的位置。</p></div>
+<section class="solo-toolbar"><label>难度 <select id="difficulty"><option value="easy">简单</option><option value="medium">中等</option><option value="hard">困难</option></select></label><button id="new-game">重新开始</button><span class="badge">单人游戏</span></section>
+<div class="solo-layout">
+<section class="solo-panel">
+  <div class="stats"><span>已填写 <strong id="filled">0 / 81</strong></span><span>用时 <strong id="timer">00:00</strong></span></div>
+  <div id="sudoku-board" role="group" aria-label="九宫数独棋盘"></div>
+  <p class="subtext" id="clues"></p>
+</section>
+<aside><h2>数字工具</h2><p class="status" id="solo-status" role="status"></p>
+<div id="number-pad" aria-label="输入数字"></div>
+<div class="tool-grid"><button id="notes" aria-pressed="false">笔记</button><button id="erase">擦除</button><button id="undo">撤回</button><button id="check">检查</button><button id="hint">提示一格</button></div>
+<p class="subtext">已使用提示 <strong id="hint-count">0</strong> 次</p>
+<section class="rules"><h2>玩法</h2><p>每行、每列和每个 3 × 3 宫均需填入不重复的 1～9。深色数字为题目给定，蓝色数字可修改。选中空格后，用下方数字键或键盘输入。</p><p>笔记模式可记录候选数字，键盘 N 可切换，Delete 可擦除。重复数字自动标红，「检查」会指出与答案不同的数字。</p><p>每道题均检查唯一解。简单 42 个提示数，中等 34 个，困难 28 个，按提示数划分难度。</p></section>
+</aside></div></main></body></html>

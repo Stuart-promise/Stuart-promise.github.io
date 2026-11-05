@@ -8,11 +8,12 @@
   <script defer src="./home.js?v=peer1"></script>
 <link rel="stylesheet" href="./flight.css?v=peer1">
 <link rel="stylesheet" href="./checkers.css?v=checkers1">
+<link rel="stylesheet" href="./solo.css?v=solo1">
 </head>
 <body>
   <header><a class="brand" href="./"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><span class="room">宠物游戏室</span></header>
   <main class="home">
-    <div class="intro"><span class="eyebrow">一起玩一局 <i></i> PLAY</span><h1>今天，一起玩什么？</h1><p>选一个游戏，邀请朋友入座。也可以在同一台设备上轮流对弈。</p></div>
+    <div class="intro"><span class="eyebrow">一起玩一局 <i></i> PLAY</span><h1>今天，一起玩什么？</h1><p>和朋友来一局对战，或独自挑战扫雷与数独。</p></div>
     <nav class="game-cards" aria-label="选择游戏">
       <a class="game-card gomoku-card" href="./gomoku.html?v=peer1">
         <span class="card-number">01 / GOMOKU</span>
@@ -37,6 +38,14 @@
         <div class="game-art checkers-art" aria-hidden="true"><span>●<br>● ●</span><b>✦</b><span>● ●<br>●</span></div>
         <h2>跳棋</h2><p>两军相对，连跳进营。</p>
         <span class="card-footer"><span>双人在线 · 双人同屏</span><b>开始跳棋 ↗</b></span>
+      </a>
+      <a class="game-card mines-card" href="./mines.html?v=solo1">
+        <span class="card-number">05 / MINESWEEPER</span><div class="game-art solo-art mines-art" aria-hidden="true"><span>1</span><span>⚑</span><span>2</span></div>
+        <h2>扫雷</h2><p>步步推理，找到安全的落点。</p><span class="card-footer"><span>单人 · 简单 / 中等 / 困难</span><b>开始排雷 ↗</b></span>
+      </a>
+      <a class="game-card sudoku-card" href="./sudoku.html?v=solo1">
+        <span class="card-number">06 / SUDOKU</span><div class="game-art solo-art sudoku-art" aria-hidden="true"><span>1</span><span>5</span><span>9</span></div>
+        <h2>数独</h2><p>填满九宫格，解开数字谜题。</p><span class="card-footer"><span>单人 · 简单 / 中等 / 困难</span><b>开始解题 ↗</b></span>
       </a>
     </nav>
     <p class="home-tip">开房后分享六位邀请码，好友加入即可开始。对局期间请保持双方页面打开。</p>
