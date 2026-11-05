@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>动物2048 · 234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./animal2048.css?v=animals1">
+<script defer src="./animal2048-engine.js?v=animals1"></script><script defer src="./animal2048.js?v=animals1"></script>
+</head>
+<body class="animal-page">
+<header><a class="brand" href="./?v=animals1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" href="./?v=animals1">← 游戏主界面</a></header>
+<main><div class="intro"><span class="eyebrow">小小动物，大大世界 <i></i> 07</span><h1>动物 2048</h1><p>从小仓鼠到大象，合并相同动物，发现更大的朋友。</p></div>
+<div class="animal-layout">
+<section class="animal-play">
+<div class="animal-stats"><div>当前得分<strong id="score">0</strong></div><div>历史最高<strong id="best">0</strong></div><button id="new-game">重新开始</button></div>
+<p id="animal-status" role="status"></p>
+<div id="animal-board" role="grid" aria-label="动物2048棋盘" tabindex="0"></div>
+<div class="animal-bottom"><span>本局最大 <strong id="highest"></strong></span><button id="continue" hidden>继续挑战鲸类 →</button></div>
+<div class="direction-pad" aria-label="方向控制"><button data-direction="up" aria-label="向上移动">↑</button><button data-direction="left" aria-label="向左移动">←</button><button data-direction="down" aria-label="向下移动">↓</button><button data-direction="right" aria-label="向右移动">→</button></div>
+<p class="animal-note">手机在棋盘上滑动，电脑使用方向键或 WASD，也可点击方向按钮。</p><p id="save-note" class="animal-note"></p>
+</section>
+<aside><div class="panel-head"><h2>体型成长图鉴</h2><span class="badge">单人游戏</span></div>
+<p class="animal-note">按选取的成年体重参考值由小到大排列，已解锁的动物会亮起。</p>
+<ol id="animal-book"></ol>
+<details class="rules"><summary>怎么玩？</summary><p>棋盘为 4 × 4。同一方向滑动时，相同等级的两个动物合成下一级，每枚棋子在一回合内只合成一次。有效移动后随机出现一只仓鼠或兔，合成得分按对应的 2048 数值累计。无法移动时本局结束。</p><p>大象对应 2048，达成后可继续合成鲸类。蓝鲸之后以蓝鲸群的数量继续挑战。</p></details>
+<details class="rules"><summary>体型依据与资料</summary><p>体重是为游戏选取的成年个体参考值，实际体型随性别、品种和个体变化，部分物种的体重范围会重叠。合并数值属于游戏规则。</p><ul id="animal-sources"></ul></details>
+</aside></div></main>
+</body></html>

@@ -1,0 +1,33 @@
+.animal-page main{max-width:1140px}
+.animal-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.animal-play{padding:20px;border:1px solid #ccd8c5;border-radius:18px;background:#fcfdf6;min-width:0}
+.animal-stats{display:flex;align-items:center;gap:10px}
+.animal-stats>div{padding:9px 15px;border-radius:10px;background:#e7eddf;font-size:12px;color:#5d6b60;min-width:88px}
+.animal-stats strong{display:block;font-size:24px;color:#2b4938;font-variant-numeric:tabular-nums}
+.animal-stats button,.animal-bottom button,.direction-pad button{font:inherit;border:1px solid #a2b79a;border-radius:8px;background:#f5f8ee;padding:9px 12px;color:#2b4938;cursor:pointer}
+.animal-stats button{margin-left:auto;font-size:14px}
+#animal-status{min-height:3em;font-size:14px;color:#4c6652;margin:14px 0}
+#animal-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px;border-radius:14px;background:#aab99b;aspect-ratio:1;touch-action:none;user-select:none;color-scheme:only light;outline-offset:4px}
+.animal-cell{border-radius:9px;background:#d8dfca;aspect-ratio:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.animal-cell.filled{background:hsl(var(--tile-hue) 45% 86%);box-shadow:0 2px 2px #49694020}
+.animal-icon{font-size:clamp(28px,4.5vw,54px);line-height:1.1}
+.animal-name{font-size:clamp(10px,1.2vw,14px);font-weight:700;color:#254b36;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.animal-value{font-size:11px;color:#5c735e;line-height:1}
+.animal-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0;font-size:14px}
+.animal-bottom button{font-size:13px;background:#d9ebd7}
+.animal-note{font-size:13px;color:#64745f;margin:10px 0;line-height:1.6}
+.direction-pad{display:flex;justify-content:center;gap:8px}
+.direction-pad button{width:52px;font-size:22px;padding:5px}
+#animal-book{list-style:none;padding:0;margin:14px 0 0}
+#animal-book li{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #e4e9dc;padding:9px 0;font-size:14px}
+#animal-book li span:last-child{color:#67775e;font-size:12px}
+#animal-book li.locked{opacity:.48}
+#animal-sources{padding-left:20px;font-size:13px}
+#animal-sources a{color:#3f6b51}
+.pop{animation:animal-pop .16s ease-out}
+@keyframes animal-pop{0%{transform:scale(.88)}75%{transform:scale(1.04)}100%{transform:scale(1)}}
+.animals-card{background:#e9edda}
+.animals-art{gap:12px;font-size:54px}
+@media(prefers-reduced-motion:reduce){.pop{animation:none}}
+@media(max-width:850px){.animal-layout{grid-template-columns:1fr}.animal-page aside{width:100%;max-width:640px}.animal-play{max-width:640px;width:100%;margin:auto}}
+@media(max-width:450px){.animal-page main{padding-left:8px;padding-right:8px}.animal-play{padding:12px}#animal-board{padding:7px;gap:6px}.animal-icon{font-size:34px}.animal-stats>div{min-width:75px;padding:8px 10px}.animal-stats button{padding:8px;font-size:12px}.animal-cell{gap:1px}.animal-name{font-size:10px}}
