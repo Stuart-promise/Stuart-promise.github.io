@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>四季小院 · 234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./farm.css?v=farm1">
+<script src="./room-config.js?v=farm1"></script><script type="module" src="./farm.js?v=farm1"></script></head>
+<body class="farm-page">
+<header><a class="brand" href="./?v=farm1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" href="./?v=farm1">← 游戏主界面</a></header>
+<main>
+<section id="account-screen" class="account-screen">
+<div class="farm-welcome"><span class="eyebrow">把日子种进土里 <i></i> 09</span><h1>四季小院</h1><p>从几块田、一包种子开始，经营属于你的农场。</p><img src="./farm-scene.svg" alt="农舍、池塘、树木和鸡舍组成的田园小院"><div class="welcome-points"><span>🌱 四季种植</span><span>🐓 鸡舍养殖</span><span>🏡 持续经营</span><span>☁ 账号云存档</span></div><p class="farm-note">游戏日通过农舍睡觉推进。退出后进度保留，离线期间不会推进游戏日。</p></div>
+<div class="account-card">
+<div class="account-tabs" role="group" aria-label="账号操作"><button data-auth="login" aria-pressed="true">登录</button><button data-auth="register" aria-pressed="false">注册</button><button data-auth="reset" aria-pressed="false">找回密码</button></div>
+<h2 id="auth-title">回到你的农场</h2>
+<form id="account-form">
+<label>账号<input id="username" name="username" pattern="[A-Za-z0-9_]{3,24}" minlength="3" maxlength="24" autocomplete="username" required placeholder="3～24 位字母、数字或下划线"></label>
+<label id="recovery-label" hidden>恢复码<input id="recovery-input" autocomplete="off" maxlength="32" placeholder="注册时保存的 32 位恢复码"></label>
+<label id="password-label">密码<input id="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required placeholder="至少 8 个字符"></label>
+<label id="confirm-label" hidden>确认密码<input id="confirm-password" type="password" minlength="8" maxlength="128" autocomplete="new-password"></label>
+<button id="auth-submit" class="farm-primary">登录农场</button>
+</form>
+<button id="resume-account" hidden>重新连接已登录账号</button>
+<p id="auth-status" class="farm-message" role="status"></p>
+<p class="farm-note">账号忽略字母大小写。注册后请保存账号和恢复码，可用于找回密码。每次找回后会生成新的恢复码。存档需要连接云端。当前使用 Cloudflare，部分大陆网络可能访问超时。</p>
+</div></section>
+<section id="farm-screen" hidden>
+<div class="farm-topline"><div><span class="eyebrow">属于你的四季小院</span><h1 id="farm-name">我的农场</h1></div><div class="account-actions"><span id="save-state" role="status">云存档</span><button id="refresh-farm">刷新存档</button><button id="logout">退出登录</button></div></div>
+<div class="farm-hud"><span id="calendar"></span><span id="weather"></span><span>金币 <strong id="coins"></strong></span><span id="level"></span><span id="farm-clock"></span><span id="energy"></span></div>
+<div class="farm-layout">
+<section class="farm-world">
+<div class="farm-scene"><img src="./farm-scene.svg" alt="小院里的农舍、池塘与鸡舍"><span id="season-banner"></span></div>
+<div class="building-actions"><button id="sleep">🏡 农舍 · 睡觉</button><button id="forage">🌳 林地 · 采集</button><button id="view-coop">🐓 查看鸡舍</button></div>
+<div id="tool-bar" class="tool-bar" role="group" aria-label="农具">
+<button data-tool="clear">🪓 清理</button><button data-tool="hoe" aria-pressed="true">⛏ 开垦</button><button data-tool="seed">🌱 播种</button><button data-tool="water">💧 浇水</button><button data-tool="harvest">🧺 收获</button>
+</div>
+<div class="seed-row"><label>播种种类 <select id="seed-select"></select></label><span id="tool-help"></span></div>
+<div id="farm-grid" class="farm-grid" role="group" aria-label="农场土地，共 8 列 6 行"></div>
+<p id="farm-status" class="farm-message" role="status"></p>
+<div class="farm-progress"><span id="harvest-stats"></span><span id="earned-stats"></span><span id="land-stats"></span></div>
+</section>
+<aside class="farm-sidebar">
+<div class="panel-tabs" role="group" aria-label="农场面板"><button data-panel="shop" aria-pressed="true">送货商店</button><button data-panel="bag">背包</button><button data-panel="upgrade">建设</button><button data-panel="coop">鸡舍</button></div>
+<div id="side-content"></div>
+<details class="farm-rules"><summary>农场手册</summary>
+<p>先清理杂物，再开垦、播种、浇水。作物只有在浇水后的过夜才增长一天。成熟后选「收获」，在背包里出售农产品。</p><p>每季 28 天，四季循环。商店只出售当季种子，小麦四季可种。换季后不适应季节的作物会枯萎，可清理后重种。下雨会自动给作物浇水。</p><p>操作消耗体力并推进时间，22 点后需睡觉。睡觉恢复体力并进入次日。林地每天可以采集一次，野莓可售卖补贴种子钱。</p><p>收获积累经验，可解锁种子、扩建土地和建设鸡舍。小鸡需要饲料，两次喂养过夜后开始产蛋。每次操作由云端确认并自动保存，可用同一账号在另一台设备登录。</p></details>
+<details class="farm-rules"><summary>更改密码</summary><form id="password-form"><label>原密码<input id="old-password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></label><label>新密码<input id="new-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label><button type="submit">更新密码</button></form><p class="farm-note">更改后其他设备的登录将失效，农场进度保留。</p></details>
+</aside>
+</div></section>
+<dialog id="recovery-dialog"><h2>保存你的恢复码</h2><p id="recovery-account"></p><p>忘记密码时，可用账号和恢复码找回农场。恢复码请自行妥善保存。</p><input id="recovery-code" readonly aria-label="账号恢复码"><div class="dialog-buttons"><button id="copy-recovery">复制恢复码</button><button id="close-recovery" class="farm-primary">进入农场</button></div><p id="copy-status" role="status"></p></dialog>
+</main></body></html>

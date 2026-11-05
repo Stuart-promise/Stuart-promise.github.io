@@ -1,3 +1,4 @@
+export {FarmAccount} from "./farm.js";
 import {newFlight, rollFlight, moveFlight} from "../234宠物之家/flight-engine.mjs";
 import { DurableObject } from "cloudflare:workers";
 
@@ -22,6 +23,11 @@ export default {
     const match = url.pathname.match(/^\/v1\/rooms\/(gomoku|xiangqi|flight)\/([0-9]{6})$/);
     let response;
     if (url.pathname === "/health") response = json({ok: true, version: 1});
+    else if (/^\/v1\/farm\/[a-z0-9_]{3,24}\/(register|login|reset|state|action|logout|password)$/.test(url.pathname)) {
+      const username=url.pathname.split("/")[3];
+      const id=env.FARMS.idFromName(username);
+      response=await env.FARMS.get(id).fetch(request);
+    }
     else if (!match || !["GET", "POST"].includes(request.method)) response = fail("接口不存在", 404);
     else {
       const id = env.ROOMS.idFromName(match[1] + "-" + match[2]);
