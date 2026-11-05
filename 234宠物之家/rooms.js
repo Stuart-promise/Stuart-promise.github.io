@@ -5,7 +5,11 @@ const room = {
   phase: "idle", code: "", color: "", peer: null, link: null, timer: null,
   round: 1, mineAgain: false, theirAgain: false
 };
-const prefix = "234-pet-gomoku-v1-";
+const chessRoom = document.body.dataset.game === "xiangqi";
+const prefix = chessRoom ? "234-pet-xiangqi-v1-" : "234-pet-gomoku-v1-";
+const firstColor = chessRoom ? "红" : "黑";
+const secondColor = chessRoom ? "黑" : "白";
+const seatingNote = `房主执${firstColor}，好友执${secondColor}。`;
 const validCode = code => /^[0-9]{6}$/.test(code);
 const note = message => { byId("room-note").textContent = message; };
 
@@ -85,7 +89,7 @@ function beginPlay() {
 function receive(data) {
   if (!data || typeof data !== "object") return;
   if (data.type === "full" && room.phase === "connecting") return stopRoom("closed", "房间已经坐满，请换一个房间。");
-  if (data.type === "start" && room.color === "白" && room.phase === "connecting") return beginPlay();
+  if (data.type === "start" && room.color === secondColor && room.phase === "connecting") return beginPlay();
   if (data.type === "leave") return stopRoom("closed", "对方已退出，房间已关闭。");
   if (room.phase !== "playing" || data.round !== room.round) return;
   if (data.type === "again" && moves.length) {
@@ -105,7 +109,7 @@ function bindLink(link) {
   deadline("未能连接对方，请检查网络后重新加入。");
   link.on("open", () => {
     if (room.link !== link) return;
-    if (room.color === "黑" && transmit({type: "start"})) beginPlay();
+    if (room.color === firstColor && transmit({type: "start"})) beginPlay();
   });
   link.on("data", data => { if (room.link === link) receive(data); });
   const disconnected = () => {
@@ -117,7 +121,7 @@ function bindLink(link) {
 
 function openRoom(host, code) {
   if (room.phase !== "idle" || localMode) return;
-  room.color = host ? "黑" : "白";
+  room.color = host ? firstColor : secondColor;
   room.code = code;
   room.round = 1;
   room.mineAgain = room.theirAgain = false;
@@ -192,7 +196,7 @@ byId("switch-mode").onclick = () => {
   if (localMode && moves.length && !window.confirm("结束同屏对局，切换为在线模式？")) return;
   localMode = !localMode;
   clearBoard();
-  note(localMode ? "同屏模式：两人在这台设备上轮流落子。" : "房主执黑，好友执白。");
+  note(localMode ? "同屏模式：两人在这台设备上轮流落子。" : seatingNote);
   refreshLobby();
 };
 
@@ -202,3 +206,14 @@ if (validCode(invitedCode)) {
   note("好友邀请你对战，点击「加入房间」即可入座。");
 }
 refreshLobby();
+
+document.querySelectorAll("[data-home]").forEach(link => {
+  link.addEventListener("click", event => {
+    if ((room.phase === "playing" || localMode && moves.length) && !window.confirm("结束当前对局，返回游戏主界面？")) {
+      event.preventDefault();
+      return;
+    }
+    if (room.link?.open) transmit({type: "leave"});
+    stopRoom("idle", "");
+  });
+});

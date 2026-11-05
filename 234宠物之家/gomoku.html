@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>234宠物之家</title>
+  <link rel="stylesheet" href="./style.css?v=games2">
+  <script defer src="./vendor/peerjs-1.5.5.min.js"></script>
+  <script defer src="./game.js?v=games2"></script>
+  <script defer src="./rooms.js?v=games2"></script>
+</head>
+<body data-game="gomoku">
+  <header><a class="brand" href="./" data-home><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a class="back-home" href="./" data-home>← 游戏主界面</a><span class="room">宠物游戏室</span></header>
+  <main>
+    <div class="intro"><span class="eyebrow">桌游角 <i></i> 01</span><h1>五子棋</h1><p>开个房间，和朋友各执一色，先连成五子的一方获胜。</p></div>
+    <section class="lobby" aria-labelledby="room-title">
+      <div class="panel-head"><h2 id="room-title">对战房间</h2><button type="button" class="subtle" id="switch-mode">切换为同屏</button></div>
+      <div id="entry">
+        <p>创建房间后，把邀请码发给朋友。收到邀请码后，输入房间码即可加入。</p>
+        <form id="join-form">
+          <button type="button" class="primary" id="create">创建房间</button>
+          <input id="room-code" aria-label="六位房间码" placeholder="六位房间码" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="off" required>
+          <button type="submit">加入房间</button>
+        </form>
+      </div>
+      <div id="room-tools" hidden><strong id="code-display"></strong><button type="button" id="invite" hidden>复制邀请链接</button><button type="button" id="leave">退出房间</button></div>
+      <p id="room-note" role="status">房主执黑，好友执白。</p>
+    </section>
+    <div class="layout">
+      <section class="board-card" aria-label="五子棋盘"><div id="board" role="group" aria-label="十五路棋盘，可用方向键移动，回车键落子"></div></section>
+      <aside>
+        <div class="panel-head"><h2>本局对弈</h2><span class="badge" id="mode-badge">在线双人</span></div>
+        <p class="status" id="status" role="status"></p>
+        <div class="players"><div><i class="sample black"></i>黑棋 <small>先手</small></div><div><i class="sample white"></i>白棋 <small>后手</small></div></div>
+        <div class="detail">已落子 <strong id="count">0</strong></div>
+        <div class="controls"><button id="undo" type="button">↶ 悔棋</button><button id="restart" type="button">重新开局</button></div>
+        <section class="rules"><h2>玩法</h2><p>黑棋先行，双方轮流点击交叉点落子。横、竖或斜向连成五子或以上即胜。棋盘下满仍无胜方则为和棋。</p></section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>
