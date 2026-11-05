@@ -11,7 +11,7 @@ let moves=checkers.history;
 let localMode=false;
 let selected=null;
 const nextColor=()=>checkers.turn===0?"红":"蓝";
-const activeTurn=()=>checkers.winner===null && (localMode || room.phase==="playing" && room.color===nextColor());
+const activeTurn=()=>checkers.winner===null && !checkers.blocked && (localMode || room.phase==="playing" && room.color===nextColor());
 function element(tag,attrs,text) {
   const item=document.createElementNS(ns,tag);
   for(const [key,value] of Object.entries(attrs))item.setAttribute(key,value);
@@ -79,6 +79,7 @@ function render() {
   document.getElementById("red-progress").textContent=checkers.goals[0].filter(key=>checkers.pieces[key]===0).length+" / 10";
   document.getElementById("blue-progress").textContent=checkers.goals[1].filter(key=>checkers.pieces[key]===1).length+" / 10";
   if(!ready)statusLine.textContent=room.phase==="closed"?"房间已断开":"等待双人就位";
+  else if(checkers.blocked)statusLine.textContent="双方均无合法走法，等待协商重新开局";
   else if(checkers.winner!==null)statusLine.textContent=(checkers.winner===0?"红":"蓝")+"方获胜！";
   else statusLine.textContent=online?(active?"轮到你走棋（"+room.color+"方）":"等待对方走棋"):"轮到"+nextColor()+"方走棋";
   undo.hidden=online;
@@ -93,6 +94,8 @@ function place(move) {
   selected=null;
   const hops=moves.at(-1).path.length-1;
   hint.textContent=hops>1?"完成 "+hops+" 段连续跳跃。":"点击己方棋子，绿色标记为可到达位置。";
+  if(checkers.blocked) hint.textContent="双方回合均已跳过。当前无法继续走棋，可申请重新开局。";
+  else if(checkers.skipped.length) hint.textContent=(checkers.skipped[0]===0?"红":"蓝")+"方无合法走法，自动跳过回合，"+nextColor()+"方继续。";
   render();
 }
 function choose(key) {

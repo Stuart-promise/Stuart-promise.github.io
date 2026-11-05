@@ -27,13 +27,15 @@ class ChineseCheckers {
     this.homes.forEach((camp,seat)=>camp.forEach(key=>{this.pieces[key]=seat;}));
     this.turn=0;
     this.winner=null;
+    this.blocked=false;
+    this.skipped=[];
     this.history=[];
   }
 
-  destinations(from) {
+  destinations(from,seat=this.turn) {
     const destinations=new Map();
-    if(this.winner!==null || this.pieces[from]!==this.turn)return destinations;
-    const goal=new Set(this.goals[this.turn]);
+    if(this.winner!==null || this.blocked || this.pieces[from]!==seat)return destinations;
+    const goal=new Set(this.goals[seat]);
     const allowed=(current,to)=>this.cells.has(to) && !(to in this.pieces) && (!goal.has(current)||goal.has(to));
     const {q,r}=this.cells.get(from);
     for(const [dq,dr] of this.directions) {
@@ -67,15 +69,30 @@ class ChineseCheckers {
       this.destinations(move.from).has(move.to);
   }
 
+  hasMove(seat) {
+    return Object.keys(this.pieces).some(from=>this.pieces[from]===seat && this.destinations(from,seat).size>0);
+  }
+
   move(move) {
     if(!this.legal(move))return false;
     const path=this.destinations(move.from).get(move.to);
     const seat=this.turn;
     delete this.pieces[move.from];
     this.pieces[move.to]=seat;
-    this.history.push({from:move.from,to:move.to,path,seat});
+    this.skipped=[];
     if(this.goals[seat].every(key=>this.pieces[key]===seat))this.winner=seat;
-    else this.turn=1-seat;
+    else {
+      this.turn=1-seat;
+      if(!this.hasMove(this.turn)) {
+        this.skipped.push(this.turn);
+        this.turn=seat;
+        if(!this.hasMove(seat)) {
+          this.skipped.push(seat);
+          this.blocked=true;
+        }
+      }
+    }
+    this.history.push({from:move.from,to:move.to,path,seat,skipped:this.skipped.slice()});
     return true;
   }
 
@@ -86,5 +103,7 @@ class ChineseCheckers {
     this.pieces[last.from]=last.seat;
     this.turn=last.seat;
     this.winner=null;
+    this.blocked=false;
+    this.skipped=this.history.at(-1)?.skipped.slice()||[];
   }
 }
