@@ -1,0 +1,38 @@
+.study-index,.course {max-width:1120px}
+.study-index h1,.course-heading h1 {font-size:clamp(28px,4vw,40px)}
+.study-index h1 {margin-bottom:24px}
+.course-card {display:block;max-width:680px;color:var(--ink);background:#e8efdf;border:1px solid #bbcbb1;border-radius:16px;padding:26px;text-decoration:none}
+.course-card h2 {font-size:27px;margin-bottom:10px}
+.course-card p {margin:8px 0}
+.course-card strong {display:inline-block;margin-top:12px}
+.course-heading,.actions,.task-tabs {display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.course-heading {justify-content:space-between;margin-bottom:22px}
+.course-heading p,.footnote {color:var(--muted);margin:5px 0}
+.course-grid {display:grid;grid-template-columns:242px minmax(0,1fr);gap:22px;align-items:start}
+.course button {padding:8px 12px;border:1px solid #a8b6a4;color:var(--ink);background:#fffef8;border-radius:8px}
+.course button:disabled {cursor:default;color:#667068;background:#f3f2ed}
+.course button.primary,.task-tabs button[aria-pressed=true] {background:#2d4e40;color:white}
+#roadmap,.lesson-head,.practice {padding:20px;background:#fffef8;border:1px solid var(--line);border-radius:16px}
+#roadmap progress {width:100%;accent-color:#467455;display:block;margin:10px 0 18px}
+#roadmap details {border-top:1px solid var(--line);padding:8px 0}
+#roadmap summary {cursor:pointer;font-weight:650}
+#roadmap button {display:block;text-align:left;width:100%;border:0;font-size:14px;margin-top:4px}
+#roadmap button[aria-current=true] {background:#e1ecd9;font-weight:700}
+#stage,.lesson-head small {color:var(--muted);font-size:14px}
+.lesson-head h2 {font-size:clamp(23px,3vw,31px);margin:5px 0}
+.lesson-head p,.practice p {line-height:1.7}
+.course pre {white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.65 Consolas,monospace}
+#example {padding:14px 18px;background:#eef2e8;border-radius:10px}
+.practice {margin-top:14px}
+.practice h3 {margin:0 0 12px}
+.practice h4 {font-size:20px;margin:16px 0 4px}
+.practice label {display:block;font-weight:650;margin:12px 0 5px}
+.sample {background:#f4f1e6;padding:10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.course textarea {display:block;width:100%;padding:12px;border:1px solid #acb7a8;border-radius:8px;font:15px/1.5 Consolas,monospace;color:#23392d;background:#fff;resize:vertical;tab-size:4}
+#source {min-height:178px}
+.actions {margin-top:12px}
+#output {background:#213b31;color:#f2f7ed;padding:14px;border-radius:9px;max-height:320px;overflow:auto}
+.footnote {font-size:13px;margin:12px 2px}
+#map-button,#store-warning:empty {display:none}
+@media(max-width:780px){.course-grid{display:block}#map-button{display:block}#roadmap{display:none;margin-bottom:12px}#roadmap.visible{display:block}.lesson-head,.practice{padding:16px}}
+#walk {margin:12px 0} #walk summary {cursor:pointer;color:#315c46}

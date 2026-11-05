@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python 闯关课 · 234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./learn.css?v=1">
+<script type="module" src="./python.js?v=1"></script>
+</head>
+<body>
+<header><a class="brand" href="./"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a class="back-home" href="./study.html?v=py1">← 学习页面</a></header>
+<main class="course">
+  <div class="course-heading"><div><h1>Python 闯关课</h1><p>24 关 · 72 道编程题 · 预计 24 小时 20 分钟</p></div><button id="map-button" type="button" aria-controls="roadmap">课程目录</button></div>
+  <p id="store-warning" role="status"></p>
+  <div class="course-grid">
+    <nav id="roadmap" aria-label="课程目录"><strong id="progress"></strong><progress id="meter" max="72" value="0"></progress><div id="chapters"></div></nav>
+    <article>
+      <section class="lesson-head"><span id="stage"></span><h2 id="title" tabindex="-1"></h2><p id="summary"></p><pre id="example"></pre><details id="walk"><summary>查看示例推演与常见错误</summary><p id="trace"></p><p id="pitfall"></p></details><small id="plan"></small></section>
+      <section class="practice"><h3>动手练习</h3><p>通过本关三道编程题，就能解锁下一关。自由实践可随时试跑。</p><div id="tasks" class="task-tabs"></div><h4 id="task-title"></h4><p id="goal"></p><p class="sample" id="sample"></p>
+        <label for="source">Python 代码</label><textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+        <label id="input-label" for="given">试跑输入</label><textarea id="given" rows="2" spellcheck="false" autocapitalize="off"></textarea>
+        <div class="actions"><button id="try">试跑代码</button><button id="submit" class="primary">检验答案</button><button id="stop" hidden>停止运行</button></div>
+        <pre id="output" aria-live="polite">运行结果会显示在这里。</pre>
+        <button id="next" hidden></button>
+      </section>
+      <p class="footnote">代码草稿和通关进度保存在当前浏览器。首次运行需要加载约 14 MB 的 Python 环境。</p>
+    </article>
+  </div>
+</main>
+</body></html>
