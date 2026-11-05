@@ -1,74 +1,37 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>234宠物之家 · 游戏室</title>
-  <link rel="stylesheet" href="./style.css?v=peer1">
-  <script defer src="./home.js?v=peer1"></script>
-<link rel="stylesheet" href="./flight.css?v=peer1">
-<link rel="stylesheet" href="./checkers.css?v=checkers1">
-<link rel="stylesheet" href="./solo.css?v=solo1">
-<link rel="stylesheet" href="./animal2048.css?v=animals1">
-<link rel="stylesheet" href="./animal-drop.css?v=drop1">
-<link rel="stylesheet" href="./farm.css?v=farm1">
-<link rel="stylesheet" href="./blocks.css?v=blocks1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./portal.css?v=portal1">
+<script defer src="./home.js?v=peer1"></script>
 </head>
-<body>
-  <header><a class="brand" href="./"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><span class="room">宠物游戏室</span></header>
-  <main class="home">
-    <div class="intro"><span class="eyebrow">一起玩一局 <i></i> PLAY</span><h1>今天，一起玩什么？</h1><p>和朋友对战，独自解谜，或在四季小院经营一片自己的田。</p></div>
-    <nav class="game-cards" aria-label="选择游戏">
-      <a class="game-card gomoku-card" href="./gomoku.html?v=peer1">
-        <span class="card-number">01 / GOMOKU</span>
-        <div class="game-art gomoku-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-        <h2>五子棋</h2><p>黑白交替，五子成线。</p>
-        <span class="card-footer"><span>在线开房 · 双人同屏</span><b>开始对弈 ↗</b></span>
-      </a>
-      <a class="game-card xiangqi-card" href="./xiangqi.html?v=peer1">
-        <span class="card-number">02 / XIANGQI</span>
-        <div class="game-art xiangqi-art" aria-hidden="true"><img src="./pieces/rK.svg" alt=""><span>楚河<br>汉界</span><img src="./pieces/bK.svg" alt=""></div>
-        <h2>中国象棋</h2><p>楚河汉界，车马争锋。</p>
-        <span class="card-footer"><span>在线开房 · 双人同屏</span><b>开始对弈 ↗</b></span>
-      </a>
-      <a class="game-card flight-card" href="./flight.html?v=cross1">
-        <span class="card-number">03 / AEROPLANE</span>
-        <div class="game-art flight-art" aria-hidden="true"><span>✈</span><span>✈</span></div>
-        <h2>飞行棋</h2><p>对角出发，掷 5 或 6 即可起飞。</p>
-        <span class="card-footer"><span>双人在线 · 加入即开局</span><b>进入机场 ↗</b></span>
-      </a>
-      <a class="game-card checkers-card" href="./checkers.html?v=checkers2">
-        <span class="card-number">04 / CHINESE CHECKERS</span>
-        <div class="game-art checkers-art" aria-hidden="true"><span>●<br>● ●</span><b>✦</b><span>● ●<br>●</span></div>
-        <h2>跳棋</h2><p>两军相对，连跳进营。</p>
-        <span class="card-footer"><span>双人在线 · 双人同屏</span><b>开始跳棋 ↗</b></span>
-      </a>
-      <a class="game-card mines-card" href="./mines.html?v=solo1">
-        <span class="card-number">05 / MINESWEEPER</span><div class="game-art solo-art mines-art" aria-hidden="true"><span>1</span><span>⚑</span><span>2</span></div>
-        <h2>扫雷</h2><p>步步推理，找到安全的落点。</p><span class="card-footer"><span>单人 · 简单 / 中等 / 困难</span><b>开始排雷 ↗</b></span>
-      </a>
-      <a class="game-card sudoku-card" href="./sudoku.html?v=solo1">
-        <span class="card-number">06 / SUDOKU</span><div class="game-art solo-art sudoku-art" aria-hidden="true"><span>1</span><span>5</span><span>9</span></div>
-        <h2>数独</h2><p>填满九宫格，解开数字谜题。</p><span class="card-footer"><span>单人 · 简单 / 中等 / 困难</span><b>开始解题 ↗</b></span>
-      </a>
-      <a class="game-card animals-card" href="./animal2048.html?v=animals1">
-        <span class="card-number">07 / ANIMAL 2048</span><div class="game-art animals-art" aria-hidden="true"><span>🐹</span><span>🐈</span><span>🐘</span></div>
-        <h2>动物 2048</h2><p>从小仓鼠到大象，越合越大。</p><span class="card-footer"><span>单人 · 滑动合成 · 自动保存</span><b>开始合成 ↗</b></span>
-      </a>
-      <a class="game-card drop-card" href="./animal-drop.html?v=drop1">
-        <span class="card-number">08 / ANIMAL DROP</span><div class="game-art drop-art" aria-hidden="true"><span>🐹</span><span>🐼</span><span>🐘</span></div>
-        <h2>动物合成大西瓜</h2><p>投下一只小动物，碰撞合成大家伙。</p><span class="card-footer"><span>单人 · 下落碰撞 · 最高分保存</span><b>开始投放 ↗</b></span>
-      </a>
-      <a class="game-card farm-card" href="./farm.html?v=farm1">
-        <span class="card-number">09 / FOUR SEASONS FARM</span><div class="game-art farm-art" aria-hidden="true"><span>🏡</span><span>🌾</span><span>🐓</span></div>
-        <h2>四季小院</h2><p>种下第一粒种子，经营四季的日常。</p><span class="card-footer"><span>单人 · 账号云存档 · 农场经营</span><b>进入小院 ↗</b></span>
-      </a>
-      <a class="game-card blocks-card" href="./blocks.html?v=blocks1">
-        <span class="card-number">10 / FALLING BLOCKS</span><div class="game-art blocks-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <h2>俄罗斯方块</h2><p>旋转下落，消行升级，挑战节奏。</p><span class="card-footer"><span>单人 · 等级加速 · 最高分保存</span><b>开始消行 ↗</b></span>
-      </a>
-    </nav>
-    <p class="home-tip">开房后分享六位邀请码，好友加入即可开始。对局期间请保持双方页面打开。</p>
-  </main>
-</body>
-</html>
+<body class="portal-page">
+<header><a class="brand" href="./?v=portal1"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><span class="room">主界面</span></header>
+<main class="portal-main">
+<div class="portal-intro"><span class="eyebrow">欢迎回来 <i></i> WELCOME</span><h1>今天，去哪个空间？</h1></div>
+<nav class="portal-cards" aria-label="选择学习或游戏">
+<a class="portal-card study-entry" href="./study.html?v=portal1">
+<span class="portal-number">01 / LEARN</span>
+<svg viewBox="0 0 240 160" class="portal-art" aria-hidden="true">
+<circle cx="120" cy="80" r="67" fill="#dce7d2"/>
+<path d="M41 44Q77 30 120 51Q158 30 199 44V124Q161 110 120 130Q79 110 41 124Z" fill="#fffbed" stroke="#69825e" stroke-width="3" stroke-linejoin="round"/>
+<path d="M120 51V130M56 59Q82 52 104 64M56 75Q82 68 104 80M56 91Q82 84 104 96M137 64Q161 52 185 59M137 80Q161 68 185 75M137 96Q161 84 185 91" fill="none" stroke="#9eaf8c" stroke-width="3" stroke-linecap="round"/>
+<path d="M173 36V88L161 78 150 88V38" fill="#c7aa73"/>
+</svg>
+<div class="portal-label"><h2>学习页面</h2><span aria-hidden="true">↗</span></div>
+</a>
+<a class="portal-card games-entry" href="./games.html?v=portal1">
+<span class="portal-number">02 / PLAY</span>
+<svg viewBox="0 0 240 160" class="portal-art" aria-hidden="true">
+<circle cx="120" cy="80" r="67" fill="#e4deee"/>
+<path d="M79 49H162Q181 49 188 69L202 112Q207 137 187 137Q178 137 163 116H77Q64 137 54 137Q33 137 39 112L52 69Q59 49 79 49Z" fill="#faf7ff" stroke="#7b7190" stroke-width="3"/>
+<path d="M80 70V102M64 86H96" stroke="#859681" stroke-width="10" stroke-linecap="round"/>
+<circle cx="160" cy="75" r="8" fill="#b0a3c2"/><circle cx="179" cy="94" r="8" fill="#c5ae82"/>
+<path d="M120 49V30H145" stroke="#9f96ae" stroke-width="3" stroke-linecap="round" fill="none"/>
+<rect x="112" y="83" width="10" height="5" rx="2" fill="#b4aec0"/><rect x="128" y="83" width="10" height="5" rx="2" fill="#b4aec0"/>
+</svg>
+<div class="portal-label"><h2>游戏页面</h2><span aria-hidden="true">↗</span></div>
+</a>
+</nav>
+</main></body></html>
