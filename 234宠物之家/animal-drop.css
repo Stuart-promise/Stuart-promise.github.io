@@ -1,0 +1,24 @@
+.drop-page main{max-width:1060px}
+.drop-page h1{font-size:clamp(29px,4vw,43px);letter-spacing:0}
+.drop-layout{display:grid;grid-template-columns:minmax(0,540px) minmax(260px,1fr);gap:24px;align-items:start}
+.drop-play{min-width:0;border:1px solid #cad4bb;border-radius:18px;background:#fcfcf4;padding:16px}
+.drop-stats{display:flex;align-items:center;gap:10px;font-size:13px;color:#617253;flex-wrap:wrap}
+.drop-stats strong{font-size:22px;color:#2d4936;font-variant-numeric:tabular-nums}
+.drop-stats button{font:inherit;padding:7px 10px;border:1px solid #a4b49b;border-radius:8px;background:#f2f5e9;color:#304f39;cursor:pointer}
+.drop-stats button:first-of-type{margin-left:auto}
+#drop-status{min-height:3em;font-size:14px;color:#586f4b;line-height:1.5}
+#drop-canvas{display:block;width:100%;height:auto;aspect-ratio:2/3;border:2px solid #a6b594;border-radius:12px;touch-action:none;cursor:crosshair;outline-offset:4px;color-scheme:only light}
+.aim-control{display:flex;align-items:center;gap:12px;margin:15px 0;font-size:14px;color:#5c7051}
+.aim-control input{flex:1;min-width:0;accent-color:#487146}
+.drop-button{width:100%;padding:11px;border:1px solid #49734b;background:#3d6545;color:white;border-radius:9px;font:600 16px system-ui;cursor:pointer}
+.drop-page button:disabled{opacity:.45;cursor:default}
+.drop-note{font-size:13px;color:#65775d;line-height:1.6}
+.drop-preview{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0;padding:12px;background:#edf1e3;border-radius:10px;font-size:14px}
+.drop-preview strong{font-size:18px}
+#drop-book{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px}
+#drop-book li{padding:7px;background:#f0f3e7;border-radius:7px}
+.drop-card{background:#f4e8d4}
+.drop-art{font-size:44px;gap:8px;align-items:end}
+.drop-art span:nth-child(2){font-size:60px;align-self:start}
+@media(max-width:820px){.drop-layout{grid-template-columns:1fr}.drop-play,.drop-page aside{max-width:540px;width:100%;margin:auto}}
+@media(max-width:450px){.drop-page main{padding-left:7px;padding-right:7px}.drop-play{padding:10px}.drop-stats{gap:8px}.drop-stats strong{font-size:20px}.drop-stats button{padding:6px 8px}}

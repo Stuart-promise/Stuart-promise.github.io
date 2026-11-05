@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>动物合成大西瓜 · 234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./animal-drop.css?v=drop1">
+<script defer src="./vendor/matter-0.20.0.min.js"></script><script defer src="./animal-drop-engine.js?v=drop1"></script><script defer src="./animal-drop.js?v=drop1"></script></head>
+<body class="drop-page">
+<header><a class="brand" href="./?v=drop1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" href="./?v=drop1">← 游戏主界面</a></header>
+<main><div class="intro"><span class="eyebrow">落下一只，合成惊喜 <i></i> 08</span><h1>动物合成大西瓜</h1><p>让小动物滚到一起，从仓鼠一路合成大象。</p></div>
+<div class="drop-layout">
+<section class="drop-play"><div class="drop-stats"><span>得分 <strong id="score">0</strong></span><span>最高 <strong id="best">0</strong></span><button id="pause">暂停</button><button id="new-game">重新开始</button></div>
+<p id="drop-status" role="status"></p>
+<canvas id="drop-canvas" width="440" height="660" tabindex="0" role="application" aria-label="动物下落容器，左右方向键选择位置，空格或回车投放动物">请使用支持 Canvas 的浏览器。</canvas>
+<label class="aim-control">选择落点<input id="aim" type="range" min="12" max="428" value="220"></label>
+<button class="drop-button" id="drop-button">投放动物 ↓</button>
+<p class="drop-note">手机在容器内拖动并松手投放，电脑点击落点。也可使用滑杆和投放按钮。</p></section>
+<aside><div class="panel-head"><h2>本局小伙伴</h2><span class="badge">单人游戏</span></div>
+<div class="drop-preview">当前 <strong id="current-animal"></strong></div><div class="drop-preview">下一只 <strong id="next-animal"></strong></div>
+<p class="drop-note">本局最大 <strong id="highest"></strong></p>
+<section class="rules"><h2>体型升级顺序</h2><ol id="drop-book"></ol><p>沿用动物 2048 的成年体重参考顺序。容器中的圆形大小按游戏等级递增。</p></section>
+<details class="rules"><summary>玩法与结束条件</summary><p>选择横向落点投放一只动物，动物会下落、滚动和堆叠。相同等级的两个动物碰撞后合成更大一级，合成会获得分数。</p><p>每次投放间隔约 0.65 秒。动物落下后有宽限时间，堆积持续超过警戒线才会结束，短暂弹起不会立即结束。大象是最高等级，合成后可继续挑战高分。</p><p>方向键左右选择落点，空格、回车或向下键投放。切换标签页会自动暂停，返回后点「继续」。最高分保存在当前浏览器，刷新会重新开始本局。</p></details>
+</aside></div></main></body></html>
