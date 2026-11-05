@@ -1,8 +1,8 @@
-import {choices, newFlight, rollFlight, moveFlight} from "./flight-engine.mjs";
+import {choices, newFlight, rollFlight, moveFlight, flightTrackIndex} from "./flight-engine.mjs?v=cross1";
 const $=id=>document.getElementById(id);
 const colors=["#b83b30","#2674a5","#bd8618","#35794e"];
 const labels=["红","蓝","黄","绿"];
-const prefix="234-pet-flight-peer-v1-";
+const prefix="234-pet-flight-cross-v1-";
 let room=null, code="", busy=false, peer=null, link=null, timer=null;
 let isHost=false;
 const svg=$("flight-board"), ns="http://www.w3.org/2000/svg";
@@ -12,44 +12,79 @@ function node(tag,attrs,text){
   if(text!==undefined)element.textContent=text;
   return element;
 }
-function track(i){
-  i=(i+52)%52;
-  const side=Math.floor(i/13),t=(i%13)/13;
-  return [[95+310*t,95],[405,95+310*t],[405-310*t,405],[95,405-310*t]][side];
+
+// Clockwise circuit around a fifteen-by-fifteen cross.
+const route = [
+  [6,0],[6,1],[6,2],[6,3],[6,4],[6,5],
+  [5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],
+  [1,8],[2,8],[3,8],[4,8],[5,8],
+  [6,9],[6,10],[6,11],[6,12],[6,13],[6,14],
+  [7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],
+  [9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],
+  [13,6],[12,6],[11,6],[10,6],[9,6],
+  [8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0]
+];
+const cell=40, margin=30;
+const center=(row,col)=>[margin+col*cell+cell/2,margin+row*cell+cell/2];
+function track(i) {
+  const [row,col]=route[(i+52)%52];
+  return center(row,col);
 }
-function airport(seat,pawn){
-  const corners=[[43,43],[457,43],[457,457],[43,457]];
-  return [corners[seat][0]+(pawn%2 ? 15:-15),corners[seat][1]+(pawn<2 ? -15:15)];
+function airport(seat,pawn) {
+  const base=seat===0 ? 466 : 106;
+  return [base+(pawn%2)*80,base+Math.floor(pawn/2)*80];
 }
-function position(seat,pos,pawn){
+function position(seat,pos,pawn) {
   if(pos<0)return airport(seat,pawn);
-  if(pos<52)return track(seat*13+pos);
-  const start=track(seat*13),t=(pos-51)/7;
-  return [start[0]+(250-start[0])*t,start[1]+(250-start[1])*t];
+  if(pos<52)return track(flightTrackIndex(seat,pos));
+  return center(7,seat===0 ? 65-pos : pos-51);
 }
-function renderBoard(){
+function tile(row,col,fill,stroke="#53645e") {
+  return node("rect",{x:margin+col*cell,y:margin+row*cell,width:cell,height:cell,fill,stroke,"stroke-width":1.3});
+}
+function renderBoard() {
   svg.replaceChildren();
-  svg.append(node("rect",{x:5,y:5,width:490,height:490,rx:24,fill:"#f6efd9"}));
-  for(let seat=0;seat<2;seat++){
-    const [x,y]=airport(seat,0),[xx,yy]=airport(seat,3);
-    svg.append(node("rect",{x:Math.min(x,xx)-18,y:Math.min(y,yy)-18,width:66,height:66,rx:16,fill:colors[seat],opacity:".13"}));
-    for(let p=52;p<=57;p++){
-      const [cx,cy]=position(seat,p,0);
-      svg.append(node("circle",{cx,cy,r:10,fill:colors[seat],opacity:".24",stroke:colors[seat]}));
+  svg.append(node("rect",{x:6,y:6,width:648,height:648,rx:22,fill:"#fffdf4",stroke:"#b7c7bd","stroke-width":2}));
+  const trackColors=[colors[1],colors[2],colors[0],colors[3]];
+  route.forEach(([row,col],index)=>{
+    const [cx,cy]=center(row,col);
+    svg.append(tile(row,col,trackColors[index%4]));
+    svg.append(node("circle",{cx,cy,r:12,fill:"#fffdf4",stroke:"#ffffffaa","stroke-width":1}));
+  });
+  for(let seat=0;seat<2;seat++) {
+    const base=seat===0?9:0;
+    const airportGroup=node("g",{"data-airport":seat,"aria-label":labels[seat]+"方机场"});
+    airportGroup.append(node("rect",{x:margin+base*cell+4,y:margin+base*cell+4,width:232,height:232,rx:18,fill:colors[seat],stroke:"#344c43","stroke-width":3}));
+    airportGroup.append(node("text",{x:margin+base*cell+120,y:margin+base*cell+207,"text-anchor":"middle","font-size":20,"font-weight":700,fill:"white"},labels[seat]+"方机场"));
+    for(let pawn=0;pawn<4;pawn++) {
+      const [cx,cy]=airport(seat,pawn);
+      airportGroup.append(node("circle",{cx,cy,r:29,fill:"#fffdf4",stroke:"#ffffff88","stroke-width":3}));
     }
+    svg.append(airportGroup);
+    for(let p=52;p<=57;p++) {
+      const col=seat===0?65-p:p-51;
+      const [cx,cy]=position(seat,p,0);
+      svg.append(tile(7,col,colors[seat]));
+      svg.append(node("circle",{cx,cy,r:12,fill:"#fffdf4"}));
+    }
+    const [sx,sy]=position(seat,0,0);
+    svg.append(node("text",{x:sx,y:sy+5,"text-anchor":"middle","font-size":17,"font-weight":700,fill:colors[seat]},"➜"));
+    const [fx,fy]=position(seat,16,0);
+    svg.append(node("text",{x:fx,y:fy+6,"text-anchor":"middle","font-size":20,fill:colors[seat]},"✈"));
   }
-  for(let i=0;i<52;i++){
-    const [cx,cy]=track(i);
-    const flightSeat=[0,1,2,3].find(seat=>(seat*13+16)%52===i);
-    const color=flightSeat??i%4;
-    svg.append(node("circle",{cx,cy,r:10,fill:colors[color],opacity:".7"}));
-    if(flightSeat!==undefined)svg.append(node("text",{x:cx,y:cy+4,"text-anchor":"middle","font-size":12,fill:"white"},"✈"));
-  }
-  svg.append(node("circle",{cx:250,cy:250,r:28,fill:"#fffaf0",stroke:"#a2916e","stroke-width":2}));
-  svg.append(node("text",{x:250,y:255,"text-anchor":"middle","font-size":16,fill:"#655638"},"终点"));
-  svg.append(node("text",{x:250,y:145,"text-anchor":"middle","font-size":14,fill:"#655638"},"顺时针飞行 →"));
+  // The remaining two corners are deliberately open, with no airport or home lane.
+  svg.append(node("text",{x:510,y:125,"text-anchor":"middle","font-size":26,"font-weight":700,fill:"#345349"},"双人对角飞行"));
+  svg.append(node("text",{x:510,y:157,"text-anchor":"middle","font-size":17,fill:"#64776d"},"左上蓝方 · 右下红方"));
+  svg.append(node("text",{x:150,y:495,"text-anchor":"middle","font-size":23,"font-weight":700,fill:"#345349"},"5 / 6 起飞"));
+  svg.append(node("text",{x:150,y:528,"text-anchor":"middle","font-size":17,fill:"#64776d"},"只有 6 可再掷一次"));
+  svg.append(node("polygon",{points:"270,270 390,270 330,330",fill:"#e3c54b",stroke:"#53645e"}));
+  svg.append(node("polygon",{points:"390,270 390,390 330,330",fill:colors[0],stroke:"#53645e"}));
+  svg.append(node("polygon",{points:"390,390 270,390 330,330",fill:"#75a880",stroke:"#53645e"}));
+  svg.append(node("polygon",{points:"270,390 270,270 330,330",fill:colors[1],stroke:"#53645e"}));
+  svg.append(node("circle",{cx:330,cy:330,r:25,fill:"#fffdf4",stroke:"#53645e"}));
+  svg.append(node("text",{x:330,y:336,"text-anchor":"middle","font-size":17,"font-weight":700,fill:"#345349"},"终点"));
   const game=room?.flight;
-  const seats=game ? game.players : (room?.players||[false,false]).flatMap((present,i)=>present?[i]:[]);
+  const seats=game ? game.players : [0,1];
   const legal=game && game.players[game.turn]===room.seat && !busy ? choices(game):[];
   const occupied=new Map();
   seats.forEach((seat,index)=>{
@@ -61,8 +96,8 @@ function renderBoard(){
       if(offset){cx+=(offset%2 ? 5:-5);cy+=Math.floor((offset+1)/2)*5;}
       const active=legal.includes(pawn) && room.seat===seat && room.phase==="playing";
       const group=node("g",{class:"plane"+(active?" available":""),role:"button",tabindex:active?0:-1,"aria-label":labels[seat]+"方"+(pawn+1)+"号飞机"+(pos===57?"，已到终点":""),"aria-disabled":String(!active)});
-      group.append(node("circle",{cx,cy,r:12,fill:"#fffaf0",stroke:colors[seat],"stroke-width":active?4:2}));
-      group.append(node("text",{x:cx,y:cy+4,"text-anchor":"middle","font-size":12,"font-weight":700,fill:colors[seat]},pawn+1));
+      group.append(node("circle",{cx,cy,r:17,fill:"#fffaf0",stroke:colors[seat],"stroke-width":active?4:2}));
+      group.append(node("text",{x:cx,y:cy+6,"text-anchor":"middle","font-size":17,"font-weight":700,fill:colors[seat]},pawn+1));
       if(active){
         group.onclick=()=>command("plane",{pawn});
         group.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();command("plane",{pawn});}};
@@ -224,7 +259,7 @@ $("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=peer1&room="+code,location.href).href;
+  const url=new URL("./flight.html?v=cross1&room="+code,location.href).href;
   try{await navigator.clipboard.writeText(url);note("邀请链接已复制。");}catch{prompt("复制邀请链接",url);}
 };
 function leave() {

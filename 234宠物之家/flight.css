@@ -13,3 +13,8 @@
 .flight-card{background:#e0edf0}
 .flight-art{font-size:70px;gap:14px;color:#2f7899}
 .flight-art span:nth-child(2){color:#b94535}
+.flight-page main{max-width:1320px}
+.flight-page .layout{grid-template-columns:minmax(0,1fr) 300px;gap:22px}
+.flight-page .board-card{padding:10px;background:#d9e4d9;border-color:#9bab9b;box-shadow:0 4px 20px #2c463318}
+@media(max-width:950px){.flight-page .layout{grid-template-columns:1fr}.flight-page .board-card{max-width:820px}.flight-page aside{max-width:820px;width:100%}}
+@media(max-width:710px){.flight-page main{padding-left:6px;padding-right:6px}.flight-page .board-card{padding:3px}.flight-page .intro,.flight-page .lobby{margin-left:6px;margin-right:6px}}

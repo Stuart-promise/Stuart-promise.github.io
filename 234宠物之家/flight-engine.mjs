@@ -1,9 +1,12 @@
+export function flightTrackIndex(seat, position) {
+  return ((seat === 0 ? 26 : 0) + position) % 52;
+}
 export function newFlight(players) {
-  return {players, turn: 0, planes: players.map(() => [-1,-1,-1,-1]), die: null, winner: null, log: "游戏开始，掷到 6 即可起飞。"};
+  return {players, turn: 0, planes: players.map(() => [-1,-1,-1,-1]), die: null, winner: null, log: "游戏开始，掷到 5 或 6 即可起飞。"};
 }
 export function choices(game) {
   if (game.die === null || game.winner !== null) return [];
-  return game.planes[game.turn].flatMap((p,i) => p === -1 ? (game.die === 6 ? [i] : []) : p < 57 && p + game.die <= 57 ? [i] : []);
+  return game.planes[game.turn].flatMap((p,i) => p === -1 ? (game.die >= 5 ? [i] : []) : p < 57 && p + game.die <= 57 ? [i] : []);
 }
 function nextTurn(game) {
   game.turn = (game.turn + 1) % game.players.length;
@@ -27,12 +30,12 @@ export function moveFlight(game, pawn) {
   // The casual course uses a same-colour jump every four steps and a flight at step 16.
   if (pos === 16) pos=28;
   else if (pos > 0 && pos < 52 && pos % 4 === 0) pos=pos+4;
-  const physical=(game.players[seat]*13+pos)%52;
+  const physical=flightTrackIndex(game.players[seat],pos);
   let captured=0;
   if(pos<52) game.planes.forEach((planes,other)=>{
     if(other===seat)return;
     planes.forEach((p,i)=>{
-      if(p>=0 && p<52 && (game.players[other]*13+p)%52===physical){planes[i]=-1;captured++;}
+      if(p>=0 && p<52 && flightTrackIndex(game.players[other],p)===physical){planes[i]=-1;captured++;}
     });
   });
   game.planes[seat][pawn]=pos;
