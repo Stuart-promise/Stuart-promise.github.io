@@ -27,7 +27,7 @@
 .practice h3 {margin:0 0 12px}
 .practice h4 {font-size:20px;margin:16px 0 4px}
 .practice label {display:block;font-weight:650;margin:12px 0 5px}
-.sample {background:#f4f1e6;padding:10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.practice-example {background:#f4f1e6;padding:10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
 .course textarea {display:block;width:100%;padding:12px;border:1px solid #acb7a8;border-radius:8px;font:15px/1.5 Consolas,monospace;color:#23392d;background:#fff;resize:vertical;tab-size:4}
 #source {min-height:178px}
 .actions {margin-top:12px}
