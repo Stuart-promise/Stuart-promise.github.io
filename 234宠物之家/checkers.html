@@ -6,9 +6,10 @@
   <title>跳棋 · 234宠物之家</title>
   <link rel="stylesheet" href="./style.css?v=peer1">
   <script defer src="./vendor/peerjs-1.5.5.min.js"></script>
+  <script defer src="./room-config.js"></script><script defer src="./relay.js?v=relay1"></script>
   <script defer src="./checkers-engine.js?v=checkers2"></script>
   <script defer src="./checkers.js?v=checkers2"></script>
-  <script defer src="./rooms.js?v=checkers2"></script>
+  <script defer src="./rooms.js?v=relay1"></script>
 <link rel="stylesheet" href="./checkers.css?v=checkers2">
 </head>
 <body data-game="checkers" class="checkers-page">
@@ -19,9 +20,10 @@
       <div class="panel-head"><h2 id="room-title">对战房间</h2><button type="button" class="subtle" id="switch-mode">切换为同屏</button></div>
       <div id="entry">
         <p>创建房间后，把邀请码发给朋友。收到邀请码后，输入房间码即可加入。</p>
+        <p>电脑或手机直连失败时，可让房主创建中转房。好友输入完整房间码即可加入。</p>
         <form id="join-form">
-          <button type="button" class="primary" id="create">创建房间</button>
-          <input id="room-code" aria-label="六位房间码" placeholder="六位房间码" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="off" required>
+          <button type="button" class="primary" id="create">创建直连房</button><button type="button" id="create-relay">创建中转房</button>
+          <input id="room-code" aria-label="房间码" placeholder="房间码" maxlength="7" pattern="[Rr]?[0-9]{6}" autocomplete="off" required>
           <button type="submit">加入房间</button>
         </form>
       </div>

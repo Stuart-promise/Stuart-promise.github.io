@@ -11,7 +11,7 @@ const prefix = checkersRoom ? "234-pet-checkers-v2-" : chessRoom ? "234-pet-xian
 const firstColor = chessRoom || checkersRoom ? "红" : "黑";
 const secondColor = checkersRoom ? "蓝" : chessRoom ? "黑" : "白";
 const seatingNote = `房主执${firstColor}，好友执${secondColor}。`;
-const validCode = code => /^[0-9]{6}$/.test(code);
+const validCode = code => /^R?[0-9]{6}$/.test(code);
 const note = message => { byId("room-note").textContent = message; };
 
 function refreshLobby() {
@@ -132,14 +132,14 @@ function openRoom(host, code) {
   note(host ? "正在创建房间…" : "正在连接房主…");
   deadline("连接超时，请检查网络后重试。");
   try {
-    const peer = host ? new Peer(prefix + code) : new Peer();
+    const peer = createGamePeer(document.body.dataset.game, prefix, code, host);
     room.peer = peer;
     peer.on("open", () => {
       if (room.peer !== peer) return;
       if (host) {
         clearTimeout(room.timer);
         room.phase = "waiting";
-        note("等待好友加入。可以复制邀请链接，或把六位房间码发给好友。");
+        note("等待好友加入。可以复制邀请链接，或把完整房间码发给好友。");
         refreshLobby();
       } else {
         bindLink(peer.connect(prefix + code, {reliable: true}));
@@ -155,6 +155,8 @@ function openRoom(host, code) {
     peer.on("error", err => {
       if (room.peer !== peer || room.phase === "playing" && room.link?.open) return;
       const messages = {
+        "room-full": "房间已经坐满，请换一个房间。",
+        "relay-unreachable": "无法连接中转服务，请尝试直连房或更换网络。",
         "peer-unavailable": "找不到这个房间，请核对邀请码，并确认房主仍在线。",
         "unavailable-id": "房间码已被占用，请返回大厅再创建一次。",
         "browser-incompatible": "当前浏览器不支持在线连接，请使用新版浏览器。"
@@ -169,19 +171,17 @@ function openRoom(host, code) {
   }
 }
 
-byId("create").onclick = () => {
-  const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0");
-  openRoom(true, code);
-};
+byId("create").onclick = () => openRoom(true, createRoomCode(false));
+byId("create-relay").onclick = () => openRoom(true, createRoomCode(true));
 byId("join-form").onsubmit = event => {
   event.preventDefault();
-  const code = byId("room-code").value.trim();
+  const code = byId("room-code").value.trim().toUpperCase();
   if (validCode(code)) openRoom(false, code);
 };
 byId("invite").onclick = async () => {
   const url = new URL(location.pathname, location.href);
   url.searchParams.set("room", room.code);
-  url.searchParams.set("v", checkersRoom ? "checkers2" : "peer1");
+  url.searchParams.set("v", "relay1");
   try {
     await navigator.clipboard.writeText(url.href);
     note("邀请链接已复制，可以发给好友了。");

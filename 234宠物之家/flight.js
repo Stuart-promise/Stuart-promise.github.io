@@ -219,15 +219,15 @@ function bindConnection(connection) {
   connection.on("close",disconnected);
   connection.on("error",disconnected);
 }
-function enter(host) {
+function enter(host, relay = false) {
   if(busy||room)return;
   isHost=host;
-  code=host?String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0"):$("code").value;
+  code=host?createRoomCode(relay):$("code").value.trim().toUpperCase();
   room={seat:host?0:1,phase:"connecting",version:0,players:host?[true,false]:[false,true],flight:null};
   render();note(host?"正在创建房间…":"正在连接房主…");
   timer=setTimeout(()=>closeRoom("连接超时，请检查网络后重新开房。"),25000);
   try {
-    const current=host?new Peer(prefix+code):new Peer();
+    const current=createGamePeer("flight",prefix,code,host);
     peer=current;
     current.on("open",()=>{
       if(peer!==current)return;
@@ -246,7 +246,7 @@ function enter(host) {
     });
     current.on("error",error=>{
       if(peer!==current || room.phase==="playing" && link?.open)return;
-      const messages={"peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
+      const messages={"room-full":"房间已经坐满，请换一个房间。","relay-unreachable":"无法连接中转服务，请尝试直连房或更换网络。","peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
       closeRoom(messages[error.type]||"无法建立连接，请检查网络或使用新版浏览器。");
     });
     current.on("disconnected",()=>{
@@ -255,11 +255,12 @@ function enter(host) {
   } catch { closeRoom("当前浏览器无法连接，请使用新版浏览器。"); }
 }
 $("create").onclick=()=>enter(true);
+$("create-relay").onclick=()=>enter(true,true);
 $("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=cross1&room="+code,location.href).href;
+  const url=new URL("./flight.html?v=relay1&room="+code,location.href).href;
   try{await navigator.clipboard.writeText(url);note("邀请链接已复制。");}catch{prompt("复制邀请链接",url);}
 };
 function leave() {
@@ -273,5 +274,5 @@ $("home-link").onclick=event=>{
   if(room && !leave())event.preventDefault();
 };
 const invite=new URLSearchParams(location.search).get("room");
-if(/^[0-9]{6}$/.test(invite||""))$("code").value=invite;
+if(/^R?[0-9]{6}$/.test(invite||""))$("code").value=invite;
 render();

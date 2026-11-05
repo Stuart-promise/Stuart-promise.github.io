@@ -1,3 +1,4 @@
+import {acceptRelay} from "./relay.js";
 export {FarmAccount} from "./farm.js";
 import {newFlight, rollFlight, moveFlight} from "../234宠物之家/flight-engine.mjs";
 import { DurableObject } from "cloudflare:workers";
@@ -20,6 +21,12 @@ export default {
     };
     if (request.method === "OPTIONS") return new Response(null, {status: 204, headers: cors});
     const url = new URL(request.url);
+    const relay = /^\/v1\/relay\/(gomoku|xiangqi|checkers|flight)\/([0-9]{6})$/.exec(url.pathname);
+    if (relay) {
+      if (!allowed || request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return fail("需要网页联机连接", 403);
+      const id = env.ROOMS.idFromName("relay-" + relay[1] + "-" + relay[2]);
+      return env.ROOMS.get(id).fetch(request);
+    }
     const match = url.pathname.match(/^\/v1\/rooms\/(gomoku|xiangqi|flight)\/([0-9]{6})$/);
     let response;
     if (url.pathname === "/health") response = json({ok: true, version: 1});
@@ -46,6 +53,7 @@ export class GameRoom extends DurableObject {
   }
 
   async fetch(request) {
+    if (new URL(request.url).pathname.startsWith("/v1/relay/")) return acceptRelay(this.ctx, request);
     const token = request.headers.get("Authorization")?.replace(/^Bearer /, "");
     if (!/^[a-f0-9]{64}$/.test(token || "")) return fail("房间凭证无效", 401);
     let message = null;
@@ -188,6 +196,26 @@ export class GameRoom extends DurableObject {
 
   flightSnapshot(state, seat) {
     return json({seat,version:state.version,phase:state.closed?"closed":state.started?"playing":"waiting",players:state.tokens.map(Boolean),flight:state.flight});
+  }
+
+  webSocketMessage(sender, text) {
+    if (typeof text !== "string" || text.length > 8192) return sender.close(1009, "invalid-size");
+    let value;
+    try { value = JSON.parse(text); } catch { return sender.close(1003, "invalid-data"); }
+    const packet = JSON.stringify({event: "data", value});
+    for (const socket of this.ctx.getWebSockets()) {
+      if (socket !== sender && socket.readyState === 1) socket.send(packet);
+    }
+  }
+
+  webSocketClose(sender) {
+    for (const socket of this.ctx.getWebSockets()) {
+      if (socket !== sender && socket.readyState === 1) socket.close(1000, "left");
+    }
+  }
+
+  webSocketError(sender) {
+    this.webSocketClose(sender);
   }
 
   async alarm() { await this.ctx.storage.deleteAll(); }
