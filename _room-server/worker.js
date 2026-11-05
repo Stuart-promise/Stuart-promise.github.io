@@ -127,9 +127,15 @@ export class GameRoom extends DurableObject {
 
   async flightRequest(state, token, message) {
     const action=message?.action;
+    if (state.flightVersion === 1) {
+      if (!state.tokens.includes(token)) return fail("房间版本已更新，请创建双人房间", 410);
+      state.closed = true;
+      await this.ctx.storage.put("room", state);
+      return this.flightSnapshot(state, state.tokens.indexOf(token));
+    }
     if (!state.flightVersion) {
-      state.tokens=[state.tokens[0],null,null,null];
-      state.flightVersion=1;
+      state.tokens=[state.tokens[0],null];
+      state.flightVersion=2;
       state.started=false;
       state.flight=null;
       state.recent=[];
@@ -139,8 +145,10 @@ export class GameRoom extends DurableObject {
       if(state.closed) return fail("房间已关闭",410);
       if(state.started) return fail("游戏已经开始，请等待下一局或另开房间",409);
       seat=state.tokens.indexOf(null);
-      if(seat<0)return fail("房间已经坐满，最多四人",409);
+      if(seat<0)return fail("房间已经坐满，最多两人",409);
       state.tokens[seat]=token;
+      state.flight=newFlight([0,1]);
+      state.started=true;
       state.version++;
     }
     if(seat<0)return fail("房间凭证无效",401);

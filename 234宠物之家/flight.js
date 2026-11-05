@@ -2,7 +2,7 @@ import {choices} from "./flight-engine.mjs";
 const $=id=>document.getElementById(id);
 const colors=["#b83b30","#2674a5","#bd8618","#35794e"];
 const labels=["红","蓝","黄","绿"];
-const key="pet234-flight-room";
+const key="pet234-flight-duo-room";
 let room=null, token="", code="", busy=false, timer=null, generation=0, lastVersion=-1;
 const svg=$("flight-board"), ns="http://www.w3.org/2000/svg";
 function node(tag,attrs,text){
@@ -29,7 +29,7 @@ function position(seat,pos,pawn){
 function renderBoard(){
   svg.replaceChildren();
   svg.append(node("rect",{x:5,y:5,width:490,height:490,rx:24,fill:"#f6efd9"}));
-  for(let seat=0;seat<4;seat++){
+  for(let seat=0;seat<2;seat++){
     const [x,y]=airport(seat,0),[xx,yy]=airport(seat,3);
     svg.append(node("rect",{x:Math.min(x,xx)-18,y:Math.min(y,yy)-18,width:66,height:66,rx:16,fill:colors[seat],opacity:".13"}));
     for(let p=52;p<=57;p++){
@@ -48,7 +48,7 @@ function renderBoard(){
   svg.append(node("text",{x:250,y:255,"text-anchor":"middle","font-size":16,fill:"#655638"},"终点"));
   svg.append(node("text",{x:250,y:145,"text-anchor":"middle","font-size":14,fill:"#655638"},"顺时针飞行 →"));
   const game=room?.flight;
-  const seats=game ? game.players : (room?.players||[false,false,false,false]).flatMap((present,i)=>present?[i]:[]);
+  const seats=game ? game.players : (room?.players||[false,false]).flatMap((present,i)=>present?[i]:[]);
   const legal=game && game.players[game.turn]===room.seat && !busy ? choices(game):[];
   const occupied=new Map();
   seats.forEach((seat,index)=>{
@@ -74,8 +74,8 @@ function render(){
   $("entry").hidden=!!room;
   $("tools").hidden=!room;
   $("room-label").textContent="房间 "+code;
-  const seats=room?.players||[false,false,false,false];
-  $("seats").textContent=seats.filter(Boolean).length+" / 4 人";
+  const seats=room?.players||[false,false];
+  $("seats").textContent=seats.filter(Boolean).length+" / 2 人";
   $("players").replaceChildren();
   seats.forEach((present,seat)=>{
     const li=document.createElement("li");
@@ -85,9 +85,9 @@ function render(){
   });
   const game=room?.flight;
   const playing=room?.phase==="playing", mine=playing && game.players[game.turn]===room.seat;
-  $("start").hidden=!!game && game.winner===null;
+  $("start").hidden=!game || game.winner===null;
   $("start").disabled=busy || !room || room.seat!==0 || room.phase==="closed" || seats.filter(Boolean).length<2;
-  $("start").textContent=game?.winner!==null && game ? "房主再开一局":"开始游戏（至少 2 人）";
+  $("start").textContent=game?.winner!==null && game ? "房主再开一局":"等待好友加入";
   $("roll").disabled=busy || !mine || game.die!==null || game.winner!==null;
   $("dice").textContent=game?.die ?? "✈";
   $("status").textContent=!room?"创建或加入房间，邀请朋友入座":room.phase==="closed"?"房间已关闭":game?.winner!==null && game?labels[game.players[game.winner]]+"方获胜！":playing?(mine?"轮到你":"轮到"+labels[game.players[game.turn]]+"方")+(game.die===null?"掷骰子":"选择飞机"):"等待玩家入座";
@@ -117,7 +117,7 @@ async function api(message){
 function apply(data){
   if(data.version<lastVersion)return;
   lastVersion=data.version;room=data;save();render();
-  $("note").textContent=data.phase==="closed"?"房间已结束，请返回大厅创建新房间。":data.phase==="waiting"?"至少两人入座后，由房主点击开始。最多四人。":"你是"+labels[data.seat]+"方。刷新页面可恢复本局。";
+  $("note").textContent=data.phase==="closed"?"房间已结束，请返回大厅创建新房间。":data.phase==="waiting"?"等待另一位玩家加入，入座后自动开始。":"你是"+labels[data.seat]+"方。刷新页面可恢复本局。";
 }
 function schedule(){
   clearTimeout(timer);
@@ -141,7 +141,7 @@ async function command(action,extra={}){
       try{data=await api(message);break;}catch(e){if(e.status||attempt===2)throw e;}
     }
     if(session===generation)apply(data);
-  }catch(e){if(session===generation)$("note").textContent=e.message||"网络连接失败，请重试。";}
+  }catch(e){if(session===generation)$("note").textContent=e.status?e.message:"当前网络无法连接房间服务，请检查网络后重试。";}
   finally{if(session===generation){busy=false;render();schedule();}}
 }
 async function enter(create){
@@ -156,7 +156,7 @@ $("entry").onsubmit=e=>{e.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=flight1&room="+code,location.href).href;
+  const url=new URL("./flight.html?v=flight2&room="+code,location.href).href;
   try{await navigator.clipboard.writeText(url);$("note").textContent="邀请链接已复制。";}catch{prompt("复制邀请链接",url);}
 };
 async function leave(){
@@ -168,7 +168,7 @@ async function leave(){
   generation++;clearTimeout(timer);room=null;token="";code="";lastVersion=-1;save();render();return true;
 }
 $("leave").onclick=leave;
-$("home-link").onclick=async e=>{e.preventDefault();if(await leave())location.href=e.currentTarget?.href||"./?v=flight1";};
+$("home-link").onclick=async e=>{e.preventDefault();if(await leave())location.href=e.currentTarget?.href||"./?v=flight2";};
 const invite=new URLSearchParams(location.search).get("room");
 if(/^[0-9]{6}$/.test(invite||""))$("code").value=invite;
 render();
