@@ -36,3 +36,5 @@
 #map-button,#store-warning:empty {display:none}
 @media(max-width:780px){.course-grid{display:block}#map-button{display:block}#roadmap{display:none;margin-bottom:12px}#roadmap.visible{display:block}.lesson-head,.practice{padding:16px}}
 #walk {margin:12px 0} #walk summary {cursor:pointer;color:#315c46}
+
+.study-index .plot-entry {margin-top:16px;background:#e6eff0;border-color:#b9cdd0}
