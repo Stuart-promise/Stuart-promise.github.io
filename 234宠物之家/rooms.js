@@ -1,20 +1,17 @@
 "use strict";
 
 const byId = id => document.getElementById(id);
+const room = {
+  phase: "idle", code: "", color: "", peer: null, link: null, timer: null,
+  round: 1, mineAgain: false, theirAgain: false
+};
 const chessRoom = document.body.dataset.game === "xiangqi";
-const gameName = chessRoom ? "xiangqi" : "gomoku";
+const prefix = chessRoom ? "234-pet-xiangqi-v1-" : "234-pet-gomoku-v1-";
 const firstColor = chessRoom ? "红" : "黑";
 const secondColor = chessRoom ? "黑" : "白";
 const seatingNote = `房主执${firstColor}，好友执${secondColor}。`;
 const validCode = code => /^[0-9]{6}$/.test(code);
 const note = message => { byId("room-note").textContent = message; };
-const room = {
-  phase: "idle", code: "", color: "", token: "", round: 1,
-  mineAgain: false, theirAgain: false, pending: false, version: -1,
-  timer: null, session: 0, controller: null
-};
-const server = window.ROOM_SERVER;
-const storageKey = "pet234-" + gameName + "-room";
 
 function refreshLobby() {
   const busy = room.phase !== "idle";
@@ -23,195 +20,157 @@ function refreshLobby() {
   byId("switch-mode").hidden = busy;
   byId("switch-mode").textContent = localMode ? "切换为在线" : "切换为同屏";
   byId("mode-badge").textContent = localMode ? "双人同屏" : "在线双人";
-  byId("invite").hidden = !["waiting", "playing"].includes(room.phase);
+  byId("invite").hidden = room.phase !== "waiting";
   byId("leave").textContent = room.phase === "closed" ? "返回大厅" : "退出房间";
   byId("code-display").textContent = room.code ? `房间 ${room.code}` : "";
   render();
 }
 
-function rememberRoom() {
-  try {
-    if (room.phase === "idle" || room.phase === "closed") sessionStorage.removeItem(storageKey);
-    else sessionStorage.setItem(storageKey, JSON.stringify({code: room.code, token: room.token}));
-  } catch { /* Private browsing can disable storage. The current game still works. */ }
-}
-
 function stopRoom(phase, message) {
-  room.session++;
-  room.controller?.abort();
-  clearTimeout(room.timer);
-  room.pending = false;
+  const peer = room.peer;
   room.phase = phase;
+  room.peer = room.link = null;
+  clearTimeout(room.timer);
+  peer?.destroy();
   if (phase === "idle") {
-    room.code = room.color = room.token = "";
-    room.version = -1;
+    room.code = room.color = "";
     clearBoard();
   }
-  rememberRoom();
   note(message);
   refreshLobby();
 }
 
-async function requestState(message, session) {
-  const controller = new AbortController();
-  room.controller = controller;
-  const timeout = setTimeout(() => controller.abort(), 10000);
-  try {
-    const response = await fetch(`${server}/v1/rooms/${gameName}/${room.code}`, {
-      method: message ? "POST" : "GET",
-      headers: {"Authorization": "Bearer " + room.token, ...(message ? {"Content-Type": "application/json"} : {})},
-      body: message ? JSON.stringify(message) : undefined,
-      cache: "no-store",
-      signal: controller.signal
-    });
-    const state = await response.json();
-    if (!response.ok) {
-      const error = new Error(state.error || "房间服务暂时不可用");
-      error.status = response.status;
-      throw error;
-    }
-    if (session !== room.session) return;
-    return state;
-  } finally {
-    clearTimeout(timeout);
-    if (room.controller === controller) room.controller = null;
-  }
-}
-
-function applySnapshot(state) {
-  if (!state || state.version < room.version) return;
-  room.color = state.seat === 0 ? firstColor : secondColor;
-  room.phase = state.phase;
-  const changedRound = state.round !== room.round;
-  room.round = state.round;
-  room.mineAgain = state.votes[state.seat];
-  room.theirAgain = state.votes[1 - state.seat];
-  // A reload or reconnect rebuilds from the server's ordered move log.
-  const localMoves = chessRoom ? moves.map(move => ({from: move.from, to: move.to})) : moves;
-  const mismatch = localMoves.length > state.moves.length ||
-    localMoves.some((move, i) => JSON.stringify(move) !== JSON.stringify(state.moves[i]));
-  if (changedRound || mismatch) clearBoard();
-  for (let i = moves.length; i < state.moves.length; i++) {
-    const move = state.moves[i];
-    if (!legalMove(move)) {
-      stopRoom("closed", "收到不合法的棋步，已结束房间。请重新开房。");
-      return;
-    }
-    place(move);
-  }
-  room.version = state.version;
-  rememberRoom();
-  if (room.phase === "closed") {
-    stopRoom("closed", "房间已关闭，请返回大厅重新开房。");
-    return;
-  }
-  note(room.phase === "waiting"
-    ? "等待好友加入。分享邀请码或邀请链接，好友入座即可开局。"
-    : `双方已就位，你执${room.color}棋。刷新页面后可恢复本局。`);
-  refreshLobby();
-}
-
-function schedulePoll(delay = 1200) {
+function deadline(message) {
   clearTimeout(room.timer);
-  if (room.phase === "idle" || room.phase === "closed") return;
-  room.timer = setTimeout(poll, delay);
+  room.timer = setTimeout(() => stopRoom("closed", message), 25000);
 }
 
-async function poll() {
-  if (room.pending) return schedulePoll();
-  const session = room.session;
+function transmit(data) {
+  if (!room.link?.open) return false;
   try {
-    const state = await requestState(null, session);
-    if (session === room.session) applySnapshot(state);
-  } catch (error) {
-    if (session !== room.session) return;
-    if ([401, 404, 410].includes(error.status)) {
-      stopRoom("closed", error.message);
-      return;
-    }
-    room.phase = "connecting";
-    note("网络暂时断开，正在自动重连并恢复棋盘…");
-    refreshLobby();
-  }
-  if (session === room.session) schedulePoll();
-}
-
-async function command(message) {
-  if (room.pending) return;
-  const session = room.session;
-  clearTimeout(room.timer);
-  room.pending = true;
-  render();
-  try {
-    let state;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        state = await requestState(message, session);
-        break;
-      } catch (error) {
-        if (session !== room.session) return;
-        if (error.status || attempt === 2) throw error;
-        await new Promise(resolve => setTimeout(resolve, 700));
-      }
-    }
-    if (session === room.session) applySnapshot(state);
-  } catch (error) {
-    if (session !== room.session) return;
-    if (["create", "join"].includes(message.action) || [401, 404, 410].includes(error.status)) {
-      stopRoom("closed", error.status ? error.message : "暂时无法访问房间服务，请稍后重试。");
-    } else {
-      note(error.status ? error.message : "同步暂时中断，正在恢复棋盘…");
-      room.phase = "connecting";
-    }
-  } finally {
-    if (session === room.session) {
-      room.pending = false;
-      refreshLobby();
-      schedulePoll();
-    }
+    room.link.send(data);
+    return true;
+  } catch {
+    stopRoom("closed", "连接已断开。请返回大厅重新开房。");
+    return false;
   }
 }
 
 function sendMove(i) {
-  if (room.phase === "playing" && !room.pending && room.color === nextColor()) {
-    void command({action: "move", round: room.round, ply: moves.length, i});
+  if (room.phase !== "playing" || room.color !== nextColor()) return false;
+  return transmit({type: "move", round: room.round, ply: moves.length, i});
+}
+
+function newRoundIfAgreed() {
+  if (room.mineAgain && room.theirAgain) {
+    room.round++;
+    room.mineAgain = room.theirAgain = false;
+    clearBoard();
+    note(`新一局开始，你执${room.color}棋。`);
   }
-  // The server confirms the move before either browser adds it to the board.
-  return false;
+  render();
 }
 
 function voteAgain() {
-  if (room.phase === "playing" && !room.pending && moves.length && !room.mineAgain) {
-    void command({action: "again", round: room.round});
+  if (room.phase !== "playing" || !moves.length || room.mineAgain) return;
+  if (transmit({type: "again", round: room.round})) {
+    room.mineAgain = true;
+    newRoundIfAgreed();
   }
+}
+
+function beginPlay() {
+  clearTimeout(room.timer);
+  room.phase = "playing";
+  note(`对手已入座，你执${room.color}棋。对局期间请保持页面打开。`);
+  refreshLobby();
+}
+
+function receive(data) {
+  if (!data || typeof data !== "object") return;
+  if (data.type === "full" && room.phase === "connecting") return stopRoom("closed", "房间已经坐满，请换一个房间。");
+  if (data.type === "start" && room.color === secondColor && room.phase === "connecting") return beginPlay();
+  if (data.type === "leave") return stopRoom("closed", "对方已退出，房间已关闭。");
+  if (room.phase !== "playing" || data.round !== room.round) return;
+  if (data.type === "again" && moves.length) {
+    room.theirAgain = true;
+    newRoundIfAgreed();
+  } else if (data.type === "move") {
+    if (nextColor() === room.color || data.ply !== moves.length || !legalMove(data.i)) {
+      stopRoom("closed", "双方棋盘状态不一致，请返回大厅重新开房。");
+    } else {
+      place(data.i);
+    }
+  }
+}
+
+function bindLink(link) {
+  room.link = link;
+  deadline("未能连接对方，请检查网络后重新加入。");
+  link.on("open", () => {
+    if (room.link !== link) return;
+    if (room.color === firstColor && transmit({type: "start"})) beginPlay();
+  });
+  link.on("data", data => { if (room.link === link) receive(data); });
+  const disconnected = () => {
+    if (room.link === link) stopRoom("closed", "与对方的连接已断开，请返回大厅重新开房。");
+  };
+  link.on("close", disconnected);
+  link.on("error", disconnected);
 }
 
 function openRoom(host, code) {
   if (room.phase !== "idle" || localMode) return;
-  if (!server) { note("房间服务尚未配置，请稍后重试。"); return; }
-  room.session++;
-  room.code = code;
-  room.token = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, "0")).join("");
   room.color = host ? firstColor : secondColor;
+  room.code = code;
   room.round = 1;
-  room.version = -1;
   room.mineAgain = room.theirAgain = false;
   room.phase = "connecting";
   clearBoard();
-  note(host ? "正在创建房间…" : "正在加入房间…");
   refreshLobby();
-  void command({action: host ? "create" : "join"});
-}
-
-async function leaveRoom() {
-  if (room.phase !== "idle" && room.phase !== "closed") {
-    try { await requestState({action: "leave"}, room.session); } catch { /* Leaving locally must remain possible while offline. */ }
+  note(host ? "正在创建房间…" : "正在连接房主…");
+  deadline("连接超时，请检查网络后重试。");
+  try {
+    const peer = host ? new Peer(prefix + code) : new Peer();
+    room.peer = peer;
+    peer.on("open", () => {
+      if (room.peer !== peer) return;
+      if (host) {
+        clearTimeout(room.timer);
+        room.phase = "waiting";
+        note("等待好友加入。可以复制邀请链接，或把六位房间码发给好友。");
+        refreshLobby();
+      } else {
+        bindLink(peer.connect(prefix + code, {reliable: true}));
+      }
+    });
+    peer.on("connection", link => {
+      if (room.peer !== peer || !host || room.link || room.phase !== "waiting") {
+        link.on("open", () => { link.send({type: "full"}); setTimeout(() => link.close(), 500); });
+        return;
+      }
+      bindLink(link);
+    });
+    peer.on("error", err => {
+      if (room.peer !== peer || room.phase === "playing" && room.link?.open) return;
+      const messages = {
+        "peer-unavailable": "找不到这个房间，请核对邀请码，并确认房主仍在线。",
+        "unavailable-id": "房间码已被占用，请返回大厅再创建一次。",
+        "browser-incompatible": "当前浏览器不支持在线连接，请使用新版浏览器。"
+      };
+      stopRoom("closed", messages[err.type] || "无法建立在线连接，请检查网络或更换网络后重试。");
+    });
+    peer.on("disconnected", () => {
+      if (room.peer === peer && room.phase !== "playing") stopRoom("closed", "房间服务已断开，请返回大厅重试。");
+    });
+  } catch {
+    stopRoom("closed", "当前浏览器无法建立在线连接，请检查网络或更换浏览器。");
   }
-  stopRoom("idle", "已返回大厅，可以创建或加入新的房间。");
 }
 
 byId("create").onclick = () => {
-  openRoom(true, String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0"));
+  const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0");
+  openRoom(true, code);
 };
 byId("join-form").onsubmit = event => {
   event.preventDefault();
@@ -221,7 +180,7 @@ byId("join-form").onsubmit = event => {
 byId("invite").onclick = async () => {
   const url = new URL(location.pathname, location.href);
   url.searchParams.set("room", room.code);
-  url.searchParams.set("v", "cloud1");
+  url.searchParams.set("v", "peer1");
   try {
     await navigator.clipboard.writeText(url.href);
     note("邀请链接已复制，可以发给好友了。");
@@ -229,9 +188,10 @@ byId("invite").onclick = async () => {
     window.prompt("复制以下邀请链接发给好友", url.href);
   }
 };
-byId("leave").onclick = async () => {
+byId("leave").onclick = () => {
   if (room.phase === "playing" && !window.confirm("退出将结束这间房的对局，确定退出？")) return;
-  await leaveRoom();
+  if (room.link?.open) transmit({type: "leave"});
+  stopRoom("idle", "已返回大厅，可以创建或加入新的房间。");
 };
 byId("switch-mode").onclick = () => {
   if (localMode && moves.length && !window.confirm("结束同屏对局，切换为在线模式？")) return;
@@ -240,18 +200,6 @@ byId("switch-mode").onclick = () => {
   note(localMode ? "同屏模式：两人在这台设备上轮流落子。" : seatingNote);
   refreshLobby();
 };
-document.querySelectorAll("[data-home]").forEach(link => {
-  link.addEventListener("click", async event => {
-    if (room.phase === "idle") {
-      if (localMode && moves.length && !window.confirm("结束当前对局，返回游戏主界面？")) event.preventDefault();
-      return;
-    }
-    event.preventDefault();
-    if (room.phase === "playing" && !window.confirm("结束当前对局，返回游戏主界面？")) return;
-    await leaveRoom();
-    location.href = link.href;
-  });
-});
 
 const invitedCode = new URLSearchParams(location.search).get("room");
 if (validCode(invitedCode)) {
@@ -259,14 +207,14 @@ if (validCode(invitedCode)) {
   note("好友邀请你对战，点击「加入房间」即可入座。");
 }
 refreshLobby();
-try {
-  const saved = JSON.parse(sessionStorage.getItem(storageKey));
-  if (saved && validCode(saved.code) && /^[a-f0-9]{64}$/.test(saved.token) && (!validCode(invitedCode) || invitedCode === saved.code)) {
-    room.code = saved.code;
-    room.token = saved.token;
-    room.phase = "connecting";
-    note("正在恢复上次的房间…");
-    refreshLobby();
-    void poll();
-  }
-} catch { /* An expired or unavailable browser session starts in the lobby. */ }
+
+document.querySelectorAll("[data-home]").forEach(link => {
+  link.addEventListener("click", event => {
+    if ((room.phase === "playing" || localMode && moves.length) && !window.confirm("结束当前对局，返回游戏主界面？")) {
+      event.preventDefault();
+      return;
+    }
+    if (room.link?.open) transmit({type: "leave"});
+    stopRoom("idle", "");
+  });
+});

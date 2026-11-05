@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>飞行棋 · 234宠物之家</title>
-<link rel="stylesheet" href="./style.css?v=flight2"><link rel="stylesheet" href="./flight.css?v=flight2">
-<script src="./room-config.js?v=cloud1"></script><script type="module" src="./flight.js?v=flight2"></script>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./flight.css?v=peer1">
+<script src="./vendor/peerjs-1.5.5.min.js"></script><script type="module" src="./flight.js?v=peer1"></script>
 </head>
 <body>
-<header><a class="brand" href="./?v=flight2"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" id="home-link" href="./?v=flight2">← 游戏主界面</a></header>
+<header><a class="brand" href="./?v=peer1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" id="home-link" href="./?v=peer1">← 游戏主界面</a></header>
 <main>
 <div class="intro"><span class="eyebrow">一起起飞 <i></i> 03</span><h1>飞行棋</h1><p>两位朋友，各执四架飞机，一起飞向终点。</p></div>
 <section class="lobby">
@@ -26,7 +26,7 @@
 <div class="controls"><button id="start" disabled>再开一局</button><button id="roll" disabled>掷骰子</button></div>
 <p id="log" role="status"></p>
 <div id="plane-controls" aria-label="选择飞机"></div>
-<details class="rules"><summary>休闲版玩法</summary><p>每人四架飞机，掷出 6 才能从机场起飞，掷 6 可再掷一次。按顺时针沿外圈前进，落在自己的彩色格跳 4 格，落在标有 ✈ 的同色格飞跃 12 格。跳格和飞跃只触发一次。最终落点有对方飞机时，将它们撞回机场。进入自己的斜向归航道后，必须恰好到达终点。先让四架飞机全部到达终点的一方获胜。</p><p>本页采用休闲环形航线。开始后不再接受新玩家加入，刷新或短暂断网后可恢复对局。中途退出会结束本局。</p></details>
+<details class="rules"><summary>休闲版玩法</summary><p>每人四架飞机，掷出 6 才能从机场起飞，掷 6 可再掷一次。按顺时针沿外圈前进，落在自己的彩色格跳 4 格，落在标有 ✈ 的同色格飞跃 12 格。跳格和飞跃只触发一次。最终落点有对方飞机时，将它们撞回机场。进入自己的斜向归航道后，必须恰好到达终点。先让四架飞机全部到达终点的一方获胜。</p><p>本页采用休闲环形航线。开始后不再接受新玩家加入，对局期间请保持双方页面打开。刷新或关闭页面后需重新开房。中途退出会结束本局。</p></details>
 </aside>
 </div></main>
 </body></html>

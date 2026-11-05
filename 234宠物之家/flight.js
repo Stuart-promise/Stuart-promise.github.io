@@ -1,9 +1,10 @@
-import {choices} from "./flight-engine.mjs";
+import {choices, newFlight, rollFlight, moveFlight} from "./flight-engine.mjs";
 const $=id=>document.getElementById(id);
 const colors=["#b83b30","#2674a5","#bd8618","#35794e"];
 const labels=["红","蓝","黄","绿"];
-const key="pet234-flight-duo-room";
-let room=null, token="", code="", busy=false, timer=null, generation=0, lastVersion=-1;
+const prefix="234-pet-flight-peer-v1-";
+let room=null, code="", busy=false, peer=null, link=null, timer=null;
+let isHost=false;
 const svg=$("flight-board"), ns="http://www.w3.org/2000/svg";
 function node(tag,attrs,text){
   const element=document.createElementNS(ns,tag);
@@ -92,7 +93,7 @@ function render(){
   $("dice").textContent=game?.die ?? "✈";
   $("status").textContent=!room?"创建或加入房间，邀请朋友入座":room.phase==="closed"?"房间已关闭":game?.winner!==null && game?labels[game.players[game.winner]]+"方获胜！":playing?(mine?"轮到你":"轮到"+labels[game.players[game.turn]]+"方")+(game.die===null?"掷骰子":"选择飞机"):"等待玩家入座";
   if(busy)$("status").textContent="正在同步…";
-  $("log").textContent=game?.log||"掷骰结果由服务器生成，所有玩家同步显示。";
+  $("log").textContent=game?.log||"骰子由房主设备生成，双方同步显示。";
   $("plane-controls").replaceChildren();
   if(mine && !busy)for(const pawn of choices(game)){
     const button=document.createElement("button");
@@ -102,79 +103,140 @@ function render(){
   }
   renderBoard();
 }
-function save(){
-  try{if(room && room.phase!=="closed")sessionStorage.setItem(key,JSON.stringify({code,token}));else sessionStorage.removeItem(key);}catch{}
+function note(text) { $("note").textContent=text; }
+function transmit(data) {
+  if (!link?.open) return false;
+  try { link.send(data); return true; }
+  catch { closeRoom("与对方的连接已断开，请重新开房。"); return false; }
 }
-async function api(message){
-  const response=await fetch(window.ROOM_SERVER+"/v1/rooms/flight/"+code,{
-    method:message?"POST":"GET",headers:{"Authorization":"Bearer "+token,...(message?{"Content-Type":"application/json"}:{})},
-    body:message?JSON.stringify(message):undefined,cache:"no-store",signal:AbortSignal.timeout(10000)
-  });
-  const data=await response.json();
-  if(!response.ok){const e=new Error(data.error||"服务暂不可用");e.status=response.status;throw e;}
-  return data;
-}
-function apply(data){
-  if(data.version<lastVersion)return;
-  lastVersion=data.version;room=data;save();render();
-  $("note").textContent=data.phase==="closed"?"房间已结束，请返回大厅创建新房间。":data.phase==="waiting"?"等待另一位玩家加入，入座后自动开始。":"你是"+labels[data.seat]+"方。刷新页面可恢复本局。";
-}
-function schedule(){
+function closeRoom(message) {
+  const oldPeer=peer;
+  peer=link=null;
   clearTimeout(timer);
-  if(room && room.phase!=="closed")timer=setTimeout(poll,1200);
+  busy=false;
+  if(room) room.phase="closed";
+  oldPeer?.destroy();
+  render();
+  note(message);
 }
-async function poll(){
-  if(busy)return schedule();
-  const session=generation;
-  try{const data=await api();if(session===generation)apply(data);}
-  catch(e){if(session===generation){$("note").textContent=e.status?e.message:"网络暂时断开，正在自动重连…";if([401,404,410].includes(e.status)){room.phase="closed";save();render();}}}
-  if(session===generation)schedule();
+function sendState(error) {
+  return transmit({type:"state",state:{...room,seat:1},error});
 }
-async function command(action,extra={}){
-  if(busy)return;
-  const session=generation;
-  busy=true;clearTimeout(timer);render();
-  const message={action,version:room?.version,id:crypto.randomUUID(),...extra};
-  try{
-    let data;
-    for(let attempt=0;attempt<3;attempt++){
-      try{data=await api(message);break;}catch(e){if(e.status||attempt===2)throw e;}
+function acceptAction(seat,action,extra) {
+  let error="";
+  if(room?.phase!=="playing") error="对局尚未开始。";
+  else if(extra.version!==room.version) error="棋盘已更新，请重试。";
+  else if(action==="start") {
+    if(seat!==0 || room.flight.winner===null) error="本局尚未结束。";
+    else {room.flight=newFlight([0,1]);room.version++;}
+  } else if(room.flight.players[room.flight.turn]!==seat) error="请等待对方操作。";
+  else {
+    const valid=action==="roll" ? rollFlight(room.flight,randomDie()) :
+      action==="plane" && moveFlight(room.flight,extra.pawn);
+    if(valid)room.version++;
+    else error="当前不能进行此操作。";
+  }
+  sendState(error);
+  render();
+  if(error)note(error);
+}
+function randomDie() {
+  const bytes=new Uint32Array(1);
+  do {crypto.getRandomValues(bytes);} while(bytes[0]>=4294967292);
+  return bytes[0]%6+1;
+}
+function command(action,extra={}) {
+  if(busy || room?.phase!=="playing")return;
+  const data={...extra,version:room.version};
+  if(isHost) acceptAction(0,action,data);
+  else {
+    busy=true;
+    if(!transmit({type:"action",action,...data}))busy=false;
+    render();
+  }
+}
+function bindConnection(connection) {
+  link=connection;
+  connection.on("open",()=>{
+    if(link!==connection)return;
+    if(isHost){
+      clearTimeout(timer);
+      room={seat:0,version:0,phase:"playing",players:[true,true],flight:newFlight([0,1])};
+      sendState();
+      render();
+      note("你是红方。对局期间请保持双方页面打开。");
     }
-    if(session===generation)apply(data);
-  }catch(e){if(session===generation)$("note").textContent=e.status?e.message:"当前网络无法连接房间服务，请检查网络后重试。";}
-  finally{if(session===generation){busy=false;render();schedule();}}
+  });
+  connection.on("data",data=>{
+    if(link!==connection || !data || typeof data!=="object")return;
+    if(data.type==="full"){closeRoom("房间已经坐满，最多两人。");return;}
+    if(data.type==="leave"){closeRoom("对方已退出，请重新开房。");return;}
+    if(isHost && data.type==="action")acceptAction(1,data.action,data);
+    else if(!isHost && data.type==="state" && data.state){
+      clearTimeout(timer);
+      room=data.state;
+      busy=false;
+      render();
+      note(data.error||"你是蓝方。对局期间请保持双方页面打开。");
+    }
+  });
+  const disconnected=()=>{if(link===connection)closeRoom("与对方的连接已断开，请重新开房。");};
+  connection.on("close",disconnected);
+  connection.on("error",disconnected);
 }
-async function enter(create){
-  if(busy)return;
-  generation++;lastVersion=-1;room=null;
-  code=create?String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0"):$("code").value;
-  token=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,"0")).join("");
-  await command(create?"create":"join");
+function enter(host) {
+  if(busy||room)return;
+  isHost=host;
+  code=host?String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0"):$("code").value;
+  room={seat:host?0:1,phase:"connecting",version:0,players:host?[true,false]:[false,true],flight:null};
+  render();note(host?"正在创建房间…":"正在连接房主…");
+  timer=setTimeout(()=>closeRoom("连接超时，请检查网络后重新开房。"),25000);
+  try {
+    const current=host?new Peer(prefix+code):new Peer();
+    peer=current;
+    current.on("open",()=>{
+      if(peer!==current)return;
+      if(host){
+        clearTimeout(timer);room.phase="waiting";render();note("等待好友加入，入座后自动开始。");
+      }else bindConnection(current.connect(prefix+code,{reliable:true}));
+    });
+    current.on("connection",incoming=>{
+      if(peer!==current||!host||link||room.phase!=="waiting"){
+        incoming.on("open",()=>{incoming.send({type:"full"});setTimeout(()=>incoming.close(),500);});
+        return;
+      }
+      bindConnection(incoming);
+      clearTimeout(timer);
+      timer=setTimeout(()=>closeRoom("未能连接对方，请重新开房。"),25000);
+    });
+    current.on("error",error=>{
+      if(peer!==current || room.phase==="playing" && link?.open)return;
+      const messages={"peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
+      closeRoom(messages[error.type]||"无法建立连接，请检查网络或使用新版浏览器。");
+    });
+    current.on("disconnected",()=>{
+      if(peer===current && room.phase!=="playing")closeRoom("房间服务已断开，请重新开房。");
+    });
+  } catch { closeRoom("当前浏览器无法连接，请使用新版浏览器。"); }
 }
 $("create").onclick=()=>enter(true);
-$("entry").onsubmit=e=>{e.preventDefault();enter(false);};
+$("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=flight2&room="+code,location.href).href;
-  try{await navigator.clipboard.writeText(url);$("note").textContent="邀请链接已复制。";}catch{prompt("复制邀请链接",url);}
+  const url=new URL("./flight.html?v=peer1&room="+code,location.href).href;
+  try{await navigator.clipboard.writeText(url);note("邀请链接已复制。");}catch{prompt("复制邀请链接",url);}
 };
-async function leave(){
-  if(busy)return false;
-  if(room && room.phase!=="closed"){
-    if(room.phase==="playing" && !confirm("退出会结束本局，确定退出？"))return false;
-    await command("leave");
-  }
-  generation++;clearTimeout(timer);room=null;token="";code="";lastVersion=-1;save();render();return true;
+function leave() {
+  if(room?.phase==="playing" && !confirm("退出会结束本局，确定退出？"))return false;
+  if(link?.open)transmit({type:"leave"});
+  closeRoom("已返回大厅。");
+  room=null;code="";render();return true;
 }
 $("leave").onclick=leave;
-$("home-link").onclick=async e=>{e.preventDefault();if(await leave())location.href=e.currentTarget?.href||"./?v=flight2";};
+$("home-link").onclick=event=>{
+  if(room && !leave())event.preventDefault();
+};
 const invite=new URLSearchParams(location.search).get("room");
 if(/^[0-9]{6}$/.test(invite||""))$("code").value=invite;
 render();
-try{
-  const stored=JSON.parse(sessionStorage.getItem(key));
-  if(stored && /^[0-9]{6}$/.test(stored.code) && /^[a-f0-9]{64}$/.test(stored.token) && (!invite||invite===stored.code)){
-    code=stored.code;token=stored.token;room={phase:"waiting",players:[],seat:0,version:-1};poll();
-  }
-}catch{}
