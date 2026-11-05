@@ -1,29 +1,23 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>函数绘制器 · 234宠物之家</title>
-<link rel="stylesheet" href="style.css?v=peer1"><link rel="stylesheet" href="plot.css?v=1">
-<script defer src="plot.js?v=1"></script></head>
-<body><header><a class="brand" href="./"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a class="back-home" href="study.html?v=plot1">← 学习页面</a></header>
-<main class="plot"><h1>函数绘制器</h1>
-<div class="workspace">
-<form id="controls">
-<label for="mode">绘图类型</label><select id="mode"><option value="explicit">函数曲线　y = f(x)</option><option value="implicit">隐式方程　F(x, y) = 0</option><option value="param">参数曲线　(x(t), y(t))</option><option value="polar">极坐标　r = f(θ)</option><option value="sequence">离散数列　a(n)</option><option value="surface">三维曲面　z = f(x, y)</option></select>
-<label for="formula">公式</label><textarea id="formula" rows="3" maxlength="3000" spellcheck="false" autocapitalize="off">sin(x)</textarea><small id="hint"></small>
-<label for="presets">试一个例子</label><select id="presets"></select>
-<div id="param-fields" hidden><fieldset><legend>参数范围</legend><label>从<input id="pmin" value="0"></label><label>到<input id="pmax" value="2*pi"></label></fieldset></div>
-<div id="angle-field" hidden><label for="angle">曲面旋转角度</label><input type="range" id="angle" min="-180" max="180" value="35"></div>
-<details id="settings"><summary>坐标范围与自定义函数</summary>
-<fieldset><legend>x 范围</legend><label>从<input id="xmin" value="-6"></label><label>到<input id="xmax" value="6"></label></fieldset>
-<fieldset><legend>y 范围</legend><label>从<input id="ymin" value="-6"></label><label>到<input id="ymax" value="6"></label></fieldset>
-<label for="defs">自定义（每行一个，按顺序引用）</label><textarea id="defs" rows="3" maxlength="1200" placeholder="a=2&#10;f(u)=a*sin(u)" spellcheck="false" autocapitalize="off"></textarea></details>
-<button type="submit" class="draw">绘制图形</button></form>
-<section class="graph-panel" aria-label="绘图结果"><div class="graph-toolbar"><strong id="view-title">坐标平面</strong><div><button id="zoom-out" aria-label="缩小">−</button><button id="zoom-in" aria-label="放大">＋</button><button id="reset">复位视野</button></div></div>
-<svg id="graph" viewBox="0 0 600 600" role="img" aria-label="数学函数图形"></svg>
-<ul id="legend"></ul><p id="status" role="status"></p></section></div>
-<details class="guide"><summary>输入方法与绘图范围</summary>
-<p>用 ^ 表示乘方，* 表示乘法。支持 pi（π）、e 和隐式乘法，例如 2x。三角函数使用弧度。极坐标角度写作 theta 或 θ。</p>
-<p>常用函数包括 sin、cos、tan、asin、sinh、exp、ln、log10、sqrt、abs、floor、ceil、min、max、gamma、erf。分段写法：x &lt; 0 ? -x : x^2。可以用 re(...)、im(...)、abs(...) 分别绘制复数结果的实部、虚部或模。</p>
-<p>可以把能写出公式的函数加入“自定义”，例如先定义 f(u)=sin(u)+u/3，再在公式区输入 f(x)。参数曲线的两个分量用英文分号分开。</p>
-<p>图形是指定范围内的数值采样。极窄的分支、孤立解、只接触零而不变号的隐式解和快速振荡可能漏画。三维曲面按采样高度自动缩放。抽象映射、无数值算法的函数和任意高维空间无法在此完整绘出。</p></details>
-</main></body></html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <title>Desmos 函数绘制器 · 234宠物之家</title>
+  <link rel="stylesheet" href="./style.css?v=peer1">
+  <link rel="stylesheet" href="./calculator.css?v=1">
+</head>
+<body class="calculator-page">
+  <header class="calculator-nav">
+    <a href="./study.html?v=desmos1">← 学习页面</a>
+    <strong>函数绘制器</strong>
+    <nav aria-label="计算器选项">
+      <a href="./plot-local.html">备用绘图</a>
+      <a href="https://www.desmos.com/calculator?lang=zh-CN" target="_blank" rel="noopener">打开官网 ↗</a>
+    </nav>
+  </header>
+  <main class="calculator-workspace">
+    <iframe src="https://www.desmos.com/calculator?lang=zh-CN" title="Desmos 中文图形计算器" allow="fullscreen" allowfullscreen></iframe>
+  </main>
+</body>
+</html>
