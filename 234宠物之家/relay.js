@@ -20,17 +20,30 @@ function createGamePeer(game, prefix, code, host) {
     close() { socket.close(); }
   };
   const peer = {...events(), connect: () => link, destroy: () => socket.close()};
+  const verifyRules = ["234-pet-checkers-v3-", "234-pet-flight-cross-v3-"].includes(prefix);
+  let handshakeTimer;
+  function openLink() {
+    if (host) peer.emit("connection", link);
+    link.open = true;
+    link.emit("open");
+  }
   socket.onmessage = event => {
     const packet = JSON.parse(event.data);
     if (packet.event === "ready") peer.emit("open");
     if (packet.event === "paired") {
-      if (host) peer.emit("connection", link);
-      link.open = true;
-      link.emit("open");
+      if (!verifyRules) return openLink();
+      link.send({rules: prefix});
+      handshakeTimer = setTimeout(() => socket.close(4002, "rules-version"), 6000);
+    }
+    if (packet.event === "data" && verifyRules && !link.open) {
+      clearTimeout(handshakeTimer);
+      if (packet.value?.rules === prefix) return openLink();
+      return socket.close(4002, "rules-version");
     }
     if (packet.event === "data" && link.open) link.emit("data", packet.value);
   };
   socket.onclose = event => {
+    clearTimeout(handshakeTimer);
     if (link.open) {
       link.open = false;
       link.emit("close");

@@ -6,10 +6,10 @@
   <title>跳棋 · 234宠物之家</title>
   <link rel="stylesheet" href="./style.css?v=peer1">
   <script defer src="./vendor/peerjs-1.5.5.min.js"></script>
-  <script defer src="./room-config.js"></script><script defer src="./relay.js?v=relay1"></script>
-  <script defer src="./checkers-engine.js?v=checkers2"></script>
-  <script defer src="./checkers.js?v=checkers2"></script>
-  <script defer src="./rooms.js?v=relay1"></script>
+  <script defer src="./room-config.js"></script><script defer src="./relay.js?v=duo3"></script>
+  <script defer src="./checkers-engine.js?v=duo3"></script>
+  <script defer src="./checkers.js?v=duo3"></script>
+  <script defer src="./rooms.js?v=duo3"></script>
 <link rel="stylesheet" href="./checkers.css?v=checkers2">
 </head>
 <body data-game="checkers" class="checkers-page">
@@ -50,7 +50,7 @@
         </details>
         <details class="rules"><summary>平移、跳跃与连跳</summary>
           <p>平移是向六个方向中的一个相邻空孔走一格。不能走出棋盘，也不能落在已占用的孔位。</p>
-          <p>跳跃必须呈直线，越过一枚相邻棋子，落到其正后方的空孔。可跳过自己或对方的棋子，跳过的棋子留在原位，不吃子。不能跳过空位，也不能一次越过两枚或更多紧挨着的棋子。</p>
+          <p>沿直线找到第一枚棋子，以它为中点对称跳过去。中点前后距离必须相等，除了中点外，沿途和落点都必须是空孔。例如「我 · · 棋 · · 落」：前面两格空、第三格有棋子，就落在棋子后第三格。可借自己或对方的棋子跳，不吃子。</p>
           <p>连跳算同一回合，每一跳都须满足上述条件。跳与跳之间可以转向，可以在任意一次跳跃后停止，不要求跳到最远。平移和跳跃不能混在同一回合，也不能一回合移动两枚棋子。</p>
         </details>
         <details class="rules"><summary>入营、胜负与跳过回合</summary>

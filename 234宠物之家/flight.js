@@ -1,8 +1,8 @@
-import {choices, newFlight, rollFlight, moveFlight, flightTrackIndex} from "./flight-engine.mjs?v=cross1";
+import {choices, newFlight, rollFlight, moveFlight, flightTrackIndex, ARM, TRACK, FINISH} from "./flight-engine.mjs?v=duo3";
 const $=id=>document.getElementById(id);
-const colors=["#b83b30","#2674a5","#bd8618","#35794e"];
-const labels=["红","蓝","黄","绿"];
-const prefix="234-pet-flight-cross-v1-";
+const colors=["#bd4552","#28669f"];
+const labels=["红","蓝"];
+const prefix="234-pet-flight-cross-v3-";
 let room=null, code="", busy=false, peer=null, link=null, timer=null;
 let isHost=false;
 const svg=$("flight-board"), ns="http://www.w3.org/2000/svg";
@@ -13,76 +13,69 @@ function node(tag,attrs,text){
   return element;
 }
 
-// Clockwise circuit around a fifteen-by-fifteen cross.
-const route = [
-  [6,0],[6,1],[6,2],[6,3],[6,4],[6,5],
-  [5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],
-  [1,8],[2,8],[3,8],[4,8],[5,8],
-  [6,9],[6,10],[6,11],[6,12],[6,13],[6,14],
-  [7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],
-  [9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],
-  [13,6],[12,6],[11,6],[10,6],[9,6],
-  [8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0]
-];
-const cell=40, margin=30;
-const center=(row,col)=>[margin+col*cell+cell/2,margin+row*cell+cell/2];
-function track(i) {
-  const [row,col]=route[(i+52)%52];
-  return center(row,col);
+// One arm and its three quarter-turns form a continuous, symmetric circuit.
+const side=2*ARM+3, middle=ARM+1;
+const cell=32, margin=(660-side*cell)/2;
+const quadrant=[];
+for(let col=0;col<ARM;col++)quadrant.push([ARM,col]);
+for(let row=ARM-1;row>=0;row--)quadrant.push([row,ARM]);
+quadrant.push([0,middle]);
+const route=[];
+let quarter=quadrant;
+for(let turn=0;turn<4;turn++){
+  route.push(...quarter);
+  quarter=quarter.map(([r,c])=>[c,side-1-r]);
 }
+const center=(row,col)=>[margin+(col+0.5)*cell,margin+(row+0.5)*cell];
 function airport(seat,pawn) {
-  const base=seat===0 ? 466 : 106;
-  return [base+(pawn%2)*80,base+Math.floor(pawn/2)*80];
+  const base=seat===0 ? 440 : 92;
+  return [base+(pawn%2)*96,base+Math.floor(pawn/2)*82];
 }
 function position(seat,pos,pawn) {
   if(pos<0)return airport(seat,pawn);
-  if(pos<52)return track(flightTrackIndex(seat,pos));
-  return center(7,seat===0 ? 65-pos : pos-51);
+  if(pos<TRACK)return center(...route[flightTrackIndex(seat,pos,TRACK)]);
+  const step=pos-TRACK+1;
+  return center(middle,seat===0?side-1-step:step);
 }
-function tile(row,col,fill,stroke="#53645e") {
-  return node("rect",{x:margin+col*cell,y:margin+row*cell,width:cell,height:cell,fill,stroke,"stroke-width":1.3});
+function tile(row,col,fill){
+  return node("rect",{x:margin+col*cell+0.7,y:margin+row*cell+0.7,width:cell-1.4,height:cell-1.4,rx:4,fill,stroke:"#a6b1ba","stroke-width":0.9});
+}
+function caption(x,y,text,size,fill){
+  return node("text",{x,y,fill,"text-anchor":"middle","font-size":size,"font-weight":650},text);
 }
 function renderBoard() {
   svg.replaceChildren();
-  svg.append(node("rect",{x:6,y:6,width:648,height:648,rx:22,fill:"#fffdf4",stroke:"#b7c7bd","stroke-width":2}));
-  const trackColors=[colors[1],colors[2],colors[0],colors[3]];
-  route.forEach(([row,col],index)=>{
-    const [cx,cy]=center(row,col);
-    svg.append(tile(row,col,trackColors[index%4]));
-    svg.append(node("circle",{cx,cy,r:12,fill:"#fffdf4",stroke:"#ffffffaa","stroke-width":1}));
+  svg.append(node("rect",{x:2,y:2,width:656,height:656,rx:18,fill:"white",stroke:"#ced6dc","stroke-width":2}));
+  const palette=[colors[1],"white",colors[0],"white"];
+  route.forEach(([r,c],index)=>{
+    const [cx,cy]=center(r,c);
+    const square=tile(r,c,palette[index%4]);
+    square.setAttribute("data-track",index);
+    svg.append(square);
+    if(index%2===0){
+      const relative=index%4===0 ? index : (index+TRACK/2)%TRACK;
+      const mark=relative===16?"✈":relative===0?"起":"＋";
+      svg.append(caption(cx,cy+6,mark,17,"white"));
+    }
   });
-  for(let seat=0;seat<2;seat++) {
-    const base=seat===0?9:0;
-    const airportGroup=node("g",{"data-airport":seat,"aria-label":labels[seat]+"方机场"});
-    airportGroup.append(node("rect",{x:margin+base*cell+4,y:margin+base*cell+4,width:232,height:232,rx:18,fill:colors[seat],stroke:"#344c43","stroke-width":3}));
-    airportGroup.append(node("text",{x:margin+base*cell+120,y:margin+base*cell+207,"text-anchor":"middle","font-size":20,"font-weight":700,fill:"white"},labels[seat]+"方机场"));
-    for(let pawn=0;pawn<4;pawn++) {
+  for(let seat=0;seat<2;seat++){
+    const start=seat===0 ? 382 : 34;
+    const group=node("g",{"data-airport":seat,"aria-label":labels[seat]+"方机场"});
+    group.append(node("rect",{x:start,y:start,width:244,height:244,rx:20,fill:"white",stroke:colors[seat],"stroke-width":3}));
+    for(let pawn=0;pawn<4;pawn++){
       const [cx,cy]=airport(seat,pawn);
-      airportGroup.append(node("circle",{cx,cy,r:29,fill:"#fffdf4",stroke:"#ffffff88","stroke-width":3}));
+      group.append(node("circle",{cx,cy,r:25,fill:"white",stroke:colors[seat],"stroke-opacity":0.38,"stroke-width":2}));
     }
-    svg.append(airportGroup);
-    for(let p=52;p<=57;p++) {
-      const col=seat===0?65-p:p-51;
-      const [cx,cy]=position(seat,p,0);
-      svg.append(tile(7,col,colors[seat]));
-      svg.append(node("circle",{cx,cy,r:12,fill:"#fffdf4"}));
+    group.append(caption(start+122,start+211,labels[seat]+"方机场",21,colors[seat]));
+    svg.append(group);
+    for(let p=TRACK;p<=FINISH;p++){
+      const step=p-TRACK+1,col=seat===0?side-1-step:step;
+      const [cx,cy]=center(middle,col);
+      svg.append(tile(middle,col,colors[seat]),caption(cx,cy+5,p===FINISH?"★":seat===0?"‹":"›",17,"white"));
     }
-    const [sx,sy]=position(seat,0,0);
-    svg.append(node("text",{x:sx,y:sy+5,"text-anchor":"middle","font-size":17,"font-weight":700,fill:colors[seat]},"➜"));
-    const [fx,fy]=position(seat,16,0);
-    svg.append(node("text",{x:fx,y:fy+6,"text-anchor":"middle","font-size":20,fill:colors[seat]},"✈"));
   }
-  // The remaining two corners are deliberately open, with no airport or home lane.
-  svg.append(node("text",{x:510,y:125,"text-anchor":"middle","font-size":26,"font-weight":700,fill:"#345349"},"双人对角飞行"));
-  svg.append(node("text",{x:510,y:157,"text-anchor":"middle","font-size":17,fill:"#64776d"},"左上蓝方 · 右下红方"));
-  svg.append(node("text",{x:150,y:495,"text-anchor":"middle","font-size":23,"font-weight":700,fill:"#345349"},"5 / 6 起飞"));
-  svg.append(node("text",{x:150,y:528,"text-anchor":"middle","font-size":17,fill:"#64776d"},"只有 6 可再掷一次"));
-  svg.append(node("polygon",{points:"270,270 390,270 330,330",fill:"#e3c54b",stroke:"#53645e"}));
-  svg.append(node("polygon",{points:"390,270 390,390 330,330",fill:colors[0],stroke:"#53645e"}));
-  svg.append(node("polygon",{points:"390,390 270,390 330,330",fill:"#75a880",stroke:"#53645e"}));
-  svg.append(node("polygon",{points:"270,390 270,270 330,330",fill:colors[1],stroke:"#53645e"}));
-  svg.append(node("circle",{cx:330,cy:330,r:25,fill:"#fffdf4",stroke:"#53645e"}));
-  svg.append(node("text",{x:330,y:336,"text-anchor":"middle","font-size":17,"font-weight":700,fill:"#345349"},"终点"));
+  svg.append(caption(330,334,"终",16,"#455763"));
+  svg.append(caption(152,484,"同色跳 4 格",19,"#425665"),caption(152,514,"✈  飞跃 12 格",16,"#637381"));
   const game=room?.flight;
   const seats=game ? game.players : [0,1];
   const legal=game && game.players[game.turn]===room.seat && !busy ? choices(game):[];
@@ -95,9 +88,9 @@ function renderBoard() {
       occupied.set(bucket,offset+1);
       if(offset){cx+=(offset%2 ? 5:-5);cy+=Math.floor((offset+1)/2)*5;}
       const active=legal.includes(pawn) && room.seat===seat && room.phase==="playing";
-      const group=node("g",{class:"plane"+(active?" available":""),role:"button",tabindex:active?0:-1,"aria-label":labels[seat]+"方"+(pawn+1)+"号飞机"+(pos===57?"，已到终点":""),"aria-disabled":String(!active)});
-      group.append(node("circle",{cx,cy,r:17,fill:"#fffaf0",stroke:colors[seat],"stroke-width":active?4:2}));
-      group.append(node("text",{x:cx,y:cy+6,"text-anchor":"middle","font-size":17,"font-weight":700,fill:colors[seat]},pawn+1));
+      const group=node("g",{class:"plane"+(active?" available":""),role:"button",tabindex:active?0:-1,"aria-label":labels[seat]+"方"+(pawn+1)+"号飞机"+(pos===FINISH?"，已到终点":""),"aria-disabled":String(!active)});
+      group.append(node("circle",{cx,cy,r:13,fill:"white",stroke:colors[seat],"stroke-width":active?4:2}));
+      group.append(node("text",{x:cx,y:cy+5,"text-anchor":"middle","font-size":15,"font-weight":700,fill:colors[seat]},pawn+1));
       if(active){
         group.onclick=()=>command("plane",{pawn});
         group.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();command("plane",{pawn});}};
@@ -125,7 +118,16 @@ function render(){
   $("start").disabled=busy || !room || room.seat!==0 || room.phase==="closed" || seats.filter(Boolean).length<2;
   $("start").textContent=game?.winner!==null && game ? "房主再开一局":"等待好友加入";
   $("roll").disabled=busy || !mine || game.die!==null || game.winner!==null;
-  $("dice").textContent=game?.die ?? "✈";
+  const roll=game?.lastRoll;
+  const patterns=[[],[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]];
+  const face=$("dice");
+  face.replaceChildren();
+  for(const pip of patterns[roll?.value ?? 0]){
+    face.append(node("circle",{cx:12+12*(pip%3),cy:12+12*Math.floor(pip/3),r:3.8,fill:colors[roll.seat]}));
+  }
+  if(!roll)face.append(caption(24,30,"—",17,"#758491"));
+  $("die-result").textContent=roll ? labels[roll.seat]+"方 · "+roll.value+" 点" : "等待掷骰";
+  $("roll").textContent=playing && game.winner===null ? (game.die!==null?"等待选飞机":mine?"掷骰子":"对方掷骰") : "掷骰子";
   $("status").textContent=!room?"创建或加入房间，邀请朋友入座":room.phase==="closed"?"房间已关闭":game?.winner!==null && game?labels[game.players[game.winner]]+"方获胜！":playing?(mine?"轮到你":"轮到"+labels[game.players[game.turn]]+"方")+(game.die===null?"掷骰子":"选择飞机"):"等待玩家入座";
   if(busy)$("status").textContent="正在同步…";
   $("log").textContent=game?.log||"骰子由房主设备生成，双方同步显示。";
@@ -163,7 +165,7 @@ function acceptAction(seat,action,extra) {
   else if(extra.version!==room.version) error="棋盘已更新，请重试。";
   else if(action==="start") {
     if(seat!==0 || room.flight.winner===null) error="本局尚未结束。";
-    else {room.flight=newFlight([0,1]);room.version++;}
+    else {room.flight=newFlight([0,1],true);room.version++;}
   } else if(room.flight.players[room.flight.turn]!==seat) error="请等待对方操作。";
   else {
     const valid=action==="roll" ? rollFlight(room.flight,randomDie()) :
@@ -196,7 +198,7 @@ function bindConnection(connection) {
     if(link!==connection)return;
     if(isHost){
       clearTimeout(timer);
-      room={seat:0,version:0,phase:"playing",players:[true,true],flight:newFlight([0,1])};
+      room={seat:0,version:0,phase:"playing",players:[true,true],flight:newFlight([0,1],true)};
       sendState();
       render();
       note("你是红方。对局期间请保持双方页面打开。");
@@ -246,7 +248,7 @@ function enter(host, relay = false) {
     });
     current.on("error",error=>{
       if(peer!==current || room.phase==="playing" && link?.open)return;
-      const messages={"room-full":"房间已经坐满，请换一个房间。","relay-unreachable":"无法连接中转服务，请尝试直连房或更换网络。","peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
+      const messages={"rules-version":"双方的游戏版本不同，请双方刷新页面后重新开房。","room-full":"房间已经坐满，请换一个房间。","relay-unreachable":"无法连接中转服务，请尝试直连房或更换网络。","peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
       closeRoom(messages[error.type]||"无法建立连接，请检查网络或使用新版浏览器。");
     });
     current.on("disconnected",()=>{
@@ -260,7 +262,7 @@ $("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=relay1&room="+code,location.href).href;
+  const url=new URL("./flight.html?v=duo3&room="+code,location.href).href;
   try{await navigator.clipboard.writeText(url);note("邀请链接已复制。");}catch{prompt("复制邀请链接",url);}
 };
 function leave() {

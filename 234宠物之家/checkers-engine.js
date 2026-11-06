@@ -32,6 +32,18 @@ class ChineseCheckers {
     this.history=[];
   }
 
+  jumpLanding(cell, dq, dr, occupied) {
+    const keyAt = distance => (cell.q + distance*dq) + "," + (cell.r + distance*dr);
+    let distance = 1;
+    while (this.cells.has(keyAt(distance)) && !occupied.has(keyAt(distance))) distance++;
+    if (!this.cells.has(keyAt(distance))) return null;
+    for (let step = distance+1; step <= 2*distance; step++) {
+      const key = keyAt(step);
+      if (!this.cells.has(key) || occupied.has(key)) return null;
+    }
+    return keyAt(2*distance);
+  }
+
   destinations(from,seat=this.turn) {
     const destinations=new Map();
     if(this.winner!==null || this.blocked || this.pieces[from]!==seat)return destinations;
@@ -51,9 +63,8 @@ class ChineseCheckers {
       const path=queue[i],current=path.at(-1);
       const cell=this.cells.get(current);
       for(const [dq,dr] of this.directions) {
-        const over=(cell.q+dq)+","+(cell.r+dr);
-        const to=(cell.q+2*dq)+","+(cell.r+2*dr);
-        if(!occupied.has(over) || occupied.has(to) || !this.cells.has(to) || visited.has(to))continue;
+        const to=this.jumpLanding(cell,dq,dr,occupied);
+        if(!to || visited.has(to))continue;
         if(goal.has(current) && !goal.has(to))continue;
         visited.add(to);
         const next=[...path,to];

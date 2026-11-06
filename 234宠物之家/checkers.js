@@ -102,7 +102,7 @@ function choose(key) {
   if(!activeTurn())return;
   if(checkers.pieces[key]===checkers.turn) {
     selected=selected===key?null:key;
-    hint.textContent=selected===null?"点击己方棋子查看走法。":"点击绿色标记完成移动，远处标记可通过连续跳跃到达。";
+    hint.textContent=selected===null?"点击己方棋子查看走法。":"点击绿色标记完成移动，可对称远跳，也可转向连跳；点想停下的落点。";
     render();return;
   }
   const move={from:selected,to:key};

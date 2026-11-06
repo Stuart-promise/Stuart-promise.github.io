@@ -7,7 +7,7 @@ const room = {
 };
 const chessRoom = document.body.dataset.game === "xiangqi";
 const checkersRoom = document.body.dataset.game === "checkers";
-const prefix = checkersRoom ? "234-pet-checkers-v2-" : chessRoom ? "234-pet-xiangqi-v1-" : "234-pet-gomoku-v1-";
+const prefix = checkersRoom ? "234-pet-checkers-v3-" : chessRoom ? "234-pet-xiangqi-v1-" : "234-pet-gomoku-v1-";
 const firstColor = chessRoom || checkersRoom ? "红" : "黑";
 const secondColor = checkersRoom ? "蓝" : chessRoom ? "黑" : "白";
 const seatingNote = `房主执${firstColor}，好友执${secondColor}。`;
@@ -155,6 +155,7 @@ function openRoom(host, code) {
     peer.on("error", err => {
       if (room.peer !== peer || room.phase === "playing" && room.link?.open) return;
       const messages = {
+        "rules-version": "双方的游戏版本不同，请双方刷新页面后重新开房。",
         "room-full": "房间已经坐满，请换一个房间。",
         "relay-unreachable": "无法连接中转服务，请尝试直连房或更换网络。",
         "peer-unavailable": "找不到这个房间，请核对邀请码，并确认房主仍在线。",
@@ -181,7 +182,7 @@ byId("join-form").onsubmit = event => {
 byId("invite").onclick = async () => {
   const url = new URL(location.pathname, location.href);
   url.searchParams.set("room", room.code);
-  url.searchParams.set("v", "relay1");
+  url.searchParams.set("v", checkersRoom ? "duo3" : "relay1");
   try {
     await navigator.clipboard.writeText(url.href);
     note("邀请链接已复制，可以发给好友了。");
