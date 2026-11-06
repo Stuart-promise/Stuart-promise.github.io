@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>四六级英语词汇 · 234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./vocabulary.css?v=1">
+<script type="module" src="./vocabulary.js?v=1"></script>
+</head>
+<body>
+<header><a class="brand" href="./"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a class="back-home" href="./study.html?v=words1">← 学习页面</a></header>
+<main class="vocab">
+<div class="heading"><div><h1>四六级英语词汇</h1><p id="book-summary">正在载入词库…</p></div>
+<nav class="books" aria-label="选择词库"><a href="?book=cet4" data-book="cet4">大学四级</a><a href="?book=cet6" data-book="cet6">大学六级</a></nav></div>
+<div class="workspace">
+<section class="flash" aria-label="单词练习">
+<div class="card-head"><span id="kind">单词卡</span><span id="card-book"></span></div>
+<div class="face" aria-live="polite"><h2 id="word" lang="en">…</h2><p id="phonetic"></p><p id="meaning" hidden></p><p id="cue"></p></div>
+<div class="answers">
+<button id="reveal" hidden>查看释义</button>
+<div id="grades" hidden><button id="forgot">没记住 <small>10 分钟后</small></button><button id="remember">记住了 <small id="later"></small></button></div>
+</div>
+<p id="feedback" role="status"></p>
+</section>
+<aside><h2>今日计划</h2><p id="date"></p>
+<dl><div><dt>到期待复习</dt><dd id="due">—</dd></div><div><dt>剩余新词</dt><dd id="remaining">—</dd></div><div><dt>今天已学新词</dt><dd id="learned">—</dd></div><div><dt>今天已复习</dt><dd id="reviewed">—</dd></div></dl>
+<label for="goal">每日新词目标</label><select id="goal" disabled><option value="5">5 个</option><option value="10">10 个</option><option value="20" selected>20 个</option><option value="30">30 个</option><option value="50">50 个</option></select>
+<p id="progress"></p>
+</aside></div>
+<section class="upcoming"><h2>未来七天待复习</h2><div id="week"></div></section>
+<details><summary>复习怎样安排？</summary>
+<p>参考艾宾浩斯遗忘曲线所体现的先快后慢规律，这里采用逐步拉长的复习间隔。每次选“记住了”，从本次学习日起，依次间隔 1、2、4、7、15、30 天再见；此后每 30 天巩固一次。选“没记住”会在 10 分钟后重练，并从短间隔重新开始。</p>
+<p>每天先复习到期词，再学新词。漏掉的复习会保留到下次打开。七天预览统计当前已排期的词，随学习结果更新。四级、六级分别保存进度，以当前设备的本地日期换日。</p>
+<p>词库按考试标签整理，使用 ECDICT 的音标和中文释义。<a href="https://github.com/skywind3000/ECDICT">词库来源</a> · <a href="./vendor/ECDICT-LICENSE.txt">MIT 许可</a></p></details>
+<p class="storage">学习进度保存在当前浏览器中。清除网站数据会删除进度。</p><p id="warning" role="alert"></p>
+</main></body></html>
