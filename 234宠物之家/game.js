@@ -9,7 +9,7 @@ const stones = Array(size * size).fill(null);
 const moves = [];
 const points = [];
 let winningLine = [];
-let localMode = false;
+let localMode = !!cpu.level;
 let selected = 7 * size + 7;
 const inside = (row, col) => row >= 0 && col >= 0 && row < size && col < size;
 const nextColor = () => moves.length % 2 === 0 ? "黑" : "白";
@@ -67,11 +67,12 @@ function render() {
   statusLine.textContent = won ? `${stones[winningLine[0]]}棋获胜！` : full ? "和棋，本局结束" : `轮到${nextColor()}棋落子`;
   const online = !localMode;
   const ready = !online || room.phase === "playing";
-  const myTurn = ready && !room.pending && (!online || nextColor() === room.color);
+  const myTurn = (!cpu.level || nextColor()==="黑") && ready && !room.pending && (!online || nextColor() === room.color);
   if (online) {
     if (!ready) statusLine.textContent = room.phase === "closed" ? "房间已断开" : "等待双人就位";
     else if (!won && !full) statusLine.textContent = myTurn ? `轮到你落子（${room.color}棋）` : "等待对方落子";
   }
+  if(cpu.level && !won && !full)statusLine.textContent=myTurn?"轮到你落黑棋":"电脑正在思考…";
   if (online && room.pending) statusLine.textContent = "正在同步棋步…";
   undo.hidden = online;
   undo.disabled = !moves.length;
@@ -86,6 +87,7 @@ function render() {
     point.setAttribute("aria-disabled", String(!myTurn || won || full || Boolean(stones[i])));
     point.setAttribute("aria-label", `第${Math.floor(i / size) + 1}行第${i % size + 1}列，${stones[i] ? stones[i] + "棋" : "空位"}`);
   });
+  cpu.boardTurn(!won && !full && nextColor()==="白",()=>stones,place,()=>stones.findIndex((_,i)=>legalMove(i)));
 }
 
 function legalMove(i) {
@@ -93,7 +95,7 @@ function legalMove(i) {
 }
 
 function play(i) {
-  if (!legalMove(i)) return;
+  if (!legalMove(i) || (cpu.level && nextColor()==="白")) return;
   if (!localMode && !sendMove(i)) return;
   place(i);
 }
@@ -133,8 +135,9 @@ board.addEventListener("keydown", event => {
 
 undo.addEventListener("click", () => {
   if (!moves.length) return;
-  selected = moves.pop();
-  stones[selected] = null;
+  do {
+    selected=moves.pop();stones[selected]=null;
+  } while(cpu.level && nextColor()==="白" && moves.length);
   winningLine = [];
   render();
 });

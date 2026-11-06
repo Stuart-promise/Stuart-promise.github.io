@@ -8,12 +8,12 @@ const restart = document.getElementById("restart");
 const hint = document.getElementById("move-hint");
 const points = [];
 let moves = chess.history;
-let localMode = false;
+let localMode = !!cpu.level;
 let selected = null;
 let focusCell = 85;
 const names = {rK: "帅", rA: "仕", rE: "相", rH: "马", rR: "车", rC: "炮", rP: "兵", bK: "将", bA: "士", bE: "象", bH: "马", bR: "车", bC: "炮", bP: "卒"};
 const nextColor = () => chess.turn === "r" ? "红" : "黑";
-const canPlay = () => !chess.result && (localMode || room.phase === "playing" && !room.pending && room.color === nextColor());
+const canPlay = () => (!cpu.level || chess.turn==="r") && !chess.result && (localMode || room.phase === "playing" && !room.pending && room.color === nextColor());
 
 function drawGrid() {
   const ns = "http://www.w3.org/2000/svg";
@@ -57,6 +57,7 @@ function render() {
     const turn = online ? (active ? `轮到你走棋（${room.color}方）` : "等待对方走棋") : `轮到${nextColor()}方走棋`;
     statusLine.textContent = turn + (checked ? " · 将军！" : "");
   }
+  if(cpu.level && !chess.result)statusLine.textContent=(active?"轮到你走红方":"电脑正在思考…")+(checked?" · 将军！":"");
   if (online && room.pending) statusLine.textContent = "正在同步棋步…";
   undo.hidden = online;
   undo.disabled = !moves.length;
@@ -80,6 +81,11 @@ function render() {
     point.setAttribute("aria-pressed", String(i === selected));
     point.setAttribute("aria-disabled", String(!active));
     point.setAttribute("aria-label", `第${Math.floor(i / 9) + 1}行第${i % 9 + 1}列，${piece ? (piece[0] === "r" ? "红方" : "黑方") + names[piece] : "空位"}`);
+  });
+  cpu.boardTurn(!chess.result && chess.turn==="b",()=>({board:chess.board}),place,()=>{
+    for(let from=0;from<90;from++){
+      const to=chess.targets(from)[0];if(to!==undefined)return {from,to};
+    }
   });
 }
 
@@ -151,7 +157,7 @@ board.addEventListener("keydown", event => {
 });
 undo.onclick = () => {
   if (!localMode || !moves.length) return;
-  chess.undo();
+  do {chess.undo();} while(cpu.level && chess.turn==="b" && moves.length);
   selected = null;
   hint.textContent = "已撤回一步。";
   render();

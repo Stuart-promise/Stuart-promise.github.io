@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>234宠物之家</title>
   <link rel="stylesheet" href="./style.css?v=peer1">
-  <script defer src="./vendor/peerjs-1.5.5.min.js"></script>
+  <script defer src="./computer.js?v=1"></script>
+<script defer src="./vendor/peerjs-1.5.5.min.js"></script>
   <script defer src="./room-config.js"></script><script defer src="./relay.js?v=relay1"></script>
-  <script defer src="./game.js?v=peer1"></script>
-  <script defer src="./rooms.js?v=relay1"></script>
+  <script defer src="./game.js?v=cpu1"></script>
+  <script defer src="./rooms.js?v=cpu1"></script>
+<link rel="stylesheet" href="./computer.css?v=1">
 </head>
 <body data-game="gomoku">
   <header><a class="brand" href="./?v=portal1" data-home><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a class="back-home" href="./games.html?v=portal1" data-home>← 游戏列表</a><span class="room">宠物游戏室</span></header>
@@ -16,7 +18,12 @@
     <div class="intro"><span class="eyebrow">桌游角 <i></i> 01</span><h1>五子棋</h1><p>开个房间，和朋友各执一色，先连成五子的一方获胜。</p></div>
     <section class="lobby" aria-labelledby="room-title">
       <div class="panel-head"><h2 id="room-title">对战房间</h2><button type="button" class="subtle" id="switch-mode">切换为同屏</button></div>
-      <div id="entry">
+      <form id="computer-form" class="computer-options" method="get">
+  <label>电脑难度 <select name="cpu"><option value="easy">简单</option><option value="medium" selected>中档</option><option value="hard">困难</option></select></label>
+  <button type="submit" id="cpu-start">与电脑对弈</button>
+  <a class="cpu-return" hidden>返回大厅</a>
+</form>
+<div id="entry">
         <p>创建房间后，把邀请码发给朋友。收到邀请码后，输入房间码即可加入。</p>
         <p>电脑或手机直连失败时，可让房主创建中转房。好友输入完整房间码即可加入。</p>
         <form id="join-form">

@@ -1,10 +1,11 @@
+import {choosePlane} from "./flight-opponent.mjs?v=1";
 import {choices, newFlight, rollFlight, moveFlight, flightTrackIndex, ARM, TRACK, FINISH} from "./flight-engine.mjs?v=duo3";
 const $=id=>document.getElementById(id);
 const colors=["#bd4552","#28669f"];
 const labels=["红","蓝"];
 const prefix="234-pet-flight-cross-v3-";
 let room=null, code="", busy=false, peer=null, link=null, timer=null;
-let isHost=false;
+let isHost=false, cpuTimer=null;
 const svg=$("flight-board"), ns="http://www.w3.org/2000/svg";
 function node(tag,attrs,text){
   const element=document.createElementNS(ns,tag);
@@ -101,7 +102,8 @@ function renderBoard() {
 }
 function render(){
   $("entry").hidden=!!room;
-  $("tools").hidden=!room;
+  $("tools").hidden=!room || !!cpu.level;
+  $("computer-form").hidden=!!room && !cpu.level;
   $("room-label").textContent="房间 "+code;
   const seats=room?.players||[false,false];
   $("seats").textContent=seats.filter(Boolean).length+" / 2 人";
@@ -109,7 +111,7 @@ function render(){
   seats.forEach((present,seat)=>{
     const li=document.createElement("li");
     li.style.borderLeft="5px solid "+colors[seat];
-    li.textContent=labels[seat]+"方 · "+(present?(seat===room.seat?"你":"已入座"):"等待加入")+(seat===0?" · 房主":"");
+    li.textContent=labels[seat]+"方 · "+(present?(seat===room.seat?"你":cpu.level?"电脑":"已入座"):"等待加入")+(seat===0 && !cpu.level?" · 房主":"");
     $("players").append(li);
   });
   const game=room?.flight;
@@ -128,7 +130,7 @@ function render(){
   if(!roll)face.append(caption(24,30,"—",17,"#758491"));
   $("die-result").textContent=roll ? labels[roll.seat]+"方 · "+roll.value+" 点" : "等待掷骰";
   $("roll").textContent=playing && game.winner===null ? (game.die!==null?"等待选飞机":mine?"掷骰子":"对方掷骰") : "掷骰子";
-  $("status").textContent=!room?"创建或加入房间，邀请朋友入座":room.phase==="closed"?"房间已关闭":game?.winner!==null && game?labels[game.players[game.winner]]+"方获胜！":playing?(mine?"轮到你":"轮到"+labels[game.players[game.turn]]+"方")+(game.die===null?"掷骰子":"选择飞机"):"等待玩家入座";
+  $("status").textContent=!room?"创建或加入房间，邀请朋友入座":room.phase==="closed"?"房间已关闭":game?.winner!==null && game?labels[game.players[game.winner]]+"方获胜！":playing?(mine?"轮到你":(cpu.level?"轮到电脑":"轮到"+labels[game.players[game.turn]]+"方"))+(game.die===null?"掷骰子":"选择飞机"):"等待玩家入座";
   if(busy)$("status").textContent="正在同步…";
   $("log").textContent=game?.log||"骰子由房主设备生成，双方同步显示。";
   $("plane-controls").replaceChildren();
@@ -139,6 +141,14 @@ function render(){
     $("plane-controls").append(button);
   }
   renderBoard();
+  if(cpu.level && playing && !mine && game.winner===null && cpuTimer===null){
+    cpuTimer=setTimeout(()=>{
+      cpuTimer=null;
+      if(room?.flight!==game || game.turn!==1 || game.winner!==null)return;
+      if(game.die===null)acceptAction(1,"roll",{version:room.version});
+      else acceptAction(1,"plane",{version:room.version,pawn:choosePlane(game,cpu.level)});
+    },650);
+  }
 }
 function note(text) { $("note").textContent=text; }
 function transmit(data) {
@@ -173,7 +183,7 @@ function acceptAction(seat,action,extra) {
     if(valid)room.version++;
     else error="当前不能进行此操作。";
   }
-  sendState(error);
+  if(!cpu.level)sendState(error);
   render();
   if(error)note(error);
 }
@@ -273,8 +283,17 @@ function leave() {
 }
 $("leave").onclick=leave;
 $("home-link").onclick=event=>{
-  if(room && !leave())event.preventDefault();
+  if(!cpu.level && room && !leave())event.preventDefault();
 };
 const invite=new URLSearchParams(location.search).get("room");
 if(/^R?[0-9]{6}$/.test(invite||""))$("code").value=invite;
+if(cpu.level){
+  isHost=true;
+  room={seat:0,version:0,phase:"playing",players:[true,true],flight:newFlight([0,1],true)};
+  document.querySelector(".lobby h2").textContent="与电脑对弈";
+  document.querySelector(".lobby .badge").textContent="人机 · "+cpu.label;
+  note("你执红方先掷，蓝方由电脑操作。");
+  window.addEventListener("pagehide",()=>{clearTimeout(cpuTimer);cpuTimer=null;});
+  window.addEventListener("pageshow",render);
+}
 render();

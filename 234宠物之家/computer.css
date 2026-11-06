@@ -1,0 +1,6 @@
+.computer-options:not([hidden]) {display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0}
+.computer-options label {font-size:14px;color:var(--ink)}
+.computer-options select {font:inherit;color:inherit;background:white;border:1px solid #acb8a9;border-radius:7px;padding:7px}
+.computer-options #cpu-start {background:#2d4e40;color:white;border-color:#2d4e40}
+.computer-options .cpu-return {color:var(--ink);font-size:14px}
+.cpu-mode.flight-page .lobby>p:not(#note) {display:none}

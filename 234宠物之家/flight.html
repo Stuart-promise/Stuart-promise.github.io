@@ -4,8 +4,10 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>飞行棋 · 234宠物之家</title>
 <link rel="stylesheet" href="./style.css?v=cross1"><link rel="stylesheet" href="./flight.css?v=duo3">
+<script defer src="./computer.js?v=1"></script>
 <script src="./vendor/peerjs-1.5.5.min.js"></script><script defer src="./room-config.js"></script><script defer src="./relay.js?v=duo3"></script>
-  <script type="module" src="./flight.js?v=duo3"></script>
+  <script type="module" src="./flight.js?v=cpu1"></script>
+<link rel="stylesheet" href="./computer.css?v=1">
 </head>
 <body class="flight-page">
 <header><a class="brand" href="./?v=portal1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" id="home-link" href="./games.html?v=portal1">← 游戏列表</a></header>
@@ -14,6 +16,11 @@
 <section class="lobby">
 <div class="panel-head"><h2>飞行棋房间</h2><span class="badge">双人在线</span></div>
 <p>电脑或手机直连失败时，可让房主创建中转房。好友输入完整房间码即可加入。</p>
+<form id="computer-form" class="computer-options" method="get">
+  <label>电脑难度 <select name="cpu"><option value="easy">简单</option><option value="medium" selected>中档</option><option value="hard">困难</option></select></label>
+  <button type="submit" id="cpu-start">与电脑对弈</button>
+  <a class="cpu-return" hidden>返回大厅</a>
+</form>
 <form id="entry"><button type="button" class="primary" id="create">创建直连房</button><button type="button" id="create-relay">创建中转房</button><input id="code" aria-label="房间码" placeholder="房间码" pattern="[Rr]?[0-9]{6}" maxlength="7" required><button>加入房间</button></form>
 <div id="tools" hidden><strong id="room-label"></strong><button id="invite">复制邀请链接</button><button id="leave">退出房间</button></div>
 <p id="note" role="status">另一位玩家加入后，自动开始。</p>

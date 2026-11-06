@@ -16,11 +16,12 @@ const note = message => { byId("room-note").textContent = message; };
 
 function refreshLobby() {
   const busy = room.phase !== "idle";
+  byId("computer-form").hidden = busy;
   byId("entry").hidden = localMode || busy;
   byId("room-tools").hidden = !busy;
-  byId("switch-mode").hidden = busy;
+  byId("switch-mode").hidden = busy || !!cpu.level;
   byId("switch-mode").textContent = localMode ? "切换为在线" : "切换为同屏";
-  byId("mode-badge").textContent = localMode ? "双人同屏" : "在线双人";
+  byId("mode-badge").textContent = cpu.level ? "人机 · "+cpu.label : localMode ? "双人同屏" : "在线双人";
   byId("invite").hidden = room.phase !== "waiting";
   byId("leave").textContent = room.phase === "closed" ? "返回大厅" : "退出房间";
   byId("code-display").textContent = room.code ? `房间 ${room.code}` : "";
@@ -207,6 +208,15 @@ const invitedCode = new URLSearchParams(location.search).get("room");
 if (validCode(invitedCode)) {
   byId("room-code").value = invitedCode;
   note("好友邀请你对战，点击「加入房间」即可入座。");
+}
+if(cpu.level){
+  byId("room-title").textContent="与电脑对弈";
+  note("你执"+firstColor+"先手，电脑执"+secondColor+"。");
+  window.addEventListener("pageshow",()=>render());
+} else {
+  byId("computer-form").addEventListener("submit",event=>{
+    if(localMode && moves.length && !confirm("结束同屏对局，开始与电脑对弈？"))event.preventDefault();
+  });
 }
 refreshLobby();
 

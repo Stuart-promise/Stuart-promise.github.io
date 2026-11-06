@@ -8,10 +8,10 @@ const restart=document.getElementById("restart");
 const hint=document.getElementById("move-hint");
 const ns="http://www.w3.org/2000/svg";
 let moves=checkers.history;
-let localMode=false;
+let localMode=!!cpu.level;
 let selected=null;
 const nextColor=()=>checkers.turn===0?"红":"蓝";
-const activeTurn=()=>checkers.winner===null && !checkers.blocked && (localMode || room.phase==="playing" && room.color===nextColor());
+const activeTurn=()=>(!cpu.level || checkers.turn===0) && checkers.winner===null && !checkers.blocked && (localMode || room.phase==="playing" && room.color===nextColor());
 function element(tag,attrs,text) {
   const item=document.createElementNS(ns,tag);
   for(const [key,value] of Object.entries(attrs))item.setAttribute(key,value);
@@ -82,11 +82,19 @@ function render() {
   else if(checkers.blocked)statusLine.textContent="双方均无合法走法，等待协商重新开局";
   else if(checkers.winner!==null)statusLine.textContent=(checkers.winner===0?"红":"蓝")+"方获胜！";
   else statusLine.textContent=online?(active?"轮到你走棋（"+room.color+"方）":"等待对方走棋"):"轮到"+nextColor()+"方走棋";
+  if(cpu.level && checkers.winner===null && !checkers.blocked)statusLine.textContent=active?"轮到你走红方":"电脑正在思考…";
   undo.hidden=online;
   undo.disabled=!moves.length;
   restart.disabled=online?!ready||!moves.length||room.mineAgain:!moves.length;
   restart.textContent=online?(room.mineAgain?"等待对方同意":room.theirAgain?"同意重新开局":"申请重新开局"):"重新开局";
   drawBoard();
+  cpu.boardTurn(checkers.winner===null && !checkers.blocked && checkers.turn===1,
+    ()=>({pieces:checkers.pieces,last:moves.filter(m=>m.seat===1).at(-1)}),place,()=>{
+      for(const from of Object.keys(checkers.pieces)){
+        const to=checkers.destinations(from).keys().next().value;
+        if(to)return {from,to};
+      }
+    });
 }
 function legalMove(move){return checkers.legal(move);}
 function place(move) {
@@ -115,7 +123,7 @@ function clearBoard() {
   hint.textContent="点击己方棋子，绿色标记为可到达位置。";
   render();
 }
-undo.onclick=()=>{if(!localMode)return;checkers.undo();selected=null;render();};
+undo.onclick=()=>{if(!localMode)return;do {checkers.undo();} while(cpu.level && checkers.turn===1 && moves.length);selected=null;render();};
 restart.onclick=()=>{
   if(!localMode)return voteAgain();
   if(moves.length && checkers.winner===null && !confirm("结束当前对局，重新开局？"))return;
