@@ -26,7 +26,7 @@ const cpu = (() => {
       timer=null;
       const pick = move => {cancel();apply(move ?? fallback());};
       try {
-        const current=new Worker("./board-opponent.js?v=1");
+        const current=new Worker("./board-opponent.js?v=grid19");
         worker=current;
         current.onmessage=e=>{if(worker===current)pick(e.data);};
         current.onerror=()=>{if(worker===current)pick(null);};

@@ -20,7 +20,7 @@ function createGamePeer(game, prefix, code, host) {
     close() { socket.close(); }
   };
   const peer = {...events(), connect: () => link, destroy: () => socket.close()};
-  const verifyRules = ["234-pet-checkers-v3-", "234-pet-flight-winding-v4-"].includes(prefix);
+  const verifyRules = ["234-pet-gomoku-19-v2-", "234-pet-checkers-v3-", "234-pet-flight-winding-v4-"].includes(prefix);
   let handshakeTimer;
   function openLink() {
     if (host) peer.emit("connection", link);

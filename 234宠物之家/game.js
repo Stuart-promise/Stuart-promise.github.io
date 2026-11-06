@@ -1,6 +1,8 @@
 "use strict";
 
-const size = 15;
+const size = 19;
+const middle = Math.floor(size / 2);
+const centerPoint = middle * size + middle;
 const board = document.querySelector("#board");
 const statusLine = document.querySelector("#status");
 const undo = document.querySelector("#undo");
@@ -10,30 +12,33 @@ const moves = [];
 const points = [];
 let winningLine = [];
 let localMode = !!cpu.level;
-let selected = 7 * size + 7;
+let selected = centerPoint;
 const inside = (row, col) => row >= 0 && col >= 0 && row < size && col < size;
 const nextColor = () => moves.length % 2 === 0 ? "黑" : "白";
 
 function drawGrid() {
   const ns = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 150 150");
+  const span = size * 10;
+  svg.setAttribute("viewBox", `0 0 ${span} ${span}`);
+  board.style.setProperty("--board-size", size);
   svg.setAttribute("aria-hidden", "true");
   svg.classList.add("lattice");
   const grid = document.createElementNS(ns, "path");
   let lines = "";
   for (let i = 0; i < size; i++) {
     const n = 5 + i * 10;
-    lines += `M${n} 5V145 M5 ${n}H145 `;
+    lines += `M${n} 5V${span - 5} M5 ${n}H${span - 5} `;
   }
   grid.setAttribute("d", lines);
   grid.setAttribute("stroke", "#815e39");
   grid.setAttribute("stroke-width", ".35");
   svg.append(grid);
-  for (const [x, y] of [[35, 35], [115, 35], [75, 75], [35, 115], [115, 115]]) {
+  const stars = [3, middle, size - 4];
+  for (const row of stars) for (const col of stars) {
     const dot = document.createElementNS(ns, "circle");
-    dot.setAttribute("cx", x);
-    dot.setAttribute("cy", y);
+    dot.setAttribute("cx", 5 + col * 10);
+    dot.setAttribute("cy", 5 + row * 10);
     dot.setAttribute("r", "1.1");
     dot.setAttribute("fill", "#694b2f");
     svg.append(dot);
@@ -151,6 +156,6 @@ function clearBoard() {
   stones.fill(null);
   moves.length = 0;
   winningLine = [];
-  selected = 7 * size + 7;
+  selected = centerPoint;
   render();
 }

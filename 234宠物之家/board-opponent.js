@@ -3,7 +3,7 @@ const random = list => list[Math.floor(Math.random()*list.length)];
 const dirs = [[1,0],[0,1],[1,1],[1,-1]];
 
 function gomoku(board,level){
-  const size=15;
+  const size=Math.sqrt(board.length);
   function at(r,c){return r>=0 && r<size && c>=0 && c<size ? board[r*size+c] : "#";}
   function value(i,color){
     const r=Math.floor(i/size),c=i%size;
@@ -29,7 +29,7 @@ function gomoku(board,level){
       for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)
         if(at(r+dr,c+dc)===null)cells.add((r+dr)*size+c+dc);
     });
-    return cells.size?[...cells]:[112];
+    return cells.size?[...cells]:[Math.floor(board.length/2)];
   }
   const ranked=nearby().map(i=>{
     const attack=value(i,"白"),block=value(i,"黑");

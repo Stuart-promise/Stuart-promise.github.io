@@ -4,18 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>234宠物之家</title>
-  <link rel="stylesheet" href="./style.css?v=board4">
-  <script defer src="./computer.js?v=1"></script>
+  <link rel="stylesheet" href="./style.css?v=grid19">
+  <script defer src="./computer.js?v=grid19"></script>
 <script defer src="./vendor/peerjs-1.5.5.min.js"></script>
-  <script defer src="./room-config.js"></script><script defer src="./relay.js?v=relay1"></script>
-  <script defer src="./game.js?v=cpu1"></script>
-  <script defer src="./rooms.js?v=cpu1"></script>
+  <script defer src="./room-config.js"></script><script defer src="./relay.js?v=grid19"></script>
+  <script defer src="./game.js?v=grid19"></script>
+  <script defer src="./rooms.js?v=grid19"></script>
 <link rel="stylesheet" href="./computer.css?v=1">
 </head>
 <body data-game="gomoku">
   <header><a class="brand" href="./?v=portal1" data-home><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a class="back-home" href="./games.html?v=board4" data-home>← 游戏列表</a><span class="room">宠物游戏室</span></header>
   <main>
-    <div class="intro"><span class="eyebrow">桌游角 <i></i> 01</span><h1>五子棋</h1><p>开个房间，和朋友各执一色，先连成五子的一方获胜。</p></div>
+    <div class="intro"><span class="eyebrow">桌游角 <i></i> 01</span><h1>五子棋</h1><p>在 19 × 19 的棋盘上轮流落子，先连成五子的一方获胜。</p></div>
     <section class="lobby" aria-labelledby="room-title">
       <div class="panel-head"><h2 id="room-title">对战房间</h2><button type="button" class="subtle" id="switch-mode">切换为同屏</button></div>
       <form id="computer-form" class="computer-options" method="get">
@@ -36,7 +36,7 @@
       <p id="room-note" role="status">房主执黑，好友执白。</p>
     </section>
     <div class="layout">
-      <section class="board-card" aria-label="五子棋盘"><div id="board" role="group" aria-label="十五路棋盘，可用方向键移动，回车键落子"></div></section>
+      <section class="board-card" aria-label="五子棋盘"><div id="board" role="group" aria-label="十九路棋盘，可用方向键移动，回车键落子"></div></section>
       <aside>
         <div class="panel-head"><h2>本局对弈</h2><span class="badge" id="mode-badge">在线双人</span></div>
         <p class="status" id="status" role="status"></p>
