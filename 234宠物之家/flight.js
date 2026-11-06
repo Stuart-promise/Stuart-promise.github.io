@@ -1,9 +1,9 @@
-import {choosePlane} from "./flight-opponent.mjs?v=1";
-import {choices, newFlight, rollFlight, moveFlight, flightTrackIndex, ARM, TRACK, FINISH} from "./flight-engine.mjs?v=duo3";
+import {choosePlane} from "./flight-opponent.mjs?v=board4";
+import {choices, newFlight, rollFlight, moveFlight, flightTrackIndex, route, SIDE, ARM, TRACK, FINISH} from "./flight-engine.mjs?v=board4";
 const $=id=>document.getElementById(id);
 const colors=["#bd4552","#28669f"];
 const labels=["红","蓝"];
-const prefix="234-pet-flight-cross-v3-";
+const prefix="234-pet-flight-winding-v4-";
 let room=null, code="", busy=false, peer=null, link=null, timer=null;
 let isHost=false, cpuTimer=null;
 const svg=$("flight-board"), ns="http://www.w3.org/2000/svg";
@@ -14,23 +14,14 @@ function node(tag,attrs,text){
   return element;
 }
 
-// One arm and its three quarter-turns form a continuous, symmetric circuit.
-const side=2*ARM+3, middle=ARM+1;
-const cell=32, margin=(660-side*cell)/2;
-const quadrant=[];
-for(let col=0;col<ARM;col++)quadrant.push([ARM,col]);
-for(let row=ARM-1;row>=0;row--)quadrant.push([row,ARM]);
-quadrant.push([0,middle]);
-const route=[];
-let quarter=quadrant;
-for(let turn=0;turn<4;turn++){
-  route.push(...quarter);
-  quarter=quarter.map(([r,c])=>[c,side-1-r]);
-}
+const side=SIDE, middle=ARM+1;
+const cell=34, margin=(660-side*cell)/2;
+const airportSize=124;
+const airportStart=seat=>seat===0 ? 660-16-airportSize : 16;
 const center=(row,col)=>[margin+(col+0.5)*cell,margin+(row+0.5)*cell];
 function airport(seat,pawn) {
-  const base=seat===0 ? 440 : 92;
-  return [base+(pawn%2)*96,base+Math.floor(pawn/2)*82];
+  const base=airportStart(seat);
+  return [base+35+(pawn%2)*54,base+48+Math.floor(pawn/2)*48];
 }
 function position(seat,pos,pawn) {
   if(pos<0)return airport(seat,pawn);
@@ -48,6 +39,8 @@ function renderBoard() {
   svg.replaceChildren();
   svg.append(node("rect",{x:2,y:2,width:656,height:656,rx:18,fill:"white",stroke:"#ced6dc","stroke-width":2}));
   const palette=[colors[1],"white",colors[0],"white"];
+  const path=route.map(([r,c])=>center(r,c).join(",")).join(" ");
+  svg.append(node("polygon",{points:path,fill:"none",stroke:"#abb8c2","stroke-width":5,"stroke-linejoin":"round"}));
   route.forEach(([r,c],index)=>{
     const [cx,cy]=center(r,c);
     const square=tile(r,c,palette[index%4]);
@@ -57,17 +50,21 @@ function renderBoard() {
       const relative=index%4===0 ? index : (index+TRACK/2)%TRACK;
       const mark=relative===16?"✈":relative===0?"起":"＋";
       svg.append(caption(cx,cy+6,mark,17,"white"));
+    }else{
+      const [nextRow,nextCol]=route[(index+1)%TRACK];
+      const angle=Math.atan2(nextRow-r,nextCol-c)*180/Math.PI;
+      svg.append(node("path",{d:"M -3 -5 L 2 0 L -3 5",transform:`translate(${cx} ${cy}) rotate(${angle})`,fill:"none",stroke:"#8195a3","stroke-width":2,"stroke-linecap":"round","stroke-linejoin":"round"}));
     }
   });
   for(let seat=0;seat<2;seat++){
-    const start=seat===0 ? 382 : 34;
+    const start=airportStart(seat);
     const group=node("g",{"data-airport":seat,"aria-label":labels[seat]+"方机场"});
-    group.append(node("rect",{x:start,y:start,width:244,height:244,rx:20,fill:"white",stroke:colors[seat],"stroke-width":3}));
+    group.append(node("rect",{x:start,y:start,width:airportSize,height:airportSize,rx:14,fill:seat===0?"#fff6f6":"#f3f8fd",stroke:colors[seat],"stroke-width":3}));
     for(let pawn=0;pawn<4;pawn++){
       const [cx,cy]=airport(seat,pawn);
-      group.append(node("circle",{cx,cy,r:25,fill:"white",stroke:colors[seat],"stroke-opacity":0.38,"stroke-width":2}));
+      group.append(node("circle",{cx,cy,r:18,fill:"white",stroke:colors[seat],"stroke-opacity":0.38,"stroke-width":2}));
     }
-    group.append(caption(start+122,start+211,labels[seat]+"方机场",21,colors[seat]));
+    group.append(caption(start+airportSize/2,start+22,labels[seat]+"方机场",16,colors[seat]));
     svg.append(group);
     for(let p=TRACK;p<=FINISH;p++){
       const step=p-TRACK+1,col=seat===0?side-1-step:step;
@@ -76,7 +73,6 @@ function renderBoard() {
     }
   }
   svg.append(caption(330,334,"终",16,"#455763"));
-  svg.append(caption(152,484,"同色跳 4 格",19,"#425665"),caption(152,514,"✈  飞跃 12 格",16,"#637381"));
   const game=room?.flight;
   const seats=game ? game.players : [0,1];
   const legal=game && game.players[game.turn]===room.seat && !busy ? choices(game):[];
@@ -272,7 +268,7 @@ $("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=duo3&room="+code,location.href).href;
+  const url=new URL("./flight.html?v=board4&room="+code,location.href).href;
   try{await navigator.clipboard.writeText(url);note("邀请链接已复制。");}catch{prompt("复制邀请链接",url);}
 };
 function leave() {

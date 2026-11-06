@@ -1,5 +1,5 @@
 import {DurableObject} from "cloudflare:workers";
-import {newFarm,applyFarmAction} from "../234宠物之家/farm-engine.mjs";
+import {newFarm,applyFarmAction} from "./farm-engine.mjs";
 
 const json=(data,status=200)=>Response.json(data,{status,headers:{"Cache-Control":"no-store"}});
 const hex=bytes=>Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,"0")).join("");

@@ -94,3 +94,16 @@ a.brand { color: inherit; text-decoration: none; }
 details summary { cursor: pointer; font-size: 14px; }
 @media (max-width: 650px) { .game-cards { grid-template-columns: 1fr; gap: 16px; margin-top: 22px; } .game-art { height: 115px; margin: 8px 0 16px; } .game-card { padding: 20px; } .home { padding-top: 28px; } }
 @media (max-width: 380px) { .brand { font-size: 18px; gap: 6px; } .back-home { font-size: 12px; padding: 6px 0; } }
+
+[data-game="gomoku"] main { max-width: 1296px; }
+[data-game="gomoku"] .layout { grid-template-columns: minmax(0, 1fr) minmax(245px, 290px); }
+[data-game="gomoku"] .board-card { padding: clamp(6px, 1vw, 14px); }
+@media (max-width: 900px) {
+  [data-game="gomoku"] main { padding-inline: 12px; }
+  [data-game="gomoku"] .layout { grid-template-columns: 1fr; }
+  [data-game="gomoku"] .board-card, [data-game="gomoku"] aside { max-width: none; }
+}
+@media (max-width: 710px) {
+  [data-game="gomoku"] .layout { margin-inline: -9px; }
+  [data-game="gomoku"] aside { width: calc(100% - 18px); }
+}

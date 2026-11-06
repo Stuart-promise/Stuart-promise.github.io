@@ -12,15 +12,15 @@
 .flight-card{background:#e0edf0}
 .flight-art{font-size:70px;gap:14px;color:#2f7899}
 .flight-art span:nth-child(2){color:#b94535}
-.flight-page main{max-width:1320px}
-.flight-page .layout{grid-template-columns:minmax(0,1fr) 300px;gap:22px}
-.flight-page .board-card{padding:10px;background:#d9e4d9;border-color:#9bab9b;box-shadow:0 4px 20px #2c463318}
-@media(max-width:950px){.flight-page .layout{grid-template-columns:1fr}.flight-page .board-card{max-width:820px}.flight-page aside{max-width:820px;width:100%}}
-@media(max-width:710px){.flight-page main{padding-left:6px;padding-right:6px}.flight-page .board-card{padding:3px}.flight-page .intro,.flight-page .lobby{margin-left:6px;margin-right:6px}}
+.flight-page main{max-width:1520px}
+.flight-page .layout{grid-template-columns:minmax(0,1fr) 264px;gap:18px}
+.flight-page .board-card{padding:4px;background:#d9e4d9;border-color:#9bab9b;box-shadow:0 4px 20px #2c463318}
+@media(max-width:950px){.flight-page main{padding-inline:10px}.flight-page .layout{grid-template-columns:1fr}.flight-page .board-card{max-width:none}.flight-page aside{max-width:none;width:100%}}
+@media(max-width:710px){.flight-page main{padding-left:2px;padding-right:2px}.flight-page .board-card{padding:0}.flight-page .intro,.flight-page .lobby{margin-left:6px;margin-right:6px}}
 
 .flight-page .board-card {position:relative;align-self:start;background:white;border-color:#ccd5dc;box-shadow:none}
-.board-dice {position:absolute;right:6%;top:6%;width:29%;height:32%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(2px,.7vw,9px);color:#344c5f;font-variant-numeric:tabular-nums}
-#dice {width:clamp(32px,7vw,76px);height:auto;aspect-ratio:1;flex-shrink:1;min-height:0;max-height:43%;background:white;border:2px solid #8d9fad;border-radius:22%}
+.board-dice {display:flex;align-items:center;justify-content:center;gap:12px;padding:8px;color:#344c5f;font-variant-numeric:tabular-nums}
+#dice {width:38px;height:38px;background:white;border:2px solid #8d9fad;border-radius:22%}
 #die-result {font-size:clamp(12px,1.7vw,21px)}
 .board-dice button {border-radius:99px;border:0;background:#284b62;color:white;padding:5px 15px;line-height:1.35;font-weight:650;font-size:clamp(12px,1.6vw,18px)}
 .board-dice button:disabled {background:#eaf0f4;color:#506576;cursor:default}

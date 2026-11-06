@@ -1,4 +1,4 @@
-import {choices,moveFlight,rollFlight,TRACK,FINISH} from "./flight-engine.mjs?v=duo3";
+import {choices,moveFlight,rollFlight,TRACK,FINISH} from "./flight-engine.mjs?v=board4";
 function score(game){
   if(game.winner!==null)return game.winner===1?10000:-10000;
   const progress=planes=>planes.reduce((sum,p)=>sum+(p<0?0:10+p+(p>=TRACK?12:0)+(p===FINISH?25:0)),0);

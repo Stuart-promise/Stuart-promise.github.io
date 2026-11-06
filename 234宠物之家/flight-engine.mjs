@@ -1,5 +1,18 @@
 export const ARM = 8;
-export const TRACK = 8*ARM + 4;
+// From the blue runway to the top edge. Rotate this section to close the loop.
+const quarterRoute = [
+  [8,0], [7,0], [6,0], [6,1], [6,2], [6,3], [7,3],
+  [7,4], [7,5], [6,5], [5,5], [4,5], [4,4], [3,4],
+  [2,4], [2,5], [2,6], [2,7], [1,8], [0,8], [0,9]
+];
+export const SIDE = 2 * ARM + 3;
+export const route = [];
+let section = quarterRoute;
+for (let turn = 0; turn < 4; turn++) {
+  route.push(...section);
+  section = section.map(([row, col]) => [col, SIDE - 1 - row]);
+}
+export const TRACK = route.length;
 export const FINISH = TRACK + ARM - 1;
 
 // Existing saved rooms on the legacy HTTP service still use the 52-cell course.
