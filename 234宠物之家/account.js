@@ -3,7 +3,7 @@
   'use strict';
   const base = new URL('.', document.currentScript?.src || new URL('./account.js',location.href));
   if(!document.querySelector('link[href*="account.css"]')) {
-    const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('account.css?v=rank1',base);document.head.append(style);
+    const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('account.css?v=forum1',base);document.head.append(style);
   }
   const API = 'https://111.228.4.20';
   const SESSION = 'pet234:session:v1';
@@ -230,6 +230,11 @@
     const header=document.querySelector('header');
     if(!header)return;
     header.classList.add('pet-account-header');
+    if(!header.querySelector('.pet-forum-nav')) {
+      const forum=document.createElement('a');forum.className='pet-forum-nav';forum.href=new URL('forum.html',base).href;forum.textContent='论坛';
+      if(location.pathname.endsWith('/forum.html'))forum.setAttribute('aria-current','page');
+      header.append(forum);
+    }
     const link=document.createElement('a'); link.className='pet-account-link'; link.href=new URL('account.html',base).href;
     paintAccountLink(link);
     header.append(link);

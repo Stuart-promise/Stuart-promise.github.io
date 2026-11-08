@@ -3,14 +3,16 @@
 @media(max-width:640px){.profile-heading h1{font-size:27px}.profile-hero{padding:22px 18px;border-radius:20px}.profile-identity{gap:12px}.profile-avatar{width:45px;height:45px;border-radius:15px;font-size:24px}.profile-name-line h2{font-size:21px}.level-emblem{font-size:16px;padding:9px 10px}.profile-identity p{font-size:11px}.profile-stats{gap:8px}.profile-stats>div{padding:16px 10px}.profile-stats strong{font-size:25px}.profile-stats span{font-size:11px}.profile-stats small{font-size:10px}.pet-account-main .pet-account-panel{padding:22px 18px}.reward-track{gap:5px}.reward-day{border-radius:10px;padding:12px 2px}.reward-day span,.reward-day small{font-size:10px}.reward-day strong{font-size:18px}.level-table{grid-template-columns:repeat(3,minmax(0,1fr))}.profile-inline-form{align-items:stretch}.profile-inline-form label:first-child{flex-basis:100%}.profile-growth>div{flex-wrap:wrap}.nickname-form>div{gap:6px}.pet-account-main .nickname-form input{min-width:0}.pet-account-main .nickname-form button{padding:10px}.profile-section-head h2{font-size:18px}.title-choice{max-width:100%;flex-wrap:wrap}}
 
 /* Shared navigation badge: restrained early levels, jewel tones, then gold. */
-a.pet-account-link[data-level]{color:var(--rank-ink)!important;background:var(--rank-bg);border-color:var(--rank-border);box-shadow:var(--rank-shadow,none);color-scheme:light}
-a.pet-account-link[data-level="1"]{--rank-ink:#505951;--rank-bg:#f0f1ef;--rank-border:#bdc3bc}
-a.pet-account-link[data-level="2"]{--rank-ink:#4d6337;--rank-bg:#e9efdb;--rank-border:#a9bb8f}
-a.pet-account-link[data-level="3"]{--rank-ink:#225f52;--rank-bg:#d8eee8;--rank-border:#83b4a5}
-a.pet-account-link[data-level="4"]{--rank-ink:#185175;--rank-bg:#dceefb;--rank-border:#84b6d6}
-a.pet-account-link[data-level="5"]{--rank-ink:#f0f5ff;--rank-bg:#304f95;--rank-border:#7795d1}
-a.pet-account-link[data-level="6"]{--rank-ink:#f6edff;--rank-bg:#633d91;--rank-border:#b795d9}
-a.pet-account-link[data-level="7"]{--rank-ink:#ffe9f0;--rank-bg:#772742;--rank-border:#ca8b9c;--rank-shadow:0 2px 8px #77274216}
-a.pet-account-link[data-level="8"]{--rank-ink:#694609;--rank-bg:linear-gradient(135deg,#fff4cd,#ecd18b);--rank-border:#ba943d;--rank-shadow:0 2px 10px #b28b3226}
-a.pet-account-link[data-level="9"]{--rank-ink:#fff0b6;--rank-bg:linear-gradient(135deg,#40351d,#1e1a13);--rank-border:#c6a04c;--rank-shadow:inset 0 0 0 1px #efd08026,0 2px 12px #bd92353b}
-a.pet-account-link[data-level]:focus-visible{outline:2px solid var(--rank-border);outline-offset:3px}
+:is(a.pet-account-link,.forum-rank)[data-level]{color:var(--rank-ink)!important;background:var(--rank-bg);border-color:var(--rank-border);box-shadow:var(--rank-shadow,none);color-scheme:light}
+:is(a.pet-account-link,.forum-rank)[data-level="1"]{--rank-ink:#505951;--rank-bg:#f0f1ef;--rank-border:#bdc3bc}
+:is(a.pet-account-link,.forum-rank)[data-level="2"]{--rank-ink:#4d6337;--rank-bg:#e9efdb;--rank-border:#a9bb8f}
+:is(a.pet-account-link,.forum-rank)[data-level="3"]{--rank-ink:#225f52;--rank-bg:#d8eee8;--rank-border:#83b4a5}
+:is(a.pet-account-link,.forum-rank)[data-level="4"]{--rank-ink:#185175;--rank-bg:#dceefb;--rank-border:#84b6d6}
+:is(a.pet-account-link,.forum-rank)[data-level="5"]{--rank-ink:#f0f5ff;--rank-bg:#304f95;--rank-border:#7795d1}
+:is(a.pet-account-link,.forum-rank)[data-level="6"]{--rank-ink:#f6edff;--rank-bg:#633d91;--rank-border:#b795d9}
+:is(a.pet-account-link,.forum-rank)[data-level="7"]{--rank-ink:#ffe9f0;--rank-bg:#772742;--rank-border:#ca8b9c;--rank-shadow:0 2px 8px #77274216}
+:is(a.pet-account-link,.forum-rank)[data-level="8"]{--rank-ink:#694609;--rank-bg:linear-gradient(135deg,#fff4cd,#ecd18b);--rank-border:#ba943d;--rank-shadow:0 2px 10px #b28b3226}
+:is(a.pet-account-link,.forum-rank)[data-level="9"]{--rank-ink:#fff0b6;--rank-bg:linear-gradient(135deg,#40351d,#1e1a13);--rank-border:#c6a04c;--rank-shadow:inset 0 0 0 1px #efd08026,0 2px 12px #bd92353b}
+:is(a.pet-account-link,.forum-rank)[data-level]:focus-visible{outline:2px solid var(--rank-border);outline-offset:3px}
+
+.pet-forum-nav{color:inherit;text-decoration:none;font:14px system-ui,sans-serif;white-space:nowrap}.pet-forum-nav[aria-current=page]{text-decoration:underline;text-underline-offset:5px}

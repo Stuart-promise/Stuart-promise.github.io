@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小院论坛 · 234宠物之家</title>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./account.css?v=forum1"><link rel="stylesheet" href="./forum.css?v=1">
+<script src="./account.js?v=forum1"></script><script type="module" src="./forum.js?v=1"></script>
+</head><body class="forum-page">
+<header><a class="brand" href="./"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a href="./study.html">学习</a><a href="./games.html">游戏</a></header>
+<main class="forum-main">
+<div class="forum-intro"><div><span class="forum-eyebrow">THE COURTYARD / 一起聊聊</span><h1>小院论坛</h1><p>聊学习，聊游戏，也聊今天的小发现。</p></div><button id="new-post" class="forum-primary" disabled>准备中…</button></div>
+<p id="forum-feedback" role="status" aria-live="polite"></p>
+<div class="forum-layout"><div class="forum-content">
+<section id="list-view" aria-label="帖子列表"><div class="forum-toolbar"><nav id="forum-tabs" aria-label="论坛分区"><a href="#category=all" data-category="all" aria-current="page">全部</a><a href="#category=study" data-category="study">学习交流</a><a href="#category=games" data-category="games">游戏交流</a><a href="#category=chat" data-category="chat">小院闲聊</a></nav><button id="refresh-list" class="forum-quiet">刷新</button></div><p id="forum-total" class="forum-muted">正在读取帖子…</p><div id="post-list" aria-live="polite"></div><button id="more-posts" class="forum-more" hidden>加载更多帖子</button></section>
+<section id="thread-view" hidden aria-label="帖子详情"><a id="back-to-list" class="forum-back" href="#category=all">← 返回论坛</a><div id="thread-content"></div>
+<section class="forum-comments"><div class="forum-section-title"><h2>评论 <span id="comment-count">0</span></h2><button id="refresh-thread" class="forum-quiet">刷新评论</button></div><button id="more-comments" class="forum-more" hidden>加载更早的评论</button><div id="comment-list"></div>
+<div id="comment-login" class="forum-login-note" hidden><p>登录后，加入这场讨论。</p><a href="./account.html">登录 / 注册 →</a></div>
+<form id="comment-form" hidden><label for="comment-body">留下你的想法</label><div id="comment-identity" class="forum-composer-identity"></div><fieldset id="comment-fields"><textarea id="comment-body" maxlength="2000" rows="5" required placeholder="友善交流，让每个想法都被认真看见。"></textarea><div class="forum-form-footer"><span class="forum-muted">最多 2,000 字 · 草稿保存在此设备</span><button type="submit" class="forum-primary">发表评论</button></div></fieldset></form></section></section>
+<div id="forum-error" class="forum-empty" role="alert" hidden><h2>暂时没能读取讨论</h2><p id="forum-error-text"></p><button id="retry-forum" class="forum-primary">重新加载</button><p><a class="forum-back" href="#category=all">返回帖子列表 →</a></p></div>
+</div><aside class="forum-sidebar"><section class="forum-side-card"><span class="forum-eyebrow">你在小院的名片</span><div id="forum-me"></div><p id="forum-me-note" class="forum-muted">游客可以浏览，注册会员可以发帖与评论。</p><a href="./account.html" id="forum-account-link">前往个人中心 →</a></section><section class="forum-side-card forum-guide"><span class="forum-eyebrow">一张小纸条</span><h2>好好说话，慢慢交流。</h2><p>分享遇到的问题、通关的小技巧，或者今天新学会的一件事。</p><p>发言旁会展示你的昵称、等级与当前佩戴的称号。</p><p class="forum-muted">发帖和评论不额外奖励积分。</p></section></aside></div>
+</main>
+<dialog id="post-dialog" aria-labelledby="compose-title"><form id="post-form"><div class="forum-dialog-title"><h2 id="compose-title">在小院开启一个话题</h2><button type="button" id="close-post" class="forum-quiet" aria-label="关闭发帖窗口">✕</button></div><p class="forum-muted">分享一个发现，或者向大家问个问题。</p><div id="post-identity" class="forum-composer-identity"></div><fieldset id="post-fields"><label for="post-category">选择分区</label><select id="post-category"><option value="chat">小院闲聊</option><option value="study">学习交流</option><option value="games">游戏交流</option></select><label for="post-title">标题</label><input id="post-title" maxlength="80" required placeholder="用一句话说说你的话题"><label for="post-body">正文</label><textarea id="post-body" maxlength="10000" rows="9" required placeholder="在这里写下你的分享…"></textarea><p class="forum-muted">标题最多 80 字，正文最多 10,000 字。草稿仅保存在此设备。</p><p id="post-feedback" role="status"></p><div class="forum-form-footer"><button type="button" id="save-close-post" class="forum-quiet">稍后再写</button><button type="submit" class="forum-primary">发布帖子</button></div></fieldset></form></dialog>
+</body></html>
