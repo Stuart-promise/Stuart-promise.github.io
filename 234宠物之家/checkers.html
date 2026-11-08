@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="./style.css?v=peer1">
   <script defer src="./computer.js?v=1"></script>
 <script defer src="./vendor/peerjs-1.5.5.min.js"></script>
-  <script defer src="./room-config.js"></script><script defer src="./relay.js?v=duo3"></script>
+  <script defer src="./room-config.js?v=cloud1"></script><script defer src="./relay.js?v=cloud1"></script>
   <script defer src="./checkers-engine.js?v=duo3"></script>
   <script defer src="./checkers.js?v=cpu1"></script>
-  <script defer src="./rooms.js?v=cpu1"></script>
+  <script defer src="./rooms.js?v=cloud1"></script>
 <link rel="stylesheet" href="./checkers.css?v=checkers2">
 <link rel="stylesheet" href="./computer.css?v=1">
 <link rel="stylesheet" href="./account.css?v=forum1"><script src="./account.js?v=forum1"></script></head>
@@ -27,9 +27,9 @@
 </form>
 <div id="entry">
         <p>创建房间后，把邀请码发给朋友。收到邀请码后，输入房间码即可加入。</p>
-        <p>电脑或手机直连失败时，可让房主创建中转房。好友输入完整房间码即可加入。</p>
+        <p>默认通过本站云服务器联机。创建房间后，把完整房间码发给好友即可加入。</p>
         <form id="join-form">
-          <button type="button" class="primary" id="create">创建直连房</button><button type="button" id="create-relay">创建中转房</button>
+          <button type="button" class="primary" id="create">创建服务器房</button><button type="button" id="create-relay">备用直连房</button>
           <input id="room-code" aria-label="房间码" placeholder="房间码" maxlength="7" pattern="[Rr]?[0-9]{6}" autocomplete="off" required>
           <button type="submit">加入房间</button>
         </form>

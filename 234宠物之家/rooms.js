@@ -157,8 +157,12 @@ function openRoom(host, code) {
       if (room.peer !== peer || room.phase === "playing" && room.link?.open) return;
       const messages = {
         "rules-version": "双方的游戏版本不同，请双方刷新页面后重新开房。",
+        "room-expired": "房间等待超过 20 分钟，请重新创建。",
+        "server-busy": "房间服务暂时繁忙，请稍后重试。",
+        "rate-limited": "连接过于频繁，请稍后重试。",
+        "connection-timeout": "与服务器连接超时，请重新开房。",
         "room-full": "房间已经坐满，请换一个房间。",
-        "relay-unreachable": "无法连接中转服务，请尝试直连房或更换网络。",
+        "relay-unreachable": "无法连接本站服务器，请稍后重试或使用备用直连房。",
         "peer-unavailable": "找不到这个房间，请核对邀请码，并确认房主仍在线。",
         "unavailable-id": "房间码已被占用，请返回大厅再创建一次。",
         "browser-incompatible": "当前浏览器不支持在线连接，请使用新版浏览器。"
@@ -173,8 +177,8 @@ function openRoom(host, code) {
   }
 }
 
-byId("create").onclick = () => openRoom(true, createRoomCode(false));
-byId("create-relay").onclick = () => openRoom(true, createRoomCode(true));
+byId("create").onclick = () => openRoom(true, createRoomCode(true));
+byId("create-relay").onclick = () => openRoom(true, createRoomCode(false));
 byId("join-form").onsubmit = event => {
   event.preventDefault();
   const code = byId("room-code").value.trim().toUpperCase();

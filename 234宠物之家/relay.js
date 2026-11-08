@@ -6,6 +6,7 @@ function createGamePeer(game, prefix, code, host) {
   const url = new URL("/v1/relay/" + game + "/" + code.slice(1), window.ROOM_SERVER);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   url.searchParams.set("seat", host ? "host" : "guest");
+  url.searchParams.set("rules", prefix);
   const socket = new WebSocket(url);
   function events() {
     const target = new EventTarget();
@@ -20,15 +21,25 @@ function createGamePeer(game, prefix, code, host) {
     close() { socket.close(); }
   };
   const peer = {...events(), connect: () => link, destroy: () => socket.close()};
-  const verifyRules = ["234-pet-gomoku-19-v2-", "234-pet-checkers-v3-", "234-pet-flight-winding-v4-"].includes(prefix);
-  let handshakeTimer;
+  const verifyRules = true;
+  let handshakeTimer,heartbeat;
+  let lastMessage=Date.now();
+  socket.onopen=()=>{
+    lastMessage=Date.now();
+    heartbeat=setInterval(()=>{
+      if(Date.now()-lastMessage>65000){socket.close(4000,'connection-timeout');return;}
+      if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({_relay:'ping'}));
+    },20000);
+  };
   function openLink() {
     if (host) peer.emit("connection", link);
     link.open = true;
     link.emit("open");
   }
   socket.onmessage = event => {
-    const packet = JSON.parse(event.data);
+    lastMessage=Date.now();
+    let packet;
+    try { packet=JSON.parse(event.data); } catch { socket.close(4000,'invalid-message');return; }
     if (packet.event === "ready") peer.emit("open");
     if (packet.event === "paired") {
       if (!verifyRules) return openLink();
@@ -44,6 +55,7 @@ function createGamePeer(game, prefix, code, host) {
   };
   socket.onclose = event => {
     clearTimeout(handshakeTimer);
+    clearInterval(heartbeat);
     if (link.open) {
       link.open = false;
       link.emit("close");

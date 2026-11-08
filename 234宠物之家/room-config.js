@@ -1,2 +1,2 @@
 "use strict";
-window.ROOM_SERVER = "https://pet234-rooms.tuart-promise-github-io.workers.dev";
+window.ROOM_SERVER = "https://111.228.4.20";

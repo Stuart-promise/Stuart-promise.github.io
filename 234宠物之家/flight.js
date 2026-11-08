@@ -254,7 +254,7 @@ function enter(host, relay = false) {
     });
     current.on("error",error=>{
       if(peer!==current || room.phase==="playing" && link?.open)return;
-      const messages={"rules-version":"双方的游戏版本不同，请双方刷新页面后重新开房。","room-full":"房间已经坐满，请换一个房间。","relay-unreachable":"无法连接中转服务，请尝试直连房或更换网络。","peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
+      const messages={"rules-version":"双方的游戏版本不同，请双方刷新页面后重新开房。","room-expired":"房间等待超过 20 分钟，请重新创建。","server-busy":"房间服务暂时繁忙，请稍后重试。","rate-limited":"连接过于频繁，请稍后重试。","connection-timeout":"与服务器连接超时，请重新开房。","room-full":"房间已经坐满，请换一个房间。","relay-unreachable":"无法连接本站服务器，请稍后重试或使用备用直连房。","peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
       closeRoom(messages[error.type]||"无法建立连接，请检查网络或使用新版浏览器。");
     });
     current.on("disconnected",()=>{
@@ -262,8 +262,8 @@ function enter(host, relay = false) {
     });
   } catch { closeRoom("当前浏览器无法连接，请使用新版浏览器。"); }
 }
-$("create").onclick=()=>enter(true);
-$("create-relay").onclick=()=>enter(true,true);
+$("create").onclick=()=>enter(true,true);
+$("create-relay").onclick=()=>enter(true,false);
 $("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
