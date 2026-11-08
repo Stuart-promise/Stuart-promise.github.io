@@ -1,5 +1,5 @@
 (async () => {
-if (!globalThis.PetAccount) await import("./account.js?v=2");
+if (!globalThis.PetAccount) await import("./account.js?v=3");
 const accountStore = await PetAccount.open("animal-drop");
 "use strict";
 

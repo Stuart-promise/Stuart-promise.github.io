@@ -61,7 +61,7 @@ $('export-account').onclick=async()=>{
 window.addEventListener('pet-account-status',e=>message(e.detail));
 window.addEventListener('pet-account-data',render);
 if(A.session){
-  $('auth-panel').hidden=true;$('signed-panel').hidden=false;$('welcome').textContent='你好，'+A.session.user.username;
+  $('auth-panel').hidden=true;$('signed-panel').hidden=false;$('welcome').textContent='学习与游戏存档';
   render();
   await Promise.all(Object.keys(A.modules).map(m=>A.open(m)));render();
 }

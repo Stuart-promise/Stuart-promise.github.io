@@ -3,7 +3,7 @@ const book = new URLSearchParams(location.search).get("book") === "cet6" ? "cet6
 const title = book === "cet6" ? "大学六级" : "大学四级";
 const prefix = "pet234:vocab:v1:" + book + ":";
 const goalKey = prefix + "daily-goal";
-if (!globalThis.PetAccount) await import("./account.js?v=2");
+if (!globalThis.PetAccount) await import("./account.js?v=3");
 const accountStore = await PetAccount.open("vocab-" + book);
 const intervals = [1, 2, 4, 7, 15, 30];
 const records = new Map();

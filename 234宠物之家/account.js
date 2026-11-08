@@ -3,7 +3,7 @@
   'use strict';
   const base = new URL('.', document.currentScript?.src || new URL('./account.js',location.href));
   if(!document.querySelector('link[href*="account.css"]')) {
-    const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('account.css?v=1',base);document.head.append(style);
+    const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('account.css?v=3',base);document.head.append(style);
   }
   const API = 'https://111.228.4.20';
   const SESSION = 'pet234:session:v1';
@@ -19,6 +19,27 @@
   try { session = JSON.parse(localStorage.getItem(SESSION)); } catch {}
   if (!session?.user?.id || !session?.token) session = null;
   const owner = session?.user?.id || 'guest';
+  const profileKey='pet234:profile:v1:'+owner;
+  let profile=null,checkInRunning,lastActivityCheck=0;
+  try { if(session)profile=JSON.parse(localStorage.getItem(profileKey)); } catch {}
+  function updateProfile(value,persist=true) {
+    if(!value)return;
+    profile=value;
+    if(persist)try{localStorage.setItem(profileKey,JSON.stringify(value));}catch{}
+    const link=document.querySelector('.pet-account-link');
+    if(link&&session)link.textContent=(profile.nickname||session.user.username)+' · Lv.'+profile.level;
+    window.dispatchEvent(new CustomEvent('pet-account-profile',{detail:profile}));
+  }
+  async function checkIn() {
+    if(!session||stale||document.hidden)return;
+    if(checkInRunning)return checkInRunning;
+    checkInRunning=request('/v1/check-in',{method:'POST'}).then(result=>{
+      updateProfile(result.profile);
+      if(result.reward.awarded)notify('今日登录 +'+result.reward.amount+' 积分 · 连续 '+result.profile.streak+' 天');
+      return result;
+    }).finally(()=>{checkInRunning=null;});
+    return checkInRunning;
+  }
   const key = m => 'pet234:account:v1:'+owner+':'+m;
   function notify(text) {
     message = text;
@@ -190,7 +211,7 @@
   }
   const ready=(async()=>{
     if(session) {
-      try { await request('/v1/me'); notify('已登录 · '+session.user.username); }
+      try { const data=await request('/v1/me'); updateProfile(data.profile); notify('已登录 · '+(profile?.nickname||session.user.username)); await checkIn(); }
       catch(error) { notify(error.message); }
     } else notify('游客模式 · 记录仅存本机');
   })();
@@ -199,7 +220,7 @@
     if(!header)return;
     header.classList.add('pet-account-header');
     const link=document.createElement('a'); link.className='pet-account-link'; link.href=new URL('account.html',base).href;
-    link.textContent=session?'账号：'+session.user.username:'登录 / 注册';
+    link.textContent=session?(profile?profile.nickname+' · Lv.'+profile.level:'账号：'+session.user.username):'登录 / 注册';
     header.append(link);
     const bar=document.createElement('div'); bar.className='pet-account-bar';
     const status=document.createElement('span'); status.id='pet-account-status'; status.setAttribute('role','status'); status.textContent=message;
@@ -209,15 +230,27 @@
   window.addEventListener('online',()=>flush().catch(()=>{}));
   setInterval(()=>{if(session&&!document.hidden)flush().catch(()=>{});},30000);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)flush().catch(()=>{});});
+  const onActivity=()=>{
+    if(!session||document.hidden||Date.now()-lastActivityCheck<60000)return;
+    lastActivityCheck=Date.now();
+    const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    if(!profile?.checkedInToday||profile.serverDate!==today)checkIn().catch(()=>{});
+  };
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)onActivity();});
+  window.addEventListener('online',onActivity);
+  document.addEventListener('pointerdown',onActivity,{passive:true});
+  document.addEventListener('keydown',onActivity);
   window.addEventListener('storage',e=>{
     if(e.key===SESSION) {
       stale=true;
       // Prevent the running game from writing under a new identity before reload.
       location.reload();
+    } else if(e.key===profileKey&&e.newValue) {
+      try{updateProfile(JSON.parse(e.newValue),false);}catch{}
     } else if(e.key?.startsWith('pet234:account:v1:'+owner+':')) {
       window.dispatchEvent(new CustomEvent('pet-account-data',{detail:e.key}));
     }
   });
   window.PetAccount={ready,open,flush,request,authenticate,logout,modules,read,resolve,guestData,importGuest,
-    notify,locked,ensureGameClosed,assertOwner,session,owner,base};
+    notify,locked,ensureGameClosed,assertOwner,session,owner,base,checkIn,updateProfile,get profile(){return profile;}};
 })();
