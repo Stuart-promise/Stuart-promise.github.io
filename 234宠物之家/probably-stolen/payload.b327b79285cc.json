@@ -1,0 +1,20 @@
+{
+  "Build/WebGL.data": {
+    "parts": [
+      "Build/WebGL.data.00.3116089dc6fe.bin",
+      "Build/WebGL.data.01.812cdcc1f77e.bin",
+      "Build/WebGL.data.02.9122af997d44.bin",
+      "Build/WebGL.data.03.d98031e9fa2e.bin",
+      "Build/WebGL.data.04.60f9cb1dd7e2.bin"
+    ],
+    "length": 247796535,
+    "type": "application/octet-stream"
+  },
+  "Build/WebGL.wasm": {
+    "parts": [
+      "Build/WebGL.wasm.00.c81fe0ad8888.bin"
+    ],
+    "length": 147230406,
+    "type": "application/wasm"
+  }
+}

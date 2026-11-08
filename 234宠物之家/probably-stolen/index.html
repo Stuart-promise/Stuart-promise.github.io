@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Probably Stolen · 234宠物之家</title>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#121b19;color:#f4f1e7;font-family:system-ui,sans-serif}
+    header{max-width:1440px;margin:auto;padding:16px 20px;display:flex;align-items:center;gap:18px}a{color:#c4dfd1;text-decoration:none}h1{font-size:18px;margin:0;flex:1}
+    button{font:inherit;background:#2d5144;color:white;border:1px solid #6b8c7e;border-radius:8px;padding:8px 14px;cursor:pointer}
+    main{max-width:1440px;margin:auto;padding:0 16px}.screen{position:relative;background:#080d0c;aspect-ratio:16/9;border-radius:10px;overflow:hidden}canvas{width:100%;height:100%;display:block;outline:0}
+    #loading{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:24px;background:#15221e}#loading p{max-width:500px;line-height:1.7}.track{height:8px;background:#31443c;border-radius:9px;overflow:hidden}#progress{height:100%;width:0;background:#c6df8b;transition:width .2s}
+    footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#a6b9ae;font-size:13px;padding:14px 2px 22px}#status{color:#c6df8b}#unity-warning{position:absolute;top:10px;left:10px;right:10px}
+    @media(max-width:600px){header{padding:12px;font-size:14px;gap:10px}h1{font-size:15px}main{padding:0 6px}.screen{border-radius:4px}footer{padding:12px 6px}}
+  </style>
+</head>
+<body>
+  <header><a href="../games.html">← 游戏大厅</a><h1>Probably Stolen</h1><button id="fullscreen" disabled>全屏游玩</button></header>
+  <main>
+    <div class="screen">
+      <canvas id="unity-canvas" width="1280" height="720" tabindex="0" aria-label="Probably Stolen 游戏画面"></canvas>
+      <div id="loading"><div><h2>正在准备原版游戏</h2><p id="message">首次加载约 242 MB 游戏资源，请保持页面打开。</p><div class="track"><div id="progress"></div></div><p id="percent">0%</p></div></div>
+      <div id="unity-warning"></div>
+    </div>
+    <footer><span>休息进入下一天时自动保存。存档仅在当前浏览器，清除网站数据会删除存档。推荐电脑键鼠游玩。</span><span id="status">本地存档</span></footer>
+  </main>
+  <script src="web-stream-loader.js"></script>
+  <script src="Build/WebGL.loader.b11099846f50.js"></script>
+  <script>
+    let game;
+    window.addEventListener('probably-stolen-save', event => {
+      document.getElementById('status').textContent = ({saving:'正在保存…',saved:'已保存到本地',error:'保存未完成，正在重试'})[event.detail.status] || '本地存档';
+    });
+    document.getElementById('fullscreen').addEventListener('click', () => game?.SetFullscreen(1));
+    (async () => {
+      try {
+        await installGamePayload('payload.b327b79285cc.json');
+        game = await createUnityInstance(document.getElementById('unity-canvas'), {
+          dataUrl:'Build/WebGL.data',frameworkUrl:'Build/WebGL.framework.15215d5508e9.js',codeUrl:'Build/WebGL.wasm',
+          streamingAssetsUrl:'StreamingAssets',companyName:'Probably Stolen',productName:'Probably Stolen',productVersion:'1.0',
+          cacheControl:()=>'no-store',
+          showBanner:(message,type)=>{
+            if(type!=='error')return;
+            document.getElementById('message').textContent=message;
+            const banner=document.getElementById('unity-warning');
+            banner.textContent=message;
+            banner.style.cssText='background:#762f2f;color:white;padding:12px;border-radius:6px';
+          }
+        }, progress => {
+          document.getElementById('progress').style.width=(progress*100)+'%';
+          document.getElementById('percent').textContent=Math.floor(progress*100)+'%';
+        });
+        document.getElementById('loading').style.display='none';
+        document.getElementById('fullscreen').disabled=false;
+        document.getElementById('unity-canvas').focus();
+      } catch(error) {
+        console.error(error);
+        document.getElementById('message').textContent='加载失败：'+error.message+' 请刷新重试。';
+      }
+    })();
+  </script>
+</body>
+</html>
