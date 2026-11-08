@@ -7,6 +7,7 @@ function paint(){
   const p=A.profile;if(!p||!A.session)return;
   $('profile-name').textContent=p.nickname;$('profile-username').textContent='登录用户名：'+A.session.user.username;
   $('profile-level').textContent='Lv.'+p.level;
+  document.querySelector('.profile-growth p').textContent=p.levelOverride?'当前享有站长专属等级；积分余额与历史获得积分独立记录。':'等级由历史累计获得积分决定，今后消费积分不会降低等级。';
   if(document.activeElement!==$('nickname'))$('nickname').value=p.nickname;
   $('profile-title').hidden=!p.equippedTitle;
   if(p.equippedTitle){$('profile-title').textContent=p.equippedTitle.name;$('profile-title').dataset.color=p.equippedTitle.color;}
