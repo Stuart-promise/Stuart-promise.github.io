@@ -1,7 +1,10 @@
 /* Shared account storage. Guest keys are never moved or deleted implicitly. */
 (() => {
   'use strict';
-  const base = new URL('.', document.currentScript.src);
+  const base = new URL('.', document.currentScript?.src || new URL('./account.js',location.href));
+  if(!document.querySelector('link[href*="account.css"]')) {
+    const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('account.css?v=1',base);document.head.append(style);
+  }
   const API = 'https://111.228.4.20';
   const SESSION = 'pet234:session:v1';
   const modules = {
