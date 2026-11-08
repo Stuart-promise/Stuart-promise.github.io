@@ -2,15 +2,15 @@
 <html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>小院论坛 · 234宠物之家</title>
-<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./account.css?v=forum1"><link rel="stylesheet" href="./forum.css?v=1">
-<script src="./account.js?v=forum1"></script><script type="module" src="./forum.js?v=1"></script>
+<link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./account.css?v=forum1"><link rel="stylesheet" href="./forum.css?v=search1">
+<script src="./account.js?v=forum1"></script><script type="module" src="./forum.js?v=search1"></script>
 </head><body class="forum-page">
 <header><a class="brand" href="./"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a><a href="./study.html">学习</a><a href="./games.html">游戏</a></header>
 <main class="forum-main">
 <div class="forum-intro"><div><span class="forum-eyebrow">THE COURTYARD / 一起聊聊</span><h1>小院论坛</h1><p>聊学习，聊游戏，也聊今天的小发现。</p></div><button id="new-post" class="forum-primary" disabled>准备中…</button></div>
 <p id="forum-feedback" role="status" aria-live="polite"></p>
 <div class="forum-layout"><div class="forum-content">
-<section id="list-view" aria-label="帖子列表"><div class="forum-toolbar"><nav id="forum-tabs" aria-label="论坛分区"><a href="#category=all" data-category="all" aria-current="page">全部</a><a href="#category=study" data-category="study">学习交流</a><a href="#category=games" data-category="games">游戏交流</a><a href="#category=chat" data-category="chat">小院闲聊</a></nav><button id="refresh-list" class="forum-quiet">刷新</button></div><p id="forum-total" class="forum-muted">正在读取帖子…</p><div id="post-list" aria-live="polite"></div><button id="more-posts" class="forum-more" hidden>加载更多帖子</button></section>
+<section id="list-view" aria-label="帖子列表"><form id="forum-search-form" class="forum-search" role="search"><label for="forum-search-input">搜索帖子</label><div><input id="forum-search-input" type="search" maxlength="100" placeholder="输入标题或正文关键词" autocomplete="off"><button class="forum-primary" type="submit">搜索</button><button id="clear-search" class="forum-quiet" type="button" hidden>清空</button></div></form><div class="forum-toolbar"><nav id="forum-tabs" aria-label="论坛分区"><a href="#category=all" data-category="all" aria-current="page">全部</a><a href="#category=study" data-category="study">学习交流</a><a href="#category=games" data-category="games">游戏交流</a><a href="#category=chat" data-category="chat">小院闲聊</a></nav><button id="refresh-list" class="forum-quiet">刷新</button></div><p id="forum-total" class="forum-muted">正在读取帖子…</p><div id="post-list" aria-live="polite"></div><button id="more-posts" class="forum-more" hidden>加载更多帖子</button></section>
 <section id="thread-view" hidden aria-label="帖子详情"><a id="back-to-list" class="forum-back" href="#category=all">← 返回论坛</a><div id="thread-content"></div>
 <section class="forum-comments"><div class="forum-section-title"><h2>评论 <span id="comment-count">0</span></h2><button id="refresh-thread" class="forum-quiet">刷新评论</button></div><button id="more-comments" class="forum-more" hidden>加载更早的评论</button><div id="comment-list"></div>
 <div id="comment-login" class="forum-login-note" hidden><p>登录后，加入这场讨论。</p><a href="./account.html">登录 / 注册 →</a></div>
