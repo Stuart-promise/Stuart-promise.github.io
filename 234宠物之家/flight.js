@@ -268,7 +268,7 @@ $("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=board4&room="+code,location.href).href;
+  const url=new URL("./flight.html?v=cloud1&room="+code,location.href).href;
   try{await navigator.clipboard.writeText(url);note("邀请链接已复制。");}catch{prompt("复制邀请链接",url);}
 };
 function leave() {
