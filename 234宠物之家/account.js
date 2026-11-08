@@ -3,7 +3,7 @@
   'use strict';
   const base = new URL('.', document.currentScript?.src || new URL('./account.js',location.href));
   if(!document.querySelector('link[href*="account.css"]')) {
-    const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('account.css?v=3',base);document.head.append(style);
+    const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('account.css?v=rank1',base);document.head.append(style);
   }
   const API = 'https://111.228.4.20';
   const SESSION = 'pet234:session:v1';
@@ -22,12 +22,23 @@
   const profileKey='pet234:profile:v1:'+owner;
   let profile=null,checkInRunning,lastActivityCheck=0;
   try { if(session)profile=JSON.parse(localStorage.getItem(profileKey)); } catch {}
+  function paintAccountLink(link) {
+    if(!link)return;
+    const level=Number(profile?.level);
+    if(session&&Number.isInteger(level)&&level>=1&&level<=9) {
+      link.dataset.level=String(level);
+      link.textContent=(profile.nickname||session.user.username)+' · Lv.'+level;
+    } else {
+      delete link.dataset.level;
+      link.textContent=session?'账号：'+session.user.username:'登录 / 注册';
+    }
+  }
   function updateProfile(value,persist=true) {
     if(!value)return;
     profile=value;
     if(persist)try{localStorage.setItem(profileKey,JSON.stringify(value));}catch{}
     const link=document.querySelector('.pet-account-link');
-    if(link&&session)link.textContent=(profile.nickname||session.user.username)+' · Lv.'+profile.level;
+    paintAccountLink(link);
     window.dispatchEvent(new CustomEvent('pet-account-profile',{detail:profile}));
   }
   async function checkIn() {
@@ -220,7 +231,7 @@
     if(!header)return;
     header.classList.add('pet-account-header');
     const link=document.createElement('a'); link.className='pet-account-link'; link.href=new URL('account.html',base).href;
-    link.textContent=session?(profile?profile.nickname+' · Lv.'+profile.level:'账号：'+session.user.username):'登录 / 注册';
+    paintAccountLink(link);
     header.append(link);
     const bar=document.createElement('div'); bar.className='pet-account-bar';
     const status=document.createElement('span'); status.id='pet-account-status'; status.setAttribute('role','status'); status.textContent=message;

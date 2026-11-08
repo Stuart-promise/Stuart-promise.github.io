@@ -3,7 +3,7 @@ import {groups, lessons} from "./python-course.js?v=1";
 
 const $ = id => document.getElementById(id);
 const prefix = "pet234-python-v1:";
-if (!globalThis.PetAccount) await import("./account.js?v=3");
+if (!globalThis.PetAccount) await import("./account.js?v=rank1");
 const accountStore = await PetAccount.open("python");
 const memory = new Map();
 function read(key) {

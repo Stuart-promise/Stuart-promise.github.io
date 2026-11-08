@@ -1,5 +1,5 @@
 (async () => {
-if (!globalThis.PetAccount) await import("./account.js?v=3");
+if (!globalThis.PetAccount) await import("./account.js?v=rank1");
 const accountStore = await PetAccount.open("blocks");
 "use strict";
 
