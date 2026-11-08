@@ -207,3 +207,5 @@ $("map-button").onclick = () => {
   $("map-button").setAttribute("aria-expanded", String(open));
 };
 render();
+$("source").disabled = false;
+$("given").disabled = false;
