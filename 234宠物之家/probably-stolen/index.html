@@ -13,7 +13,7 @@
     footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#a6b9ae;font-size:13px;padding:14px 2px 22px}#status{color:#c6df8b}#unity-warning{position:absolute;top:10px;left:10px;right:10px}
     @media(max-width:600px){header{padding:12px;font-size:14px;gap:10px}h1{font-size:15px}main{padding:0 6px}.screen{border-radius:4px}footer{padding:12px 6px}}
   </style>
-</head>
+<link rel="stylesheet" href="../account.css?v=1"><script src="../account.js?v=1"></script></head>
 <body>
   <header><a href="../games.html">← 游戏大厅</a><h1>Probably Stolen</h1><button id="fullscreen" disabled>全屏游玩</button></header>
   <main>
@@ -22,8 +22,9 @@
       <div id="loading"><div><h2 id="loading-title">正在准备游戏资源</h2><p id="message">首次加载约 242 MB，下载完成的资源将缓存在此设备。</p><div class="track"><div id="progress"></div></div><p id="percent">0%</p><p id="cache-message" role="status">正在检查设备缓存…</p></div></div>
       <div id="unity-warning"></div>
     </div>
-    <footer><span>休息进入下一天时自动保存。存档仅在当前浏览器，清除网站数据会删除存档。推荐电脑键鼠游玩。</span><span id="status">本地存档</span></footer>
+    <footer><span>休息进入下一天时自动保存。登录后同步账号存档；游客记录保存在此设备。推荐电脑键鼠游玩。</span><span id="status">正在准备存档…</span><button id="cloud-export">导出本机存档</button><button id="cloud-reopen" hidden>重新打开并选择存档</button></footer>
   </main>
+  <script src="cloud-save.js?v=1"></script>
   <script src="web-stream-loader.js?v=cache1"></script>
   <script src="Build/WebGL.loader.b11099846f50.js"></script>
   <script>
@@ -37,15 +38,14 @@
         document.getElementById('message').textContent = '游戏资源已从设备读取，正在启动游戏。';
       }
     });
-    window.addEventListener('probably-stolen-save', event => {
-      document.getElementById('status').textContent = ({saving:'正在保存…',saved:'已保存到本地',error:'保存未完成，正在重试'})[event.detail.status] || '本地存档';
-    });
     document.getElementById('fullscreen').addEventListener('click', () => game?.SetFullscreen(1));
     (async () => {
       try {
+        const pet234Database = await PetGameCloud.prepare();
         await installGamePayload('payload.b327b79285cc.json');
         game = await createUnityInstance(document.getElementById('unity-canvas'), {
-          dataUrl:'Build/WebGL.data',frameworkUrl:'Build/WebGL.framework.15215d5508e9.js',codeUrl:'Build/WebGL.wasm',
+          pet234Database,
+          dataUrl:'Build/WebGL.data',frameworkUrl:'Build/WebGL.framework.fe3aabc98c27.js',codeUrl:'Build/WebGL.wasm',
           streamingAssetsUrl:'StreamingAssets',companyName:'Probably Stolen',productName:'Probably Stolen',productVersion:'1.0',
           cacheControl:()=>'no-store',
           showBanner:(message,type)=>{

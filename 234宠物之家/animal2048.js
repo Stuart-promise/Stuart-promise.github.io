@@ -1,3 +1,5 @@
+(async () => {
+const accountStore = await PetAccount.open("animal2048");
 "use strict";
 
 const animals=[
@@ -24,7 +26,7 @@ const $=id=>document.getElementById(id);
 const storageKey="pet234-animal2048-v1";
 let game,best=0,seen=1,persisted=true;
 try{
-  const stored=JSON.parse(localStorage.getItem(storageKey));
+  const stored=JSON.parse(accountStore.getItem(storageKey));
   game=new Animal2048(stored?.game);
   if(Number.isSafeInteger(stored?.best)&&stored.best>=0)best=stored.best;
   if(Number.isInteger(stored?.seen)&&stored.seen>=1&&stored.seen<=32)seen=stored.seen;
@@ -36,7 +38,7 @@ for(let i=0;i<16;i++){
   tiles.push(tile);$("animal-board").append(tile);
 }
 function save(){
-  try{localStorage.setItem(storageKey,JSON.stringify({game:game.snapshot(),best,seen}));}
+  try{accountStore.setItem(storageKey,JSON.stringify({game:game.snapshot(),best,seen}));}
   catch{persisted=false;}
 }
 function render(){
@@ -106,3 +108,5 @@ animals.forEach(info=>{
   li.append(link);$("animal-sources").append(li);
 });
 render();
+
+})().catch(error => PetAccount.notify(error.message));

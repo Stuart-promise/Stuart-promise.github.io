@@ -3,6 +3,7 @@ const book = new URLSearchParams(location.search).get("book") === "cet6" ? "cet6
 const title = book === "cet6" ? "大学六级" : "大学四级";
 const prefix = "pet234:vocab:v1:" + book + ":";
 const goalKey = prefix + "daily-goal";
+const accountStore = await PetAccount.open("vocab-" + book);
 const intervals = [1, 2, 4, 7, 15, 30];
 const records = new Map();
 const fmt = (date, options) => date.toLocaleDateString("zh-CN", options);
@@ -18,10 +19,10 @@ function storageWarning() {
   $("warning").textContent = "浏览器未能读写学习进度，本次仍可学习。请允许网站存储后再试。";
 }
 function read(key) {
-  try { return localStorage.getItem(key); } catch { storageWarning(); return null; }
+  try { return accountStore.getItem(key); } catch { storageWarning(); return null; }
 }
 function write(key, value) {
-  try { localStorage.setItem(key, value); } catch { storageWarning(); }
+  try { accountStore.setItem(key, value); } catch { storageWarning(); }
 }
 function parseRecord(raw) {
   if (!raw) return null;
@@ -140,3 +141,10 @@ try {
   $("word").textContent = "词库加载失败";
   $("book-summary").textContent = "请检查网络后刷新页面重试。";
 }
+
+window.addEventListener("pet-account-data", () => {
+  if (!words) return;
+  loadGoal(); records.clear();
+  for (const [word] of words) { const entry = parseRecord(read(prefix+"word:"+word)); if (entry) records.set(word,entry); }
+  render();
+});

@@ -1,3 +1,5 @@
+(async () => {
+const accountStore = await PetAccount.open("blocks");
 "use strict";
 
 const $=id=>document.getElementById(id);
@@ -5,7 +7,7 @@ const palette={I:"#5caaa6",J:"#778fba",L:"#c58b58",O:"#c9b35a",S:"#7caa77",T:"#a
 const canvas=$("blocks-canvas"),ctx=canvas.getContext("2d");
 let game=new FallingBlocks(),best=0,lastFrame=0,accumulator=0,lastStats="";
 const pressed=new Map();
-try{const saved=Number(localStorage.getItem("pet234-blocks-best"));if(Number.isSafeInteger(saved)&&saved>=0)best=saved;}catch{}
+try{const saved=Number(accountStore.getItem("pet234-blocks-best"));if(Number.isSafeInteger(saved)&&saved>=0)best=saved;}catch{}
 const ratio=Math.min(devicePixelRatio||1,2);
 canvas.width=300*ratio;canvas.height=600*ratio;ctx.scale(ratio,ratio);
 function square(context,x,y,size,type,ghost=false){
@@ -52,7 +54,7 @@ function draw(){
 function render(){
   if(game.score>best){
     best=game.score;
-    try{localStorage.setItem("pet234-blocks-best",String(best));}catch{}
+    try{accountStore.setItem("pet234-blocks-best",String(best));}catch{}
   }
   const key=[game.score,best,game.level,game.lines,game.status,game.piece.type,game.held,game.holdUsed,game.queue.slice(0,3).join(),game.message].join("|");
   if(key!==lastStats){
@@ -134,3 +136,5 @@ function frame(time){
   render();requestAnimationFrame(frame);
 }
 render();requestAnimationFrame(frame);
+
+})().catch(error => PetAccount.notify(error.message));

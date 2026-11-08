@@ -3,14 +3,15 @@ import {groups, lessons} from "./python-course.js?v=1";
 
 const $ = id => document.getElementById(id);
 const prefix = "pet234-python-v1:";
+const accountStore = await PetAccount.open("python");
 const memory = new Map();
 function read(key) {
-  try { return localStorage.getItem(prefix + key) ?? memory.get(key); }
+  try { return accountStore.getItem(prefix + key) ?? memory.get(key); }
   catch { return memory.get(key); }
 }
 function save(key, value) {
   memory.set(key, value);
-  try { localStorage.setItem(prefix + key, value); }
+  try { accountStore.setItem(prefix + key, value); }
   catch { $("store-warning").textContent = "浏览器未能保存进度。本次学习仍可继续，关闭页面后可能丢失。"; }
 }
 const passed = (level, task) => read("pass:" + level + ":" + task) === "1";

@@ -1,3 +1,5 @@
+(async () => {
+const accountStore = await PetAccount.open("animal-drop");
 "use strict";
 
 const dropAnimals=[
@@ -7,13 +9,13 @@ const dropAnimals=[
 const $=id=>document.getElementById(id);
 const canvas=$("drop-canvas"),ctx=canvas.getContext("2d");
 let game=new AnimalDrop(),aim=220,best=0,paused=false,lastFrame=0,accumulator=0,statsKey="";
-try{const saved=Number(localStorage.getItem("pet234-animal-drop-best"));if(Number.isSafeInteger(saved)&&saved>=0)best=saved;}catch{}
+try{const saved=Number(accountStore.getItem("pet234-animal-drop-best"));if(Number.isSafeInteger(saved)&&saved>=0)best=saved;}catch{}
 const ratio=Math.min(devicePixelRatio||1,2);
 canvas.width=440*ratio;canvas.height=660*ratio;ctx.scale(ratio,ratio);
 function saveBest(){
   if(game.score<=best)return;
   best=game.score;
-  try{localStorage.setItem("pet234-animal-drop-best",String(best));}catch{}
+  try{accountStore.setItem("pet234-animal-drop-best",String(best));}catch{}
 }
 function animalCircle(level,x,y,r,ghost=false){
   ctx.save();ctx.globalAlpha=ghost ? .65 : 1;
@@ -107,3 +109,5 @@ function frame(time){
   lastFrame=time;renderStats();draw();requestAnimationFrame(frame);
 }
 renderStats();draw();requestAnimationFrame(frame);
+
+})().catch(error => PetAccount.notify(error.message));
