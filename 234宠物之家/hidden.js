@@ -16,7 +16,7 @@ async function content(){
   const stardew=document.createElement('a');stardew.className='hidden-game-card';stardew.href='https://111.228.4.20/hidden-games/launch';
   const farmCover=document.createElement('img');farmCover.src='./stardew-cover.png';farmCover.alt='星露谷物语原版农场画面';farmCover.loading='lazy';
   const farmTitle=document.createElement('h3');farmTitle.textContent='星露谷物语 · Stardew Valley';
-  const farmDescription=document.createElement('p');farmDescription.textContent='开启原版单人农场生活。睡觉后自动保存到本机浏览器，可在游戏菜单导出存档。';
+  const farmDescription=document.createElement('p');farmDescription.textContent='开启原版单人农场生活。登录网站账号后，睡觉存档会同步到云端；游客保存在本机，也可导出备份。';
   const farmAction=document.createElement('span');farmAction.textContent='单人 · 电脑键鼠 · 首次加载较久　进入农场 ↗';
   stardew.append(farmCover,farmTitle,farmDescription,farmAction);$('hidden-games').append(stardew);
   let launching=false;

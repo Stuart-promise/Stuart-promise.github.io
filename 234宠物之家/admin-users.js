@@ -1,7 +1,7 @@
 const A=window.PetAccount,$=id=>document.getElementById(id),panel=$('users-admin');
 let page=1,query='',generation=0,loaded=false;
 const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
-const modules={python:'Python 闯关','vocab-cet4':'大学四级单词','vocab-cet6':'大学六级单词',animal2048:'动物 2048',blocks:'俄罗斯方块','animal-drop':'动物合成','probably-stolen':'Probably Stolen'};
+const modules={python:'Python 闯关','vocab-cet4':'大学四级单词','vocab-cet6':'大学六级单词',animal2048:'动物 2048',blocks:'俄罗斯方块','animal-drop':'动物合成','probably-stolen':'Probably Stolen','stardew-valley':'星露谷物语'};
 const date=value=>value?new Date(value*1000).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}):'暂无';
 function titleBadge(title){const e=node('span','title-badge',title.name);e.dataset.color=title.color;return e;}
 function memberCard(u){
