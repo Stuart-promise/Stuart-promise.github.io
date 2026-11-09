@@ -13,6 +13,14 @@ async function content(){
   const description=document.createElement('p');description.textContent='经营你的店铺，接待顾客，鉴别来路不明的货物。';
   const action=document.createElement('span');action.textContent='单人 · 电脑游玩　进入店铺 ↗';
   card.append(cover,title,description,action);$('hidden-games').append(card);
+  const stardew=document.createElement('a');stardew.className='hidden-game-card';stardew.href='https://111.228.4.20/hidden-games/launch';
+  const farmCover=document.createElement('img');farmCover.src='./stardew-cover.png';farmCover.alt='星露谷物语原版农场画面';farmCover.loading='lazy';
+  const farmTitle=document.createElement('h3');farmTitle.textContent='星露谷物语 · Stardew Valley';
+  const farmDescription=document.createElement('p');farmDescription.textContent='开启原版单人农场生活。睡觉后自动保存到本机浏览器，可在游戏菜单导出存档。';
+  const farmAction=document.createElement('span');farmAction.textContent='单人 · 电脑键鼠 · 首次加载较久　进入农场 ↗';
+  stardew.append(farmCover,farmTitle,farmDescription,farmAction);$('hidden-games').append(stardew);
+  let launching=false;
+  stardew.onclick=async event=>{event.preventDefault();if(launching||!pass)return;launching=true;const entryPass=pass;farmAction.textContent='正在准备进入农场…';try{const grant=await A.request('/v1/hidden/game-ticket',{method:'POST',headers:{'X-Hidden-Token':entryPass.token}});if(pass!==entryPass)return;location.assign('https://111.228.4.20/hidden-games/launch#ticket='+encodeURIComponent(grant.ticket));}catch(error){$('hidden-message').textContent=error.message;}finally{launching=false;farmAction.textContent='单人 · 电脑键鼠 · 首次加载较久　进入农场 ↗';}};
  }
  $('hidden-content').hidden=false;$('hidden-gate').hidden=true;$('hidden-message').textContent='';
  clearTimeout(timer);timer=setTimeout(()=>forget('通行已过期，请重新输入密码。'),Math.max(0,pass.expires*1000-Date.now()));
