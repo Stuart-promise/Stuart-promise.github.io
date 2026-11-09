@@ -15,7 +15,7 @@
   </style>
 <link rel="stylesheet" href="../account.css?v=forum1"><script src="../account.js?v=forum1"></script></head>
 <body>
-  <header><a href="../games.html">← 游戏大厅</a><h1>Probably Stolen</h1><button id="fullscreen" disabled>全屏游玩</button></header>
+  <header><a href="../hidden.html">← 隐藏空间</a><h1>Probably Stolen</h1><button id="fullscreen" disabled>全屏游玩</button></header>
   <main>
     <div class="screen">
       <canvas id="unity-canvas" width="1280" height="720" tabindex="0" aria-label="Probably Stolen 游戏画面"></canvas>
@@ -41,6 +41,22 @@
     document.getElementById('fullscreen').addEventListener('click', () => game?.SetFullscreen(1));
     (async () => {
       try {
+        // Verify the hidden-space pass before downloading or starting the game.
+        await PetAccount.ready;
+        let hiddenPass;
+        try { hiddenPass = JSON.parse(sessionStorage.getItem('pet234:hidden-pass:v1')); } catch {}
+        if (!hiddenPass?.token || hiddenPass.expires * 1000 <= Date.now()) {
+          location.replace('../hidden.html'); return;
+        }
+        try {
+          await PetAccount.request('/v1/hidden/content', {headers:{'X-Hidden-Token':hiddenPass.token}});
+        } catch (error) {
+          if (error.status === 401 || error.status === 403) {
+            sessionStorage.removeItem('pet234:hidden-pass:v1');
+            location.replace('../hidden.html'); return;
+          }
+          throw error;
+        }
         const pet234Database = await PetGameCloud.prepare();
         await installGamePayload('payload.b327b79285cc.json');
         game = await createUnityInstance(document.getElementById('unity-canvas'), {
