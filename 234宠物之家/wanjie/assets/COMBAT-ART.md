@@ -1,0 +1,32 @@
+# 战斗美术与动画素材
+
+2026-11-10，使用内置 image_gen 工具生成与透明背景编辑，非 CLI/API。美术输出经过裁切分格、统一脚底基线、缩放和 WebP 编码后存入本目录。
+
+|文件|尺寸|用途|字节数|
+|---|---|---|---|
+|monsters.webp|1152×576，6列3行|每图4种普通怪外观、1种精英、1种首领|324046|
+|heroes-walk.webp|640×800，4列5行|男女店长、精灵、猎手、技师各4帧步行动画|162132|
+|ingredients.webp|384×256，3列2行|每图各自的蔬菜与香料|60346|
+
+共546524字节（约534 KiB），新增解码像素约4.86 MiB。原有 sprites.webp 继续提供站立姿势。实际步频由移动距离决定，停止或被障碍挡住时不推进动画；面向左右，纵向移动沿用最后朝向，尚非八方向动画。
+
+普通怪外观不改变战斗数值。森林狼作为普通野兽的外观变体。武器特效由 Canvas 路径绘制：6种投射物、6种范围攻击，各有独立轮廓与动画；它们不需要额外大图。命中与采集特效预算24，总特效预算40，闪电最多8条可见分支，不影响实际命中数量。
+
+## 生成提示词
+
+### 怪物图集
+
+Use case: stylized-concept. Create a production sprite atlas for a polished cute anime top-down action RPG. Landscape 1536x1024 canvas, EXACTLY SIX equal columns and THREE equal rows (18 separate full-body monster sprites). Genuine transparent background, no ground or tile. Each sprite centered in its own cell, full silhouette wholly inside cell with generous transparent padding, consistent three-quarter overhead camera, facing slightly left, same baseline at 88% cell height. Crisp hand-painted detailed shapes readable at 50-120 pixels, lively attractive enemy designs, not round blobs. Row 1 fantasy forest: column 1 small tusked brown wild boar; 2 red cap mushroom creature with little arms and feet; 3 angry striped oversized hornet with clear wings; 4 small antlered forest wolf; 5 ELITE muscular thorn-armored treant guardian with amber crystal chest and branch crown; 6 BOSS massive imposing wild boar king, huge ivory tusks, emerald mane, gilded woodland armor, mossy crown. Row 2 wasteland farm: column 1 scruffy mutant coyote; 2 scarecrow with hat and sickle; 3 rusty spidery agricultural robot; 4 mutated corn plant with clawed roots; 5 ELITE hulking scrap-armored marauder carrying a shovel; 6 BOSS towering rusted mechanical harvest reaper with tractor wheels, giant serrated harvesting blades and glowing orange furnace torso. Row 3 cyber city: column 1 angular cyan scouting drone; 2 four-legged chrome robot hound; 3 small hovering magenta defense turret; 4 armored humanoid security android; 5 ELITE tall angular violet cyber sentinel with broad luminous shoulder shields; 6 BOSS imposing floating rogue AI central core surrounded by four armored segmented robotic arms, cyan-magenta energy eye and dark metal crown. Elites must have clearly more elaborate silhouettes, bosses unique imposing anatomy, not recolored normal enemies. NO lettering, UI, circles, floor shadows, cell borders, atmospheric haze, scenery, overlapping cells. Maintain exact atlas cell positions.
+
+### 怪物透明背景修正
+
+Use case: background-extraction. Edit this exact monster atlas. Remove ALL white/off-white background and all contact shadows to genuine fully transparent pixels (alpha 0). Keep every one of the 18 monster sprites, its pose, size, identity, details, colors and exact position unchanged. Preserve 1536x1024 canvas and all six columns and three rows. Preserve pale/chrome monster parts and the hornet wings; do not remove white parts inside sprites. The empty space between the sprites must be absolutely transparent, not translucent white, not a checkerboard illustration. No added objects, no text, no rearranging. Output transparent PNG.
+
+### 角色行走图集
+
+Use case: identity-preserve. Input image is the visual identity reference for existing game characters. Create a NEW genuine transparent sprite animation atlas with EXACTLY FOUR equal columns and FIVE equal rows, portrait 1024x1536 canvas. Only the five requested characters, one character per row, repeated four times in a real walk cycle. Keep their face, hair color, outfits and attractive chibi-anime illustrated identity consistent with the reference, no scenery or background. Row 1: reference top-left brown-haired MALE shopkeeper in teal shirt, cream apron, dark trousers, boots. Row 2: reference top row second brown-haired FEMALE shopkeeper with side ponytail, teal shirt, cream apron, dark leggings and boots. Row 3: reference bottom row third blond MALE elf in green vest and cream coat, green trousers, boots; remove the food tray, carry a slender wooden bow. Row 4: reference top row third rugged grey-brown haired MALE wasteland hunter, orange scarf, brown utility clothes, crossbow. Row 5: reference top-right silver-haired FEMALE cyber technician, black violet suit, cyan trims. All characters face screen RIGHT at a three-quarter angle, full body including boots. Four columns MUST show clearly different natural walking phases: 1 left leg forward and right leg back, opposing arms; 2 feet passing under hips, rear knee raised; 3 RIGHT leg forward and left leg back, opposing arms reversed; 4 opposite passing pose, left knee raised. This must be a genuine alternating leg/arm walk, not four copies of the same standing pose. Consistent body scale, head height and screen-facing direction across each row. Fixed feet ground baseline near 90% of each row's cell. Whole sprite fully inside its own cell with 15% horizontal padding and 5% vertical padding. Exactly 20 sprites, no additional characters, no floating knives, no tray, no text, no borders, no grid lines, no cast shadows. Clear small-game-readable limbs and clean alpha silhouettes.
+
+### 采集物图集
+
+Use case: stylized-concept. Production transparent game collectible sprite atlas, landscape 1536x1024, EXACTLY three equal columns and two equal rows. Six isolated small harvestable ingredient clusters for a cute high-quality hand-painted anime overhead RPG. Each sprite completely contained in its own 512x512 cell, centered, occupying around 65 percent cell width and height. Top row vegetables left to right: forest patch of crisp cabbage with orange carrots poking from a tiny patch of soil; wasteland cluster of golden corn ears and a small ripe pumpkin with dusty green leaves; cyber city compact silver hydroponic tray with lush jade vegetables and tiny cyan status lights. Bottom row spices left to right: forest aromatic rosemary and lavender sprigs with small purple blooms; wasteland cluster of red chili peppers and desert sage; cyber city compact glass cultivation pod with luminous violet aromatic herbs, clearly a food plant. Three-quarter overhead view, beautiful crisp textures, saturated but tasteful colors, readable silhouettes at 35 pixels. No huge terrain, no floor shadows, no words, no text, no numbers, no grid, no borders, no background, no overlap. Genuine transparency between all objects.
+
