@@ -18,3 +18,32 @@
 }
 
 .service-actor.seated .actor-art{clip-path:inset(0 0 25% 0);transform:translateY(9px)}.service-actor.eating .actor-art{transform:translateY(10px) scale(.96)}
+
+/* Distinct role artwork and complete themed rooms. */
+.portrait.portrait-hero{background-image:url('./assets/hero-portraits-v2.webp');background-size:500% 100%;background-color:#273c36;aspect-ratio:5/8}
+.portrait.portrait-staff{background-image:url('./assets/staff-portraits.webp');background-size:600% 100%;background-color:#302e3a;aspect-ratio:5/8}
+.hero-summary{background:#243b32}.hero-summary h3{color:#f2dcac}.hero-summary p{color:#b7c8b5}
+.lobby{grid-template-columns:190px minmax(0,1fr) 250px}.lobby>section{min-width:0}
+.room.fantasy{--table:#93613e;--edge:#e0b37a;--chair:#86543e;--counter:#66432b;background:#735037 url('./assets/room-fantasy.webp') center/100% 100% no-repeat;border-color:#b99260}
+.room.cyber{--table:#274858;--edge:#73dae4;--chair:#384c71;--counter:#243746;background:#182b40 url('./assets/room-cyber.webp') center/100% 100% no-repeat;border-color:#6dacc0}
+.room.ancient{--table:#7b392b;--edge:#d4b179;--chair:#7e392f;--counter:#673d2a;background:#79503c url('./assets/room-ancient.webp') center/100% 100% no-repeat;border-color:#bd9664}
+.room.service-room{height:auto;aspect-ratio:2.3/1;min-height:340px;max-height:520px}
+.kitchen-zone{left:28%;right:6%;top:13%;height:20%;border:0;background:transparent}
+.kitchen-zone span{top:-20px;left:0;background:#152a23b0;border-radius:4px;padding:3px 6px}
+.pass-counter{left:29%;width:65%;top:28%;height:8%;padding:6px 12px;text-align:right;background:linear-gradient(0deg,var(--counter),var(--table));border-color:var(--edge);border-bottom-width:5px;z-index:68;box-shadow:0 5px 7px #0003}
+.queue-zone{left:3%;top:31%;width:20%;height:57%;background:#17282115;border-color:#f2deb755;font-size:10px}
+.dining-table{background:linear-gradient(140deg,var(--table),var(--counter));border-color:var(--edge);border-width:3px;box-shadow:0 7px 0 #241d224d}
+.dining-table.occupied{border-color:var(--edge)}.chair{background:var(--chair);border-color:var(--edge);top:40%;height:65%}.chair.left{left:-51%}.chair.right{right:-51%}
+.room.cyber .dining-table{border-radius:7px;box-shadow:0 6px 0 #0b1924,0 0 6px #56dce544}.room.ancient .dining-table{border-radius:6px}.room.ancient .chair{border-radius:3px}
+.service-actor{width:7.6%;height:auto;aspect-ratio:4/5;transform:translate(-50%,-95%)}
+.service-actor.guest{width:8.6%;height:auto;aspect-ratio:1}
+.service-actor .actor-art{background-image:url('./assets/staff-motion.webp');background-size:500% 600%;background-repeat:no-repeat;transform-origin:50% 90%;animation:none!important;clip-path:none!important}
+.service-actor.guest .actor-art{background-image:url('./assets/guests-motion.webp');background-size:600% 800%}
+.service-actor.seated .actor-art,.service-actor.eating .actor-art{clip-path:none;animation:none}
+.actor-label{top:1%;font-size:8px;padding:2px 4px;background:#182f26b8;max-width:140px}
+.service-actor.guest .actor-label{display:none}.service-actor.guest:hover .actor-label{display:block}.service-actor.guest{pointer-events:auto}
+.carried-dish{right:6%;top:40%;font-size:15px}.carried-dish[hidden]{display:none}
+.theme-preview{height:150px!important;min-height:0!important;aspect-ratio:auto;margin:0}.theme-preview:after{content:'';position:absolute;left:34%;top:55%;width:17%;height:20%;border:3px solid var(--edge);border-radius:8px;background:var(--table);box-shadow:100px 0 0 -2px var(--table)}
+@media(max-width:1100px){.lobby{grid-template-columns:150px minmax(0,1fr)}.room.service-room{min-height:320px}.service-actor{width:8%}.service-actor.guest{width:9%}}
+@media(max-height:600px) and (orientation:landscape){.room.service-room{min-height:300px;max-height:none}.actor-label{font-size:8px}}
+@media(orientation:portrait) and (max-width:700px){.room.service-room{min-height:300px;max-height:none}.actor-label{font-size:8px}}

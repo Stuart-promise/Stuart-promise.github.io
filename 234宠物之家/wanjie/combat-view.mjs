@@ -1,6 +1,6 @@
 // Shared small atlases: no per-monster images, filters, blur or unbounded particles.
 const monsters=new Image();monsters.src='./assets/monsters.webp';
-const walkers=new Image();walkers.src='./assets/heroes-walk.webp';
+const walkers=new Image();walkers.src='./assets/hero-motion-v2.webp';
 const ingredients=new Image();ingredients.src='./assets/ingredients.webp';
 const TAU=Math.PI*2;
 const ready=image=>image.complete&&image.naturalWidth>0;
@@ -39,12 +39,11 @@ export function drawMonster(c,e,b){
     c.font='bold 11px sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#14201d';const label=boss?'首领 · '+b.bossName:'精英 · '+eliteNames[b.map];c.strokeText(label,e.x,y-7);c.fillStyle='#fff0ca';c.fillText(label,e.x,y-7);
   }
 }
-export function drawHero(c,b,gender,idle,spriteIndex){
+export function drawHero(c,b,gender){
   ellipse(c,b.x,b.y+1,18,6,'#0b201b50');
   c.save();c.translate(b.x,b.y);if(b.face<0)c.scale(-1,1);c.globalAlpha=b.inv>0?.65:1;
   const frame=heroFrame(b),row=b.hero===0?gender:b.hero+1;
-  if(frame>=0&&ready(walkers))c.drawImage(walkers,frame*160,row*160,160,160,-45,-86,90,90);
-  else if(ready(idle)){const sw=idle.naturalWidth/4,sh=idle.naturalHeight/2;c.drawImage(idle,(spriteIndex%4)*sw,Math.floor(spriteIndex/4)*sh,sw,sh,-31,-81,62,83);}
+  if(ready(walkers))c.drawImage(walkers,(frame<0?0:frame+1)*160,row*160,160,160,-43,-82,86,86);
   c.restore();
   if(b.weapons.some(w=>w.id==='drone')){const x=b.x+Math.cos(b.t*1.8)*34,y=b.y-50+Math.sin(b.t*1.8)*10;line(c,x-13,y,x+13,y,'#356d81',3);diamond(c,x,y,9,'#8defff');ellipse(c,x,y,3,3,'#f4ffff');}
 }
