@@ -1,5 +1,5 @@
 import {mountRestaurant} from './restaurant.mjs?v=2';
-import {Battle,MAPS,WEAPONS,PASSIVES} from './engine.mjs';
+import {Battle,MAPS,WEAPONS,PASSIVES} from './engine.mjs?v=3';
 const $=s=>document.querySelector(s),main=$('#main'),modal=$('#modal');
 const people=[['岩炉','兽人厨师',4,'肉类料理每份额外赚1金币'],['绯菈','恶魔厨师',5,'制作稀有料理有概率节约香料'],['伊岚','精灵服务员',6,'轻盈送餐，岗位效率随培养提高'],['糖铃','兔耳服务员',7,'多份配送，餐厅4级后提高营业效率'],['青禾','精灵厨师',6,'蔬菜料理每份额外赚1金币'],['赤影','赛博服务员',3,'快速配送，岗位效率随培养提高']];
 const heroes=[['店长','飞刀 · 食材专家',0],['林间游侠','灵木长弓 · 远程加成',6],['废土猎手','荒原重弩 · 穿透专精',2],['霓虹技师','浮游无人机 · 科技加成',3]];
