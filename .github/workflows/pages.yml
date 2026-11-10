@@ -1,0 +1,44 @@
+name: Publish existing website
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Package tracked website at its existing paths
+        run: |
+          mkdir _site
+          git archive HEAD | tar -x -C _site
+          test -f '_site/234宠物之家/games.html'
+          test -f '_site/234宠物之家/wanjie/index.html'
+          test -f '_site/234宠物之家/wanjie/assets/sprites.webp'
+      - uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish to the existing GitHub Pages website
+        id: deployment
+        uses: actions/deploy-pages@v5.0.1
+        with:
+          timeout: '1800000'
+          reporting_interval: '15000'
