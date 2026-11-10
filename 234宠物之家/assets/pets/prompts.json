@@ -1,0 +1,347 @@
+{
+  "tool": "built-in image_gen",
+  "style": "Cute pseudo-3D, soft rounded plush/clay form, studio light upper left, natural recognizable animal colors, kind expressive eyes. Full body, three-quarter front view, centered with clear margins, truly transparent background. No text, clothes, props, other animals or scene.",
+  "stagePrompts": {
+    "baby": "BABY infant proportions: oversized head, tiny round body, short limbs, round cheeks, no mature antlers. Visibly the youngest stage.",
+    "young": "YOUNG adolescent proportions: medium sized body, playful energetic pose, longer limbs and more developed wings or tail than an infant, head moderately large. Visibly growing, not a tiny baby.",
+    "adult": "ADULT fully grown proportions: fuller larger body, complete mature markings, elegant fully developed wings, fins or tail, confident calm pose. Still very cute with expressive large eyes but head-to-body ratio smaller than an infant."
+  },
+  "species": [
+    {
+      "id": "cat",
+      "name": "橘猫",
+      "category": "land",
+      "subject": "orange tabby domestic cat, orange fur with darker stripes and white muzzle",
+      "files": [
+        "cat-baby.webp",
+        "cat-young.webp",
+        "cat-adult.webp"
+      ]
+    },
+    {
+      "id": "dog",
+      "name": "柯基",
+      "category": "land",
+      "subject": "Welsh corgi dog, golden tan and white fur, short legs and upright ears",
+      "files": [
+        "dog-baby.webp",
+        "dog-young.webp",
+        "dog-adult.webp"
+      ]
+    },
+    {
+      "id": "rabbit",
+      "name": "垂耳兔",
+      "category": "land",
+      "subject": "cream white lop-eared rabbit, long floppy ears",
+      "files": [
+        "rabbit-baby.webp",
+        "rabbit-young.webp",
+        "rabbit-adult.webp"
+      ]
+    },
+    {
+      "id": "fox",
+      "name": "赤狐",
+      "category": "land",
+      "subject": "red fox, russet orange fur, white chest and large white tipped fluffy tail",
+      "files": [
+        "fox-baby.webp",
+        "fox-young.webp",
+        "fox-adult.webp"
+      ]
+    },
+    {
+      "id": "panda",
+      "name": "大熊猫",
+      "category": "land",
+      "subject": "giant panda, black ears, black eye patches and white fur",
+      "files": [
+        "panda-baby.webp",
+        "panda-young.webp",
+        "panda-adult.webp"
+      ]
+    },
+    {
+      "id": "squirrel",
+      "name": "松鼠",
+      "category": "land",
+      "subject": "red squirrel, reddish brown fur and huge bushy curled tail",
+      "files": [
+        "squirrel-baby.webp",
+        "squirrel-young.webp",
+        "squirrel-adult.webp"
+      ]
+    },
+    {
+      "id": "hedgehog",
+      "name": "刺猬",
+      "category": "land",
+      "subject": "brown hedgehog, cream face and tiny paws, rounded soft brown spines",
+      "files": [
+        "hedgehog-baby.webp",
+        "hedgehog-young.webp",
+        "hedgehog-adult.webp"
+      ]
+    },
+    {
+      "id": "deer",
+      "name": "梅花鹿",
+      "category": "land",
+      "subject": "sika deer with warm brown fur and white spots, delicate legs",
+      "files": [
+        "deer-baby.webp",
+        "deer-young.webp",
+        "deer-adult.webp"
+      ]
+    },
+    {
+      "id": "elephant",
+      "name": "亚洲象",
+      "category": "land",
+      "subject": "Asian elephant, warm grey skin, small round ears and curved trunk",
+      "files": [
+        "elephant-baby.webp",
+        "elephant-young.webp",
+        "elephant-adult.webp"
+      ]
+    },
+    {
+      "id": "red-panda",
+      "name": "小熊猫",
+      "category": "land",
+      "subject": "red panda, reddish fur, white face markings, fluffy striped long tail",
+      "files": [
+        "red-panda-baby.webp",
+        "red-panda-young.webp",
+        "red-panda-adult.webp"
+      ]
+    },
+    {
+      "id": "sparrow",
+      "name": "麻雀",
+      "category": "sky",
+      "subject": "Eurasian tree sparrow, warm brown cap, cream cheeks, small black cheek spot",
+      "files": [
+        "sparrow-baby.webp",
+        "sparrow-young.webp",
+        "sparrow-adult.webp"
+      ]
+    },
+    {
+      "id": "swallow",
+      "name": "燕子",
+      "category": "sky",
+      "subject": "barn swallow, blue black wings, cream belly, rust throat and long forked tail",
+      "files": [
+        "swallow-baby.webp",
+        "swallow-young.webp",
+        "swallow-adult.webp"
+      ]
+    },
+    {
+      "id": "owl",
+      "name": "仓鸮",
+      "category": "sky",
+      "subject": "barn owl, heart shaped cream face, golden brown wings",
+      "files": [
+        "owl-baby.webp",
+        "owl-young.webp",
+        "owl-adult.webp"
+      ]
+    },
+    {
+      "id": "parrot",
+      "name": "虎皮鹦鹉",
+      "category": "sky",
+      "subject": "budgerigar parrot, green body, yellow face and black wing barring",
+      "files": [
+        "parrot-baby.webp",
+        "parrot-young.webp",
+        "parrot-adult.webp"
+      ]
+    },
+    {
+      "id": "pigeon",
+      "name": "鸽子",
+      "category": "sky",
+      "subject": "rock pigeon, soft grey plumage with iridescent teal neck",
+      "files": [
+        "pigeon-baby.webp",
+        "pigeon-young.webp",
+        "pigeon-adult.webp"
+      ]
+    },
+    {
+      "id": "eagle",
+      "name": "金雕",
+      "category": "sky",
+      "subject": "golden eagle, dark brown feathers and golden neck, curved beak",
+      "files": [
+        "eagle-baby.webp",
+        "eagle-young.webp",
+        "eagle-adult.webp"
+      ]
+    },
+    {
+      "id": "hummingbird",
+      "name": "蜂鸟",
+      "category": "sky",
+      "subject": "ruby throated hummingbird, emerald green wings, ruby throat, long slender beak",
+      "files": [
+        "hummingbird-baby.webp",
+        "hummingbird-young.webp",
+        "hummingbird-adult.webp"
+      ]
+    },
+    {
+      "id": "crane",
+      "name": "丹顶鹤",
+      "category": "sky",
+      "subject": "red crowned crane, white feathers, black neck accents, red crown, slender long legs",
+      "files": [
+        "crane-baby.webp",
+        "crane-young.webp",
+        "crane-adult.webp"
+      ]
+    },
+    {
+      "id": "duck",
+      "name": "绿头鸭",
+      "category": "sky",
+      "subject": "mallard duck, recognizable duck bill and feet, natural mallard plumage, juvenile brown down then mature green head",
+      "files": [
+        "duck-baby.webp",
+        "duck-young.webp",
+        "duck-adult.webp"
+      ]
+    },
+    {
+      "id": "bat",
+      "name": "果蝠",
+      "category": "sky",
+      "subject": "fruit bat, warm chocolate brown fur, big gentle eyes, leathery outstretched wings and foxlike face",
+      "files": [
+        "bat-baby.webp",
+        "bat-young.webp",
+        "bat-adult.webp"
+      ]
+    },
+    {
+      "id": "dolphin",
+      "name": "海豚",
+      "category": "water",
+      "subject": "bottlenose dolphin, blue grey back and cream belly, curved dorsal fin and friendly short snout",
+      "files": [
+        "dolphin-baby.webp",
+        "dolphin-young.webp",
+        "dolphin-adult.webp"
+      ]
+    },
+    {
+      "id": "seal",
+      "name": "海豹",
+      "category": "water",
+      "subject": "harbor seal, pale silver grey spotted body, whiskers and flippers",
+      "files": [
+        "seal-baby.webp",
+        "seal-young.webp",
+        "seal-adult.webp"
+      ]
+    },
+    {
+      "id": "otter",
+      "name": "海獭",
+      "category": "water",
+      "subject": "sea otter, chocolate brown fur and cream muzzle, round face and small paws",
+      "files": [
+        "otter-baby.webp",
+        "otter-young.webp",
+        "otter-adult.webp"
+      ]
+    },
+    {
+      "id": "turtle",
+      "name": "海龟",
+      "category": "water",
+      "subject": "green sea turtle, olive patterned domed shell and sea flippers",
+      "files": [
+        "turtle-baby.webp",
+        "turtle-young.webp",
+        "turtle-adult.webp"
+      ]
+    },
+    {
+      "id": "clownfish",
+      "name": "小丑鱼",
+      "category": "water",
+      "subject": "ocellaris clownfish, orange fish with three white black-edged bands",
+      "files": [
+        "clownfish-baby.webp",
+        "clownfish-young.webp",
+        "clownfish-adult.webp"
+      ]
+    },
+    {
+      "id": "goldfish",
+      "name": "金鱼",
+      "category": "water",
+      "subject": "fancy goldfish, warm orange gold body and flowing fan tail",
+      "files": [
+        "goldfish-baby.webp",
+        "goldfish-young.webp",
+        "goldfish-adult.webp"
+      ]
+    },
+    {
+      "id": "octopus",
+      "name": "章鱼",
+      "category": "water",
+      "subject": "small common octopus, warm peach coral body, eight curled arms with little suckers",
+      "files": [
+        "octopus-baby.webp",
+        "octopus-young.webp",
+        "octopus-adult.webp"
+      ]
+    },
+    {
+      "id": "seahorse",
+      "name": "海马",
+      "category": "water",
+      "subject": "yellow seahorse, curled tail, long curved neck, tiny fins and ridged body",
+      "files": [
+        "seahorse-baby.webp",
+        "seahorse-young.webp",
+        "seahorse-adult.webp"
+      ]
+    },
+    {
+      "id": "whale",
+      "name": "座头鲸",
+      "category": "water",
+      "subject": "humpback whale, blue grey body, cream grooved belly and long white pectoral flippers",
+      "files": [
+        "whale-baby.webp",
+        "whale-young.webp",
+        "whale-adult.webp"
+      ]
+    },
+    {
+      "id": "manta",
+      "name": "蝠鲼",
+      "category": "water",
+      "subject": "manta ray, dark blue grey broad diamond wings, pale underside and two curled cephalic fins",
+      "files": [
+        "manta-baby.webp",
+        "manta-young.webp",
+        "manta-adult.webp"
+      ]
+    }
+  ],
+  "webEncoding": {
+    "maxDimension": 640,
+    "format": "webp",
+    "quality": 84,
+    "alphaQuality": 95
+  }
+}
