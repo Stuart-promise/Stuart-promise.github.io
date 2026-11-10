@@ -28,7 +28,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 15
     permissions:
       pages: write
       id-token: write
@@ -40,5 +40,5 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v5.0.1
         with:
-          timeout: '1800000'
+          timeout: '600000'
           reporting_interval: '15000'
