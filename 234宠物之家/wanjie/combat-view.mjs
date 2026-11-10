@@ -1,7 +1,9 @@
+import {FOOD_BY_ID} from './food.mjs?v=1';
 // Shared small atlases: no per-monster images, filters, blur or unbounded particles.
 const monsters=new Image();monsters.src='./assets/monsters.webp';
 const walkers=new Image();walkers.src='./assets/hero-motion-v2.webp';
 const ingredients=new Image();ingredients.src='./assets/ingredients.webp';
+const produce=new Image();produce.src='./assets/produce.webp';
 const TAU=Math.PI*2;
 const ready=image=>image.complete&&image.naturalWidth>0;
 const palette={knife:'#d7f1ff',bow:'#b5ed8b',crossbow:'#ffce86',drone:'#73f4ff',fire:'#ff9a42',magic:'#dcafff',ice:'#acf0ff',wind:'#b2ffe2',lightning:'#c4b0ff',blade:'#fff1b1',thorn:'#b1df81',shield:'#ffdf87'};
@@ -15,7 +17,8 @@ export function drawIngredient(c,p,b){
   const near=Math.hypot(p.x-b.x,p.y-b.y)<90;
   ellipse(c,p.x,p.y+3,17,6,'#11231f38');
   if(near){c.strokeStyle=p.type==='veg'?'#ddf3ab99':'#edc3ff99';c.lineWidth=1.5;c.beginPath();c.ellipse(p.x,p.y+3,23,10,0,0,TAU);c.stroke();}
-  if(ready(ingredients))c.drawImage(ingredients,b.map*128,p.type==='veg'?0:128,128,128,p.x-24,p.y-41,48,48);
+  ingredientSprite(c,p.ingredient,b.map,p.x-24,p.y-41,48);
+  if(near&&p.ingredient){c.font='11px sans-serif';c.textAlign='center';c.strokeStyle='#153021';c.lineWidth=3;const label=FOOD_BY_ID[p.ingredient]?.name||'香料';c.strokeText(label,p.x,p.y+22);c.fillStyle='#f4f4cf';c.fillText(label,p.x,p.y+22);}
   if(near){const a=.5+Math.sin(b.t*3+p.x)*.3;c.globalAlpha=a;line(c,p.x+17,p.y-38,p.x+17,p.y-30,'#fff6c2');line(c,p.x+13,p.y-34,p.x+21,p.y-34,'#fff6c2');c.globalAlpha=1;}
 }
 export function drawTelegraph(c,e){
@@ -72,7 +75,7 @@ export function drawEffect(c,e,b){
   if(e.id==='impact'){
     c.strokeStyle=color;c.lineWidth=2;for(let i=0;i<4;i++){const a=i*TAU/4+.4,r=5+progress*12;c.beginPath();c.moveTo(Math.cos(a)*r*.45,Math.sin(a)*r*.45);c.lineTo(Math.cos(a)*r,Math.sin(a)*r);c.stroke();}
   }else if(e.id==='harvest'){
-    if(ready(ingredients))c.drawImage(ingredients,b.map*128,e.food==='veg'?0:128,128,128,-15,-30-progress*24,30,30);c.strokeStyle='#e9ffd0';c.lineWidth=2;for(let i=0;i<3;i++){const a=i*TAU/3;line(c,Math.cos(a)*(8+progress*18),Math.sin(a)*(8+progress*18)-10,Math.cos(a)*(11+progress*18),Math.sin(a)*(11+progress*18)-14,'#eeffc0',2);}
+    ingredientSprite(c,e.ingredient,b.map,-15,-30-progress*24,30);c.strokeStyle='#e9ffd0';c.lineWidth=2;for(let i=0;i<3;i++){const a=i*TAU/3;line(c,Math.cos(a)*(8+progress*18),Math.sin(a)*(8+progress*18)-10,Math.cos(a)*(11+progress*18),Math.sin(a)*(11+progress*18)-14,'#eeffc0',2);}
   }else if(e.id==='ice'){
     c.strokeStyle='#b9f5ff';c.lineWidth=3;c.beginPath();c.arc(0,0,e.r*(.7+progress*.3),0,TAU);c.stroke();
     for(let i=0;i<8;i++){const a=i*TAU/8,x=Math.cos(a)*e.r*.86,y=Math.sin(a)*e.r*.86;c.save();c.translate(x,y);c.rotate(a);diamond(c,0,0,8+progress*7,'#b4edffbb');line(c,-10,0,10,0,'#f2ffff',1);c.restore();}
@@ -94,3 +97,5 @@ export function drawEffect(c,e,b){
     c.strokeStyle='#ff9b75';c.lineWidth=4;c.beginPath();c.arc(0,0,e.r*(.5+progress*.5),0,TAU);c.stroke();
   }c.restore();
 }
+
+function ingredientSprite(c,id,map,x,y,size){const f=FOOD_BY_ID[id];if(f&&ready(produce))c.drawImage(produce,f.index%4*128,Math.floor(f.index/4)*128,128,128,x,y,size,size);else if(ready(ingredients))c.drawImage(ingredients,map*128,128,128,128,x,y,size,size);}
