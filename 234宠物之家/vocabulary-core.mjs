@@ -33,3 +33,27 @@ export function makeSession(rows,records,stats,target,size,mode,favorites=[],now
 }
 export function streak(completed,today){const days=new Set(completed);let day=dayNumber(today);if(!days.has(today))day--;
  const nums=new Set([...days].map(dayNumber));let n=0;while(nums.has(day)){n++;day--;}return n;}
+
+// New and review groups persist independently; old v2 groups can finish unchanged.
+export function makeModuleSession(rows, records, stats, target, size, mode, favorites=[], now=new Date()) {
+ const selected=mode==='new'?stats.fresh.slice(0,Math.max(0,target-stats.learned)):mode==='review'?stats.due:mode==='weak'?stats.weak:rows.filter(r=>favorites.includes(r[0]));
+ const items=selected.slice(0,size).map(r=>({word:r[0],kind:records.has(r[0])?'复习':'新词',quality:2,misses:0}));
+ return items.length?{v:3,id:globalThis.crypto.randomUUID(),mode,items,index:0,phase:'question',choices:null,selected:null}:null;
+}
+export function meaningChoices(row, rows, random=Math.random) {
+ const key=r=>r[2].replace(/\s/g,'').toLowerCase(), seen=new Set([key(row)]), tag=row[2].match(/^[a-z]+\./i)?.[0];
+ const pool=rows.filter(r=>r[0]!==row[0]);
+ // Fisher-Yates, then prefer the same part of speech without creating duplicate answers.
+ for(let i=pool.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+ pool.sort((a,b)=>Number(b[2].startsWith(tag||'!'))-Number(a[2].startsWith(tag||'!')));
+ const answer=[row[0]];
+ for(const candidate of pool){if(seen.has(key(candidate)))continue;seen.add(key(candidate));answer.push(candidate[0]);if(answer.length===4)break;}
+ for(let i=answer.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[answer[i],answer[j]]=[answer[j],answer[i]];}
+ return answer;
+}
+export function completeRecall(previous, quality, word, sessionId, now=new Date()) {
+ if(previous?.lastSession===sessionId)return previous;
+ // Extra practice today cannot repeatedly promote a word through the review intervals.
+ if(previous&&previous.due>+now&&quality===2)return {...previous,lastSession:sessionId};
+ return {...scheduled(previous,quality,word,sessionId,now),spelled:previous?.spelled||0};
+}

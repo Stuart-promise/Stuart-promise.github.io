@@ -1,0 +1,6 @@
+Vocabulary audio — 2026-11-11
+
+Pre-generated US English synthetic speech (Microsoft Zira Desktop).
+MP3 files are loaded individually only when played; no voice-engine binaries are distributed.
+Word text is from the existing ECDICT wordbooks (see ECDICT-LICENSE.txt).
+Example sentences retain their Tatoeba authors, original sentence links and CC BY 2.0 FR attribution in vocabulary-examples.json and the on-screen example card. See TATOEBA-EXAMPLES.txt. Audio is a spoken adaptation of that text.
