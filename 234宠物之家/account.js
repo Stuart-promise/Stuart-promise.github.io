@@ -8,10 +8,10 @@
   const API = 'https://111.228.4.20';
   const SESSION = 'pet234:session:v1';
   const modules = {
-    python:'Python 闯关', 'vocab-cet4':'四级单词', 'vocab-cet6':'六级单词',
+    python:'Python 闯关', 'vocab-cet4':'四级单词', 'vocab-cet6':'六级单词', 'vocab-zhongkao':'长沙中考单词', 'vocab-gaokao':'高考单词',
     animal2048:'动物 2048', blocks:'俄罗斯方块最高分', 'animal-drop':'动物合成最高分'
   };
-  const prefixes = {python:'pet234-python-v1:', 'vocab-cet4':'pet234:vocab:v1:cet4:', 'vocab-cet6':'pet234:vocab:v1:cet6:'};
+  const prefixes = {python:'pet234-python-v1:', 'vocab-cet4':'pet234:vocab:v1:cet4:', 'vocab-cet6':'pet234:vocab:v1:cet6:', 'vocab-zhongkao':'pet234:vocab:v1:zhongkao:', 'vocab-gaokao':'pet234:vocab:v1:gaokao:'};
   const singleKeys = {animal2048:'pet234-animal2048-v1',blocks:'pet234-blocks-best','animal-drop':'pet234-animal-drop-best'};
   let session = null, stale = false, message = '', timer, running;
   const loaded = new Set();

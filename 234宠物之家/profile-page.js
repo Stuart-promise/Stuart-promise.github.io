@@ -55,7 +55,7 @@ async function history(reset=false){
   if(historyBusy)return;historyBusy=true;$('history-more').disabled=true;
   try{const result=await A.request('/v1/points/history'+(!reset&&historyCursor?'?before='+historyCursor:''));
     if(reset)$('points-history').replaceChildren();
-    for(const r of result.entries){const item=document.createElement('div');item.className='point-entry';const desc=document.createElement('div'),small=document.createElement('small'),value=document.createElement('strong');desc.textContent=r.day+' · 每日登录';small.textContent='连续第 '+r.streak+' 天 · 入账后余额 '+r.balance_after;desc.append(small);value.textContent='+'+r.amount;item.append(desc,value);$('points-history').append(item);}
+    for(const r of result.entries){const item=document.createElement('div');item.className='point-entry';const desc=document.createElement('div'),small=document.createElement('small'),value=document.createElement('strong');desc.textContent=r.day+' · '+(r.source==='vocab_learning'?'单词学习达标':'每日登录');small.textContent='连续第 '+r.streak+' 天 · 入账后余额 '+r.balance_after;desc.append(small);value.textContent='+'+r.amount;item.append(desc,value);$('points-history').append(item);}
     if(!$('points-history').children.length)$('points-history').textContent='暂无积分记录。';
     historyCursor=result.nextCursor;$('history-more').hidden=!historyCursor;
   }catch(e){notice(e.message);}finally{historyBusy=false;$('history-more').disabled=false;}

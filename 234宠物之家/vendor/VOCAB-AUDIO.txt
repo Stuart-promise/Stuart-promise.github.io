@@ -4,3 +4,12 @@ Pre-generated US English synthetic speech (Microsoft Zira Desktop).
 MP3 files are loaded individually only when played; no voice-engine binaries are distributed.
 Word text is from the existing ECDICT wordbooks (see ECDICT-LICENSE.txt).
 Example sentences retain their Tatoeba authors, original sentence links and CC BY 2.0 FR attribution in vocabulary-examples.json and the on-screen example card. See TATOEBA-EXAMPLES.txt. Audio is a spoken adaptation of that text.
+
+British English added 2026-11-11:
+Piper en_GB-cori-medium, Cori Samuel voice, British English phonemization en-gb-x-rp.
+Voice model card: https://huggingface.co/rhasspy/piper-voices/blob/main/en/en_GB/cori/medium/MODEL_CARD
+Dataset: Hi-Fi Multi-Speaker English TTS Dataset, NVIDIA Corporation (CC BY 4.0), recordings by Cori Samuel for LibriVox, reader 92.
+https://www.openslr.org/109/
+https://creativecommons.org/licenses/by/4.0/
+Engine: Piper (OHF-Voice/piper1-gpl), used locally for synthesis; engine/model binaries are not included in the website.
+The distributed MP3 clips are newly synthesized speech, not recordings from BBDC or any paid vocabulary application. Example text attribution remains as above. Audio is generated at 22,050 Hz and encoded to MP3.
