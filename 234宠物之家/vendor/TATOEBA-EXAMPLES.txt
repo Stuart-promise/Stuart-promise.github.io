@@ -1,0 +1,4 @@
+English / Mandarin examples: Tatoeba contributors, selected from the bilingual corpus distributed by https://www.manythings.org/anki/.
+Downloaded 2026-11-11 from corpus mirror https://raw.githubusercontent.com/shaoshengsong/pytorch-transformer-en-zh-translation-demo/main/cmn-eng/cmn.txt
+License: CC BY 2.0 FR https://creativecommons.org/licenses/by/2.0/fr/
+Each displayed example retains English and Chinese sentence IDs, individual authors, and links to its source. Sentences and translations are unmodified; selection and highlighting only. Authors are included in vocabulary-examples.json. Community examples are not exam questions or BBDC audio recordings.
