@@ -1,5 +1,5 @@
-import {TECH,COUNT,fresh,restore,stats,price,unlocked,level,tool,buy,collect,recycle,refill,move,atMachine,MACHINE} from './model.mjs?v=1';
-import {CoinRoom} from './scene.mjs?v=1';
+import {TECH,COUNT,fresh,restore,serialize,stats,price,unlocked,level,tool,buy,collect,recycle,refill,move,atMachine,MACHINE} from './model.mjs?v=2';
+import {CoinRoom} from './scene.mjs?v=2';
 const $=s=>document.querySelector(s),canvas=$('#world'),overlay=$('#overlay'),fmt=n=>Math.floor(n).toLocaleString('zh-CN');
 let s,room,storage,paused=true,blocked=false,keys={},held=false,unloading=false,unloadCredit=0,progress=0,targets=[],stick={x:0,y:0},last=0,nextFrame=0,saveTime=0,hudTime=0,targetTime=0,lookPointer=null,stickPointer=null,audio,toastTimer,dirty=false;
 const rotated=()=>matchMedia('(orientation:portrait) and (max-width:700px)').matches;
@@ -7,7 +7,7 @@ const point=e=>rotated()?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.c
 const touch=()=>matchMedia('(pointer:coarse)').matches;
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),3200);}
 function tone(kind){if(!s?.sound||kind==='silent')return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.setValueAtTime(kind==='sell'?520:kind==='buy'?660:880,audio.currentTime);o.frequency.exponentialRampToValueAtTime(kind==='buy'?1320:kind==='sell'?780:1200,audio.currentTime+.07);g.gain.setValueAtTime(.035,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.12);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.13);}catch{}}
-function save(){if(!s||!storage||blocked||!dirty)return;try{PetAccount.assertOwner();storage.setItem('pet234-coin-tycoon-v1',JSON.stringify(s));dirty=false;syncBadge();}catch(e){blocked=true;stopInputs();showError(e.message);}}
+function save(){if(!s||!storage||blocked||!dirty)return;try{PetAccount.assertOwner();storage.setItem('pet234-coin-tycoon-v1',serialize(s));dirty=false;syncBadge();}catch(e){blocked=true;stopInputs();showError(e.message);}}
 function syncBadge(){if(!s)return;const status=PetAccount.read('coin-tycoon');$('#cloud').textContent=!PetAccount.session?'游客 · 本机存档':status.conflict?'存档冲突':status.dirty?'☁ 等待同步':'☁ 云存档已同步';if(status.conflict&&!blocked){blocked=true;stopInputs();showError('另一台设备有不同的进度。请到账号中心选择要保留的金币大亨存档，再刷新本页。');}}
 function stopInputs(){keys={};held=false;unloading=false;stick.x=stick.y=0;progress=0;lookPointer=stickPointer=null;$('#stick i').style.transform='';}
 function show(html){paused=true;stopInputs();document.exitPointerLock?.();overlay.hidden=false;overlay.innerHTML=html;}
@@ -31,7 +31,8 @@ canvas.addEventListener('pointerup',e=>{if(!touch()&&lookPointer&&!lookPointer.m
 $('#stick').addEventListener('pointerdown',e=>{if(paused||blocked)return;e.preventDefault();const p=point(e);stickPointer={id:e.pointerId,x:p.x,y:p.y};e.currentTarget.setPointerCapture(e.pointerId);});
 $('#stick').addEventListener('pointermove',e=>{if(stickPointer?.id!==e.pointerId)return;const p=point(e);stick.x=Math.max(-1,Math.min(1,(p.x-stickPointer.x)/35));stick.y=Math.max(-1,Math.min(1,(p.y-stickPointer.y)/35));$('#stick i').style.transform=`translate(${stick.x*25}px,${stick.y*25}px)`;});
 for(const event of ['pointerup','pointercancel','lostpointercapture'])$('#stick').addEventListener(event,()=>{stickPointer=null;stick.x=stick.y=0;$('#stick i').style.transform='';});
-$('#pickup').addEventListener('pointerdown',e=>{if(paused||blocked)return;e.preventDefault();held=true;e.currentTarget.setPointerCapture(e.pointerId);});for(const event of ['pointerup','pointercancel','lostpointercapture'])$('#pickup').addEventListener(event,()=>held=false);
+for(const el of [canvas,$('#pickup'),$('#stick'),$('#deposit')]){for(const event of ['contextmenu','selectstart','dragstart'])el.addEventListener(event,e=>e.preventDefault());if(el.id!=='deposit')el.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});}
+$('#pickup').addEventListener('pointerdown',e=>{if(paused||blocked)return;e.preventDefault();window.getSelection()?.removeAllRanges();held=true;e.currentTarget.setPointerCapture(e.pointerId);});for(const event of ['pointerup','pointercancel','lostpointercapture'])$('#pickup').addEventListener(event,()=>held=false);
 $('#deposit').onclick=()=>{if(!paused&&!blocked&&atMachine(s)){unloading=true;unloadCredit=0;}};$('#research').onclick=()=>{if(s&&!blocked){save();shop();}};$('#help').onclick=()=>{if(s&&!blocked){save();welcome();}};
 $('#sound').onclick=()=>{if(s&&!blocked){s.sound=!s.sound;dirty=true;save();hud();}};
 $('#fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else {await document.documentElement.requestFullscreen();try{await screen.orientation.lock('landscape');}catch{}}}catch{toast('可以横向握持手机游玩');}};

@@ -1,5 +1,6 @@
+import {CoinPile,GRID,STEP,ORIGIN_X,ORIGIN_Z,LAYER,SHELL} from './pile.mjs?v=2';
 import * as THREE from './vendor/three.module.js';
-import {COUNT,coins,level,MACHINE} from './model.mjs?v=1';
+import {level} from './model.mjs?v=2';
 export class CoinRoom {
  constructor(canvas,state){
   this.renderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.setClearColor(0x9cae9b);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1;
@@ -26,16 +27,14 @@ export class CoinRoom {
   this.machineLight=this.box(1.17,1.85,7.78,.14,.1,.06,0x8cdb9b);this.machineLight.material=new THREE.MeshBasicMaterial({color:0xb2ffd3});
   this.ring=new THREE.Mesh(new THREE.RingGeometry(.19,.22,24),new THREE.MeshBasicMaterial({color:0xfff5b5,side:THREE.DoubleSide,transparent:true,opacity:.9}));this.ring.rotation.x=-Math.PI/2;this.scene.add(this.ring);
  }
- resetCoins(s){this.positions=coins(s.shipment);this.gone=new Set(s.taken);if(!this.coinMesh){const geo=new THREE.CylinderGeometry(1,1,.22,10);this.coinMesh=new THREE.InstancedMesh(geo,this.mat(0xeeba42,90),COUNT);this.coinMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.coinMesh.frustumCulled=false;this.scene.add(this.coinMesh);this.stampMesh=new THREE.InstancedMesh(new THREE.CylinderGeometry(.62,.62,.025,8),this.mat(0xffe698,50),COUNT);this.stampMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.stampMesh.frustumCulled=false;this.scene.add(this.stampMesh);}
-  for(let i=0;i<COUNT;i++)this.setCoin(i);this.coinMesh.instanceMatrix.needsUpdate=true;this.stampMesh.instanceMatrix.needsUpdate=true;
+ resetCoins(s){this.pile=new CoinPile(s.shipment,s.taken);const slots=GRID*GRID*SHELL;if(!this.coinMesh){this.coinMesh=new THREE.InstancedMesh(new THREE.CylinderGeometry(1,1,.22,8),this.mat(0xeeba42,90),slots);this.coinMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.coinMesh.frustumCulled=false;this.scene.add(this.coinMesh);this.stampMesh=new THREE.InstancedMesh(new THREE.CylinderGeometry(.62,.62,.025,6),this.mat(0xffe698,50),slots);this.stampMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.stampMesh.frustumCulled=false;this.scene.add(this.stampMesh);
+   const vertices=new Float32Array(GRID*GRID*3),indices=[];for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++){const i=r*GRID+c;vertices[i*3]=ORIGIN_X+c*STEP;vertices[i*3+2]=ORIGIN_Z+r*STEP;if(r<GRID-1&&c<GRID-1)indices.push(i,i+GRID,i+1,i+1,i+GRID,i+GRID+1);}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(vertices,3));geo.setIndex(indices);this.body=new THREE.Mesh(geo,this.mat(0xc69736,15));this.body.frustumCulled=false;this.scene.add(this.body);
+  }for(const c of this.pile.columns)this.updateColumn(c.index);this.updateSurface();
  }
- setCoin(i){const p=this.positions[i],d=this.dummy;d.position.set(p.x,p.y,p.z);d.rotation.set(p.tilt,p.a,0);const size=this.gone.has(i)?0:p.size;d.scale.setScalar(size);d.updateMatrix();this.coinMesh.setMatrixAt(i,d.matrix);d.position.y+=size*.13;d.updateMatrix();this.stampMesh.setMatrixAt(i,d.matrix);}
- remove(ids){for(const id of ids){this.gone.add(id);this.setCoin(id);}this.coinMesh.instanceMatrix.needsUpdate=true;this.stampMesh.instanceMatrix.needsUpdate=true;this.pulse=1;}
- targets(s,stats){const fx=-Math.sin(s.yaw),fz=-Math.cos(s.yaw),candidates=[];let best=null,bestScore=Infinity;for(let i=0;i<COUNT;i++){if(this.gone.has(i))continue;const p=this.positions[i],dx=p.x-s.x,dz=p.z-s.z,d=Math.hypot(dx,dz);if(d>stats.reach||d<.15)continue;const facing=(dx*fx+dz*fz)/d;if(facing<.4)continue;const score=d+(1-facing)*2;if(score<bestScore){bestScore=score;best=i;}}
-  if(best===null){this.ring.visible=false;return [];}
-  const p=this.positions[best];this.ring.visible=true;this.ring.position.set(p.x,p.y+.03,p.z);this.ring.scale.setScalar(Math.min(3,1+stats.radius*.5));
-  for(let i=0;i<COUNT;i++){if(this.gone.has(i))continue;const q=this.positions[i],d=Math.hypot(q.x-p.x,q.z-p.z);if(d<=stats.radius&&Math.hypot(q.x-s.x,q.z-s.z)<=stats.reach)candidates.push({id:i,d});}candidates.sort((a,b)=>a.d-b.d);return candidates.map(c=>c.id);
- }
+ updateColumn(index){const c=this.pile.columns[index],d=this.dummy;for(let layer=0;layer<SHELL;layer++){const p=this.pile.surface(c,layer),size=c.left>layer?p.size:0;d.position.set(p.x,p.y,p.z);d.rotation.set(p.tilt,p.a,0);d.scale.setScalar(size);d.updateMatrix();this.coinMesh.setMatrixAt(index*SHELL+layer,d.matrix);d.position.y+=size*.13;d.updateMatrix();this.stampMesh.setMatrixAt(index*SHELL+layer,d.matrix);}this.body.geometry.attributes.position.array[index*3+1]=Math.max(.012,c.left*LAYER-.06);}
+ updateSurface(){this.coinMesh.instanceMatrix.needsUpdate=true;this.stampMesh.instanceMatrix.needsUpdate=true;this.body.geometry.attributes.position.needsUpdate=true;this.body.geometry.computeVertexNormals();}
+ remove(ids){for(const i of this.pile.remove(ids))this.updateColumn(i);this.updateSurface();this.pulse=1;}
+ targets(s,stats){const {ids,point}=this.pile.targets(s,stats);this.ring.visible=!!point;if(point){this.ring.position.set(point.x,point.y+.05,point.z);this.ring.scale.setScalar(Math.min(3,1+stats.radius*.5));}return ids;}
  createHands(){this.hand=new THREE.Group();this.camera.add(this.hand);this.hand.position.set(.37,-.42,-.62);this.hand.scale.setScalar(.8);this.box(0,-.17,.08,.19,.48,.2,0x294f46,this.hand);this.box(0,.1,0,.2,.23,.2,0xe7b58c,this.hand);for(let i=0;i<4;i++)this.box(-.074+i*.048,.23,-.025,.039,.13,.12,0xf1c8a3,this.hand);this.implement=new THREE.Group();this.hand.add(this.implement);}
  updateTool(s){const id=level(s,'vacuum')?'vacuum':level(s,'magnet')?'magnet':level(s,'scoop')?'scoop':'hand';if(id===this.lastTool)return;this.lastTool=id;for(const child of [...this.implement.children]){child.geometry?.dispose();this.implement.remove(child);}if(id==='hand')return;
   this.box(0,.26,-.1,.065,.28,.07,0x765b35,this.implement);
@@ -44,5 +43,5 @@ export class CoinRoom {
   else{this.box(0,.35,-.25,.28,.23,.5,0x358b7e,this.implement);this.box(0,.35,-.56,.4,.16,.16,0x243e3b,this.implement);this.box(0,.48,-.22,.12,.04,.2,0xefca63,this.implement);}
  }
  resize(){const c=this.renderer.domElement,w=c.clientWidth,h=c.clientHeight;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
- draw(s,dt,moving){this.clock+=dt;this.pulse=Math.max(0,(this.pulse||0)-dt*4);this.camera.position.set(s.x,1.6+(moving?Math.sin(this.clock*9)*.025:0),s.z);this.camera.rotation.set(s.pitch,s.yaw,0,'YXZ');this.hand.position.y=-.42+(moving?Math.sin(this.clock*9)*.018:0)+this.pulse*.07;this.hand.rotation.x=-this.pulse*.5;this.updateTool(s);this.renderer.render(this.scene,this.camera);}
+ draw(s,dt,moving){this.clock+=dt;this.pulse=Math.max(0,(this.pulse||0)-dt*4);this.camera.position.set(s.x,this.pile.heightAt(s.x,s.z)+1.6+(moving?Math.sin(this.clock*9)*.025:0),s.z);this.camera.rotation.set(s.pitch,s.yaw,0,'YXZ');this.hand.position.y=-.42+(moving?Math.sin(this.clock*9)*.018:0)+this.pulse*.07;this.hand.rotation.x=-this.pulse*.5;this.updateTool(s);this.renderer.render(this.scene,this.camera);}
 }

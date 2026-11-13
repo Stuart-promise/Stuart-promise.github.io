@@ -2,6 +2,6 @@ import assert from 'node:assert/strict';import {fresh,restore,stats,buy,collect,
 const s=fresh();assert.equal(stats(s).batch,1);assert.equal(collect(s,[0,1,2]).length,1);assert.equal(s.money,0);assert.equal(s.bag,1);assert.equal(recycle(s,3),1);assert.equal(s.money,1);assert.equal(recycle(s,3),0);assert.equal(collect(s,[0]).length,0);
 for(let i=1;i<30;i++)collect(s,[i]);assert.equal(s.bag,12);recycle(s,100);s.money=12;assert(buy(s,'grip'));assert.equal(s.money,0);assert.equal(stats(s).batch,2);assert(!buy(s,'magnet'));assert(!buy(s,'invalid'));
 s.money=1e12;for(const t of TECH)for(let i=0;i<t.max;i++)buy(s,t.id);for(const t of TECH)while(buy(s,t.id)){}assert.equal(stats(s).auto,true);assert.equal(stats(s).capacity,292);assert(stats(s).interval<.4);assert(stats(s).batch>40);
-assert.deepEqual(restore(JSON.stringify(s)),s);assert.throws(()=>restore('{bad'));assert.throws(()=>restore('{"schema":2}'));
+assert.deepEqual(restore(JSON.stringify(s)),s);assert.throws(()=>restore('{bad'));assert.throws(()=>restore('{"schema":3}'));
 assert.equal(coins(0).length,COUNT);assert.deepEqual(coins(0),coins(0));assert.notDeepEqual(coins(0),coins(1));s.taken=Array.from({length:COUNT},(_,i)=>i);assert(refill(s));assert.equal(s.shipment,1);assert.equal(s.taken.length,0);assert(!refill(s));
 const m=fresh();for(let i=0;i<1000;i++)move(m,1,1,.05);assert(Math.abs(m.x)<9.55&&Math.abs(m.z)<9.55);m.x=0;m.z=7;move(m,-1,0,.5);assert(m.z<=7.2);console.log('PASS coin economy, capacity, technology prerequisites/caps, persistence, deterministic resupply, room/machine collisions');
