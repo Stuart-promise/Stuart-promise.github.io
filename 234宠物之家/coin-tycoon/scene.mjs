@@ -1,6 +1,6 @@
 import {CoinPile,GRID,STEP,ORIGIN_X,ORIGIN_Z,LAYER,SHELL} from './pile.mjs?v=2';
 import * as THREE from './vendor/three.module.js';
-import {level} from './model.mjs?v=2';
+import {level} from './model.mjs?v=3';
 export class CoinRoom {
  constructor(canvas,state){
   this.renderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.setClearColor(0x9cae9b);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1;
@@ -42,6 +42,7 @@ export class CoinRoom {
   else if(id==='magnet'){for(const x of [-.12,.12]){this.box(x,.38,-.25,.1,.13,.4,0xc77d4a,this.implement);this.box(x,.38,-.48,.1,.13,.1,0xe8dfbd,this.implement);}this.box(0,.38,-.05,.34,.13,.1,0xc77d4a,this.implement);}
   else{this.box(0,.35,-.25,.28,.23,.5,0x358b7e,this.implement);this.box(0,.35,-.56,.4,.16,.16,0x243e3b,this.implement);this.box(0,.48,-.22,.12,.04,.2,0xefca63,this.implement);}
  }
+ dispose(){const geometries=new Set(),materials=new Set(),textures=new Set();this.scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:o.material?[o.material]:[]){materials.add(m);for(const value of Object.values(m))if(value?.isTexture)textures.add(value);}});for(const t of textures)t.dispose();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();this.renderer.dispose();}
  resize(){const c=this.renderer.domElement,w=c.clientWidth,h=c.clientHeight;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
  draw(s,dt,moving){this.clock+=dt;this.pulse=Math.max(0,(this.pulse||0)-dt*4);this.camera.position.set(s.x,this.pile.heightAt(s.x,s.z)+1.6+(moving?Math.sin(this.clock*9)*.025:0),s.z);this.camera.rotation.set(s.pitch,s.yaw,0,'YXZ');this.hand.position.y=-.42+(moving?Math.sin(this.clock*9)*.018:0)+this.pulse*.07;this.hand.rotation.x=-this.pulse*.5;this.updateTool(s);this.renderer.render(this.scene,this.camera);}
 }
