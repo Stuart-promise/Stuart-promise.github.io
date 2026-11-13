@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three.module.js';
-import {CoinRoom} from './scene.mjs?v=3';
+import {CoinRoom} from './scene.mjs?v=4';
 import {MUSHROOM_COUNT,mushrooms,mushroomTargets} from './mushrooms.mjs?v=3';
-import {level,stats} from './model.mjs?v=3';
+import {level,stats} from './model.mjs?v=4';
 export class MushroomRoom extends CoinRoom {
  build(){
   this.scene.fog=new THREE.Fog(0x6e8c69,17,38);this.renderer.setClearColor(0x839e79);

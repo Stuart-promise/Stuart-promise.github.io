@@ -3,42 +3,44 @@ import {COUNT,CoinPile} from './pile.mjs?v=2';
 export {COUNT};
 export const ROOM=10,MACHINE={x:0,z:8.2};
 export const TECH=[
- {id:'grip',name:'灵巧指尖',icon:'✦',branch:0,max:5,base:12,growth:1.85,desc:'每次多收集1枚金币'},
- {id:'tempo',name:'熟练拾取',icon:'↻',branch:0,max:8,base:18,growth:1.8,desc:'每级缩短拾取间隔',requires:['grip',1]},
- {id:'reach',name:'延伸手套',icon:'⌁',branch:0,max:5,base:28,growth:1.9,desc:'每级增加0.35米拾取距离',requires:['grip',2]},
- {id:'value',name:'精密分选',icon:'◇',branch:0,max:8,base:65,growth:2,desc:'每枚金币回收价增加1元',requires:['tempo',2]},
- {id:'bag',name:'加固背包',icon:'▣',branch:1,max:10,base:16,growth:1.8,desc:'每级增加8枚携带容量'},
- {id:'speed',name:'轻快步伐',icon:'»',branch:1,max:8,base:18,growth:1.8,desc:'每级增加0.28米/秒移动速度'},
- {id:'cart',name:'随身推车',icon:'▤',branch:1,max:5,base:160,growth:2.1,desc:'每级增加40枚容量',requires:['bag',3]},
- {id:'recycle',name:'高速回收',icon:'⇄',branch:1,max:5,base:45,growth:1.9,desc:'加快回收机卸货',requires:['bag',2]},
- {id:'scoop',name:'集币铲',icon:'⤓',branch:2,max:5,base:75,growth:2,desc:'解锁铲子，每级增加3枚拾取量',requires:['grip',2]},
- {id:'magnet',name:'磁力收集器',icon:'∩',branch:2,max:4,base:280,growth:2.1,desc:'解锁磁力工具，每级扩大吸附范围',requires:['scoop',2]},
- {id:'vacuum',name:'旋风吸币器',icon:'◎',branch:2,max:5,base:900,growth:2.2,desc:'每级增加8枚拾取量，并提高拾取速度',requires:['magnet',2]},
+ {id:'grip',name:'灵巧指尖',icon:'✦',branch:0,max:15,base:12,growth:1.85,desc:'每次多收集1枚金币'},
+ {id:'tempo',name:'熟练拾取',icon:'↻',branch:0,max:20,base:18,growth:1.8,desc:'每级缩短拾取间隔',requires:['grip',1]},
+ {id:'reach',name:'延伸手套',icon:'⌁',branch:0,max:10,base:28,growth:1.9,desc:'每级增加0.35米拾取距离',requires:['grip',2]},
+ {id:'value',name:'精密分选',icon:'◇',branch:0,max:16,base:65,growth:2,desc:'每枚金币回收价增加1元',requires:['tempo',2]},
+ {id:'bag',name:'加固背包',icon:'▣',branch:1,max:30,base:16,growth:1.8,desc:'前10级每级+8容量，之后每级+24'},
+ {id:'speed',name:'轻快步伐',icon:'»',branch:1,max:20,base:18,growth:1.8,desc:'前8级每级+0.28米/秒，之后+0.36'},
+ {id:'cart',name:'随身推车',icon:'▤',branch:1,max:15,base:160,growth:2.1,desc:'前5级每级+40容量，之后每级+80',requires:['bag',3]},
+ {id:'recycle',name:'高速回收',icon:'⇄',branch:1,max:20,base:45,growth:1.9,desc:'前5级每级+5枚/秒，之后+20枚/秒',requires:['bag',2]},
+ {id:'scoop',name:'集币铲',icon:'⤓',branch:2,max:12,base:75,growth:2,desc:'解锁铲子，每级增加3枚拾取量',requires:['grip',2]},
+ {id:'magnet',name:'磁力收集器',icon:'∩',branch:2,max:10,base:280,growth:2.1,desc:'解锁磁力工具，每级扩大吸附范围',requires:['scoop',2]},
+ {id:'vacuum',name:'旋风吸币器',icon:'◎',branch:2,max:12,base:900,growth:2.2,desc:'每级增加8枚拾取量，并提高拾取速度',requires:['magnet',2]},
  {id:'auto',name:'感应启动',icon:'ϟ',branch:2,max:1,base:2400,growth:1,desc:'使用吸币器时自动收集附近金币',requires:['vacuum',2]}
 ];
 export const MUSHROOM_TECH=[
- {id:'m_pick',name:'成簇采摘',icon:'✿',branch:0,max:6,base:600,growth:1.8,desc:'每次多采2朵蘑菇'},
- {id:'m_tempo',name:'采菇巧手',icon:'↻',branch:0,max:8,base:900,growth:1.85,desc:'缩短采摘间隔',requires:['m_pick',1]},
- {id:'m_reach',name:'长柄采菇器',icon:'⌁',branch:0,max:5,base:1200,growth:1.9,desc:'增加采摘距离和覆盖范围',requires:['m_pick',2]},
- {id:'m_sickle',name:'旋刃采菇器',icon:'⤓',branch:0,max:4,base:3200,growth:2,desc:'每级多采4朵，并加快采摘',requires:['m_tempo',2]},
- {id:'m_fire',name:'旺火炭炉',icon:'♨',branch:1,max:8,base:800,growth:1.9,desc:'提高烤串出餐速度'},
- {id:'m_grill',name:'并排烤架',icon:'▤',branch:1,max:5,base:2600,growth:2,desc:'扩充烤架，进一步提高出餐速度',requires:['m_fire',2]},
- {id:'m_glaze',name:'秘制酱汁',icon:'◇',branch:1,max:8,base:1100,growth:1.85,desc:'每串售价增加6元'},
- {id:'m_recipe',name:'招牌菌香串',icon:'✦',branch:1,max:4,base:3600,growth:2.1,desc:'每串售价再增加20元',requires:['m_glaze',2]},
- {id:'m_basket',name:'分层采菇篮',icon:'▣',branch:2,max:6,base:700,growth:1.8,desc:'每级增加12朵携带容量'},
- {id:'m_stride',name:'林间快步',icon:'»',branch:2,max:4,base:1300,growth:1.9,desc:'每级增加0.3米/秒移动速度'},
- {id:'m_handoff',name:'快捷交付',icon:'⇄',branch:2,max:5,base:900,growth:1.9,desc:'更快把蘑菇送进烤炉待制队列'},
+ {id:'m_pick',name:'成簇采摘',icon:'✿',branch:0,max:18,base:600,growth:1.8,desc:'每次多采2朵蘑菇'},
+ {id:'m_tempo',name:'采菇巧手',icon:'↻',branch:0,max:20,base:900,growth:1.85,desc:'缩短采摘间隔',requires:['m_pick',1]},
+ {id:'m_reach',name:'长柄采菇器',icon:'⌁',branch:0,max:10,base:1200,growth:1.9,desc:'增加采摘距离和覆盖范围',requires:['m_pick',2]},
+ {id:'m_sickle',name:'旋刃采菇器',icon:'⤓',branch:0,max:12,base:3200,growth:2,desc:'每级多采4朵，并加快采摘',requires:['m_tempo',2]},
+ {id:'m_fire',name:'旺火炭炉',icon:'♨',branch:1,max:20,base:800,growth:1.9,desc:'提高烤串出餐速度'},
+ {id:'m_grill',name:'并排烤架',icon:'▤',branch:1,max:15,base:2600,growth:2,desc:'扩充烤架，进一步提高出餐速度',requires:['m_fire',2]},
+ {id:'m_glaze',name:'秘制酱汁',icon:'◇',branch:1,max:20,base:1100,growth:1.85,desc:'每串售价增加6元'},
+ {id:'m_recipe',name:'招牌菌香串',icon:'✦',branch:1,max:12,base:3600,growth:2.1,desc:'每串售价再增加20元',requires:['m_glaze',2]},
+ {id:'m_basket',name:'分层采菇篮',icon:'▣',branch:2,max:30,base:700,growth:1.8,desc:'前6级每级+12容量，之后每级+36'},
+ {id:'m_stride',name:'林间快步',icon:'»',branch:2,max:20,base:1300,growth:1.9,desc:'前4级每级+0.3米/秒，之后+0.36'},
+ {id:'m_handoff',name:'快捷交付',icon:'⇄',branch:2,max:20,base:900,growth:1.9,desc:'前5级每级+6朵/秒，之后+15朵/秒'},
  {id:'m_auto',name:'感应采菇',icon:'ϟ',branch:2,max:1,base:12000,growth:1,desc:'朝向附近蘑菇时自动采摘',requires:['m_sickle',2]}
 ];
 export {MUSHROOM_COUNT};
 export const techTree=s=>s.map===1?MUSHROOM_TECH:TECH;
 export const level=(s,id)=>s.tech[id]||0;
-export const price=(s,t)=>Math.ceil(t.base*t.growth**level(s,t.id));
+// Preserve the opening purchases; use linear growth after level 3 so late levels remain attainable.
+export const price=(s,t)=>{const lv=level(s,t.id);return Math.ceil(t.base*t.growth**Math.min(lv,3)*(1+.18*Math.max(0,lv-3)));};
 export const unlocked=(s,t)=>!t.requires||level(s,t.requires[0])>=t.requires[1];
 export const tool=s=>s.map===1?(level(s,'m_sickle')?'旋刃采菇器':level(s,'m_reach')?'长柄采菇器':'徒手采菇'):(level(s,'vacuum')?'旋风吸币器':level(s,'magnet')?'磁力收集器':level(s,'scoop')?'集币铲':'徒手拾取');
-export function stats(s){const capacity=12+8*level(s,'bag')+40*level(s,'cart'),speed=1.8+.28*level(s,'speed');
- if(s.map===1)return {capacity:12+12*level(s,'m_basket'),speed:1.8+.3*level(s,'m_stride'),batch:1+2*level(s,'m_pick')+4*level(s,'m_sickle'),reach:1.7+.3*level(s,'m_reach'),radius:.4+.18*level(s,'m_pick')+.25*level(s,'m_reach')+.2*level(s,'m_sickle'),interval:1.2/(1+.2*level(s,'m_tempo')+.15*level(s,'m_sickle')),value:12+6*level(s,'m_glaze')+20*level(s,'m_recipe'),unload:6+6*level(s,'m_handoff'),cookRate:.5*(1+.4*level(s,'m_fire'))*(1+.5*level(s,'m_grill')),auto:!!level(s,'m_auto')};
- return {capacity,batch:1+level(s,'grip')+3*level(s,'scoop')+8*level(s,'vacuum'),speed,reach:1.65+.35*level(s,'reach')+.25*level(s,'magnet'),radius:.3+.3*level(s,'scoop')+.55*level(s,'magnet')+.25*level(s,'vacuum'),interval:1.05/(1+.18*level(s,'tempo')+.18*level(s,'vacuum')),value:1+level(s,'value'),unload:5+5*level(s,'recycle'),auto:!!level(s,'auto')};
+const tierGain=(s,id,early,threshold,late)=>{const lv=level(s,id);return Math.min(lv,threshold)*early+Math.max(0,lv-threshold)*late;};
+export function stats(s){
+ if(s.map===1)return {capacity:12+tierGain(s,'m_basket',12,6,36),speed:1.8+tierGain(s,'m_stride',.3,4,.36),batch:1+2*level(s,'m_pick')+4*level(s,'m_sickle'),reach:1.7+.3*level(s,'m_reach'),radius:.4+.18*level(s,'m_pick')+.25*level(s,'m_reach')+.2*level(s,'m_sickle'),interval:1.2/(1+.2*level(s,'m_tempo')+.15*level(s,'m_sickle')),value:12+6*level(s,'m_glaze')+20*level(s,'m_recipe'),unload:6+tierGain(s,'m_handoff',6,5,15),cookRate:.5*(1+.4*level(s,'m_fire'))*(1+.5*level(s,'m_grill')),auto:!!level(s,'m_auto')};
+ return {capacity:12+tierGain(s,'bag',8,10,24)+tierGain(s,'cart',40,5,80),batch:1+level(s,'grip')+3*level(s,'scoop')+8*level(s,'vacuum'),speed:1.8+tierGain(s,'speed',.28,8,.36),reach:1.65+.35*level(s,'reach')+.25*level(s,'magnet'),radius:.3+.3*level(s,'scoop')+.55*level(s,'magnet')+.25*level(s,'vacuum'),interval:1.05/(1+.18*level(s,'tempo')+.18*level(s,'vacuum')),value:1+level(s,'value'),unload:5+tierGain(s,'recycle',5,5,20),auto:!!level(s,'auto')};
 }
 const freshMushrooms=()=>({taken:[],batch:0,harvested:0,delivered:0,queue:0,cookFraction:0,sold:0,revenue:0});
 export function fresh(){return {schema:3,map:0,goldCompleted:false,finalGold:0,money:0,bag:0,collected:0,delivered:0,earned:0,tech:{},taken:[],shipment:0,mushrooms:freshMushrooms(),x:0,z:5.6,yaw:0,pitch:-.18,seconds:0,tutorial:false,sound:true};}

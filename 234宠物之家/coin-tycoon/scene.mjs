@@ -1,6 +1,6 @@
 import {CoinPile,GRID,STEP,ORIGIN_X,ORIGIN_Z,LAYER,SHELL} from './pile.mjs?v=2';
 import * as THREE from './vendor/three.module.js';
-import {level} from './model.mjs?v=3';
+import {level} from './model.mjs?v=4';
 export class CoinRoom {
  constructor(canvas,state){
   this.renderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.setClearColor(0x9cae9b);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1;
