@@ -16,3 +16,5 @@
 @media(max-width:650px){.portal-main{padding-top:32px}.portal-cards{grid-template-columns:1fr;gap:17px}.portal-card{padding:20px}.portal-art{max-width:220px;margin:10px auto 13px}.portal-intro{margin-bottom:23px}.portal-label h2{font-size:25px}.portal-label{padding-top:15px}}
 
 .forum-entry{background:#f3eddf;border-color:#ded4bd}
+
+.friends-entry{background:#ebe5d6}.friends-portal-art{height:160px;display:flex;align-items:center;justify-content:center;gap:24px;font-size:38px}.friends-portal-art span:nth-child(2){font-size:60px;color:#9c8358}.portal-cards{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:680px){.portal-cards{grid-template-columns:1fr}}

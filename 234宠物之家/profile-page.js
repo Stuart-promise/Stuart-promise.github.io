@@ -5,7 +5,7 @@ function badge(title){const s=document.createElement('span');s.className='title-
 function button(label,fn){const b=document.createElement('button');b.textContent=label;b.type='button';b.onclick=async()=>{b.disabled=true;try{await fn();}catch(e){notice(e.message);}finally{b.disabled=false;}};return b;}
 function paint(){
   const p=A.profile;if(!p||!A.session)return;
-  $('profile-name').textContent=p.nickname;$('profile-username').textContent='登录用户名：'+A.session.user.username;
+  $('profile-name').textContent=p.nickname;$('profile-username').textContent='登录用户名：'+A.session.user.username;$('profile-uid').textContent='UID：'+(p.uid??'正在分配');
   $('profile-level').textContent='Lv.'+p.level;
   document.querySelector('.profile-growth p').textContent=p.levelOverride?'当前享有站长专属等级；积分余额与历史获得积分独立记录。':'等级由历史累计获得积分决定，今后消费积分不会降低等级。';
   if(document.activeElement!==$('nickname'))$('nickname').value=p.nickname;

@@ -29,6 +29,7 @@
   function draw(){
     const p=state?.pet, s=find(p?.species), locked=busy||!!pending||!state;
     $('pet-balance').textContent=state?.profile.balance??'—';
+    if($('pet-battle-stats')){const values=p?[p.strength,p.speed,p.intelligence]:[],max=Math.max(...values),type=values.filter(v=>v===max).length===1?['力量型','速度型','智慧型'][values.indexOf(max)]:'均衡型';$('pet-battle-stats').textContent=p?`${type} · 血量 ${100+20*p.level} · 基础伤害 ${5+Math.floor(values.reduce((a,b)=>a+b,0)/3)}`:'先免费领养宠物，再与好友切磋';}
     $('pet-retry').hidden=!pending;$('pet-retry').disabled=busy;
     $('pet-refresh').disabled=busy;
     $('pet-adopt').disabled=busy||!!pending||!!A.session&&!state;
