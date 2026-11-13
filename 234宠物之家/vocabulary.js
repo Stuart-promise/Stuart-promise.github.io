@@ -1,5 +1,5 @@
 import {playAudio,stopAudio,audioReady} from './vocabulary-audio.mjs?v=perf1';
-import {INTERVALS,dayKey,dayNumber,afterDays,parseRecord,dayStats,scheduled,normalizeAnswer,streak,makeModuleSession,meaningChoices,completeRecall} from './vocabulary-core.mjs?v=calendar3';
+import {dayKey,afterDays,parseRecord,dayStats,makeModuleSession,meaningChoices,completeRecall} from './vocabulary-core.mjs?v=calendar3';
 const $=id=>document.getElementById(id),requestedBook=new URLSearchParams(location.search).get('book'),book=['cet4','cet6','zhongkao','gaokao'].includes(requestedBook)?requestedBook:'cet4';
 const title=({cet4:'大学四级',cet6:'大学六级',zhongkao:'长沙中考基础词汇',gaokao:'高考英语词汇'})[book],prefix=`pet234:vocab:v1:${book}:`;
 // Start static content and account restoration together instead of chaining network waits.
@@ -19,7 +19,7 @@ function load(){
  refreshSnapshot();
  records.clear();favorites.clear();for(const [word]of rows){const r=parseRecord(get('word:'+word));if(r)records.set(word,r);if(get('favorite:'+word)==='true')favorites.add(word);}
  sessionRaw=get(sessionKey);const saved=parse(sessionRaw);
- session=saved?.v===3&&Array.isArray(saved.items)&&saved.items.length>0&&saved.items.length<=20&&saved.items.every(i=>byWord.has(i.word))&&Number.isInteger(saved.index)&&saved.index>=0&&saved.index<saved.items.length&&['question','feedback','detail'].includes(saved.phase)?saved:saved?.v===2&&Array.isArray(saved.items)&&saved.items.length<=20&&saved.items.length>0&&saved.items.every(i=>byWord.has(i.word))&&Array.isArray(saved.queue)&&Array.isArray(saved.done)&&['recall','spell'].includes(saved.phase)?saved:null;
+ session=saved?.v===3&&Array.isArray(saved.items)&&saved.items.length>0&&saved.items.length<=20&&saved.items.every(i=>byWord.has(i.word))&&Number.isInteger(saved.index)&&saved.index>=0&&saved.index<saved.items.length&&['question','feedback','detail'].includes(saved.phase)?saved:null;
  const size=Number(get('batch-size'));$('batch-size').value=[5,10,20].includes(size)?size:10;
  $('accent').value=get('accent')==='en-GB'?'en-GB':'en-US';
 }
@@ -90,7 +90,7 @@ function renderDashboard(){
  const pendingNew=parse(get('session-v3:new')),pendingReview=parse(get('session-v3:review'));
  $('start').disabled=!pendingNew&&(!stats.fresh.length||stats.learned>=d.target);$('start').textContent=pendingNew?'继续新学 →':'开始新学 →';
  $('review-only').disabled=!pendingReview&&!stats.due.length;$('review-only').textContent=pendingReview?'继续复习 →':'开始复习 →';
- $('weak').disabled=!stats.weak.length;$('legacy-resume').hidden=!parse(get('session-v2'));
+ $('weak').disabled=!stats.weak.length;
  $('book-title').textContent=title;$('progress').textContent=`已学 ${records.size} / ${rows.length} 词 · 生词本 ${favorites.size} 词`;
  $('book-progress').max=rows.length;$('book-progress').value=records.size;
  renderCalendar();
@@ -131,24 +131,11 @@ function context(word,target){
  const license=document.createElement('a');license.href='https://creativecommons.org/licenses/by/2.0/fr/';license.textContent='CC BY 2.0 FR';license.target='_blank';license.rel='noopener';credit.append(license);
  target.append(en,zh,play,credit);addFamily(word,target);
 }
-function currentItem(){return session?.v===3?session.items[session.index]:session?.phase==='recall'?session.items[session.index]:session?.items.find(i=>i.word===session.queue[0]);}
+function currentItem(){return session?.items[session.index];}
 function renderPractice(){
  stopAudio();$('audio-status').textContent='';
- if(session?.v===3){renderModulePractice();return;}
- $('choice-area').hidden=true;
  if(!session){show('dashboard');return;}
- const item=currentItem();if(item)prepareReward(item.word);if(!item){finishRound();return;}const [word,phonetic,meaning]=byWord.get(item.word),spell=session.phase==='spell',feedback=session.feedback;
- $('phase-label').textContent=spell?`02 / 拼写巩固 · 已通过 ${session.done.length} / ${session.items.length}`:`01 / 回忆与理解 · ${session.index+1} / ${session.items.length}`;
- $('round-progress').max=session.items.length*2;$('round-progress').value=spell?session.items.length+session.done.length:session.index;
- $('kind').textContent=item.kind+(item.misses?' · 再练一次':'');$('favorite').textContent=favorites.has(word)?'★ 已加入生词本':'☆ 加入生词本';$('favorite').setAttribute('aria-pressed',String(favorites.has(word)));
- $('word').textContent=spell?(feedback?word:'拼出这个词'):word;$('phonetic').textContent=!spell&&phonetic?'/'+phonetic+'/':'';
- $('meaning').textContent=(spell||session.revealed)?meaning:'';$('meaning').hidden=!spell&&!session.revealed;
- $('cue').textContent=spell?'回忆英文拼写；答错的词会在本组再次出现。':session.revealed?'核对词义，听一听，也在例句里理解它。':'先想中文意思，再诚实选择自己的熟悉程度。';
- $('recall-actions').hidden=spell||session.revealed;$('spell-form').hidden=!spell||!!feedback;
- $('context').hidden=spell?!feedback:!session.revealed;if(!$('context').hidden)context(word,$('context'));else $('context').replaceChildren();
- $('next').hidden=spell?!feedback:!session.revealed;$('next').textContent=spell?(feedback?.correct?'下一个':'记住了，再练一次'):session.index===session.items.length-1?'开始本组拼写':'下一个词';
- $('feedback').textContent=feedback?(feedback.correct?`拼写正确 · ${INTERVALS[records.get(word)?.stage||0]} 天后复习`:`还差一点，正确拼写是 ${word}。看一遍，再不看答案拼一次。`):'';
- $('spelling').value='';if(spell&&!feedback)$('spelling').focus({preventScroll:true});
+ renderModulePractice();
 }
 function show(next){stopAudio();$('audio-status').textContent='';screen=next;document.body.classList.toggle('learning',next==='practice');$('dashboard').hidden=next!=='dashboard';$('practice').hidden=next!=='practice';$('round-done').hidden=next!=='done';renderDashboard();if(next==='practice')renderPractice();}
 async function act(fn){
@@ -178,7 +165,7 @@ function renderModulePractice(){
  $('word').textContent=word;$('phonetic').textContent=phonetic?'/'+phonetic+'/':'';
  $('meaning').textContent=detail?meaning:'';$('meaning').hidden=!detail;
  $('cue').textContent=detail?'结合例句理解，再进入下一词。':isNew?'先回想词义再选择，想不起来可以看答案。':'瞬间想起选「认识」，思考后想起选「模糊」。';
- $('spell-form').hidden=true;$('recall-actions').hidden=isNew||!question;
+ $('recall-actions').hidden=isNew||!question;
  $('choice-area').hidden=!isNew||detail;$('choices').replaceChildren();
  if(isNew&&!detail){for(const choice of session.choices||[]){const row=byWord.get(choice);if(!row)continue;const button=document.createElement('button');button.type='button';button.className='meaning-choice';button.dataset.word=choice;button.disabled=!question;
   if(!question&&(choice===word||choice===session.selected)){button.classList.add(choice===word?'correct':'incorrect');button.append(Object.assign(document.createElement('strong'),{textContent:choice}));}
@@ -195,36 +182,23 @@ function renderModulePractice(){
 function chooseMeaning(choice){if(session?.v!==3||session.phase!=='question'||currentItem().kind!=='新词')return;
  session.selected=choice;const item=currentItem();item.quality=choice===item.word?2:0;item.misses=item.quality===0?1:0;session.phase='feedback';saveSession();renderPractice();}
 $('reveal-answer').onclick=()=>act(()=>chooseMeaning(null));
-$('legacy-resume').onclick=()=>act(()=>{sessionKey='session-v2';load();show(session?'practice':'dashboard');});
 function finishRound(){
- const modern=session.v===3;const misses=session.items.filter(i=>i.misses>0).length;roundSummary=`${session.items.length} 个词已完成${modern?'学习与核对':'拼写'}。${misses?`${misses} 个词需要巩固，已安排短间隔复习。`:'继续按计划复习，记忆会更稳。'}`;
+ const misses=session.items.filter(i=>i.misses>0).length;roundSummary=`${session.items.length} 个词已完成学习与核对。${misses?`${misses} 个词需要巩固，已安排短间隔复习。`:'继续按计划复习，记忆会更稳。'}`;
  session=null;saveSession();$('round-summary').textContent=roundSummary;show('done');
 }
 $('start').onclick=()=>act(()=>begin());$('review-only').onclick=()=>act(()=>begin('review'));$('weak').onclick=()=>act(()=>begin('weak'));
 $('another').onclick=()=>act(()=>{show('dashboard');begin(lastMode);});$('back-dashboard').onclick=()=>show('dashboard');$('pause').onclick=()=>{stopAudio();show('dashboard');};
-for(const button of document.querySelectorAll('[data-quality]'))button.onclick=()=>act(()=>{if(session?.v===3){if(session.phase!=='question'||currentItem().kind==='新词')return;currentItem().quality=Number(button.dataset.quality);currentItem().misses=currentItem().quality===0?1:0;session.phase='detail';saveSession();renderPractice();return;}if(!session||session.phase!=='recall'||session.revealed)return;currentItem().quality=Number(button.dataset.quality);session.revealed=true;saveSession();renderPractice();});
+for(const button of document.querySelectorAll('[data-quality]'))button.onclick=()=>act(()=>{if(!session||session.phase!=='question'||currentItem().kind==='新词')return;currentItem().quality=Number(button.dataset.quality);currentItem().misses=currentItem().quality===0?1:0;session.phase='detail';saveSession();renderPractice();});
 $('next').onclick=()=>act(()=>{
  if(!session)return;
  stopAudio();$('audio-status').textContent='';
- if(session.v===3){
   if(session.phase==='feedback'){session.phase='detail';saveSession();renderPractice();return;}
   if(session.phase!=='detail')return;
   const item=currentItem(),record=completeRecall(records.get(item.word),item.quality,item.word,session.id);
   put('word:'+item.word,record);records.set(item.word,record);recordActivity(item.word);queueReward(item);
   if(session.index===session.items.length-1){finishRound();return;}
   session.index++;session.phase='question';prepareChoices();saveSession();renderDashboard();renderPractice();document.querySelector('#practice').scrollTop=0;return;
- }
- if(session.phase==='recall'){if(!session.revealed)return;session.index++;session.revealed=false;if(session.index===session.items.length){session.phase='spell';session.index=0;}}
- else{if(!session.feedback)return;const word=session.queue.shift();if(!session.feedback.correct)session.queue.push(word);session.feedback=null;if(!session.queue.length){finishRound();return;}}
- saveSession();renderPractice();
 });
-$('spell-form').onsubmit=e=>{e.preventDefault();const answer=$('spelling').value;act(()=>{
- if(!session||session.phase!=='spell'||session.feedback)return;if(!answer.trim()){sayWarning('先输入你的拼写，再检验答案。');return;}
- const item=currentItem(),correct=normalizeAnswer(answer)===normalizeAnswer(item.word);session.feedback={correct};
- if(correct){const next=scheduled(records.get(item.word),item.quality,item.word,session.id);put('word:'+item.word,next);records.set(item.word,next);recordActivity(item.word);queueReward(item);if(!session.done.includes(item.word))session.done.push(item.word);}
- else{item.quality=0;item.misses++;}saveSession();renderDashboard();renderPractice();
-});};
-$('hint').onclick=()=>act(()=>{const item=currentItem();if(!item||session.phase!=='spell')return;item.quality=Math.min(1,item.quality);saveSession();$('feedback').textContent=`首字母 ${item.word[0]} · 共 ${item.word.length} 个字符（含空格和连字符）`;$('spelling').focus();});
 $('speak').onclick=()=>{const item=currentItem();if(item)speak(item.word);};
 function toggleFavorite(word){const selected=!favorites.has(word);put('favorite:'+word,String(selected));selected?favorites.add(word):favorites.delete(word);$('practice-favorites').disabled=!favorites.size;}
 $('favorite').onclick=()=>act(()=>{const word=currentItem()?.word;if(!word)return;toggleFavorite(word);$('favorite').textContent=favorites.has(word)?'★ 已加入生词本':'☆ 加入生词本';$('favorite').setAttribute('aria-pressed',String(favorites.has(word)));});
