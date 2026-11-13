@@ -1,7 +1,10 @@
-import {playAudio,stopAudio,audioReady} from './vocabulary-audio.mjs?v=calendar3';
+import {playAudio,stopAudio,audioReady} from './vocabulary-audio.mjs?v=perf1';
 import {INTERVALS,dayKey,dayNumber,afterDays,parseRecord,dayStats,scheduled,normalizeAnswer,streak,makeModuleSession,meaningChoices,completeRecall} from './vocabulary-core.mjs?v=calendar3';
 const $=id=>document.getElementById(id),requestedBook=new URLSearchParams(location.search).get('book'),book=['cet4','cet6','zhongkao','gaokao'].includes(requestedBook)?requestedBook:'cet4';
 const title=({cet4:'大学四级',cet6:'大学六级',zhongkao:'长沙中考基础词汇',gaokao:'高考英语词汇'})[book],prefix=`pet234:vocab:v1:${book}:`;
+// Start static content and account restoration together instead of chaining network waits.
+const bookReady=fetch(`./${book}.json?v=1`).then(async response=>{if(!response.ok)throw Error('词书加载失败，请检查网络后刷新。');return response.json();});
+bookReady.catch(()=>{});
 const store=await PetAccount.open('vocab-'+book),records=new Map(),favorites=new Set();
 let rows=[],byWord=new Map(),examples={},session=null,sessionRaw=null,busy=false,screen='dashboard',filter='all',listLimit=40,nowDay='',roundSummary='';
 let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),calendarData=null,calendarRequest=0,rewardBusy=false;
@@ -101,8 +104,23 @@ function addFamily(word,target){
  const box=document.createElement('section');box.className='family';box.append(Object.assign(document.createElement('h3'),{textContent:'相关词形 · 当前词书'}));
  for(const w of family){const line=document.createElement('p'),strong=Object.assign(document.createElement('strong'),{textContent:w}),audio=Object.assign(document.createElement('button'),{type:'button',textContent:'♪',ariaLabel:'朗读 '+w});audio.onclick=()=>speak(w);line.append(audio,strong,document.createTextNode(byWord.get(w)[2]));box.append(line);}target.append(box);
 }
+const exampleLoads=new Map();
 function context(word,target){
- target.replaceChildren();const example=examples[word.toLowerCase()];
+ target.replaceChildren();target.dataset.word=word;
+ const first=word[0].toLowerCase(),shard=/^[a-z]$/.test(first)?first:'other';
+ if(!exampleLoads.has(shard)){
+  const pending=fetch(`./assets/vocabulary/examples-${shard}.json?v=perf1`).then(async r=>{if(!r.ok)throw Error();Object.assign(examples,await r.json());exampleLoads.set(shard,true);});
+  exampleLoads.set(shard,pending);
+ }
+ const loading=exampleLoads.get(shard);
+ if(loading!==true){
+  target.append(Object.assign(document.createElement('p'),{textContent:'正在加载例句…'}));
+  loading.then(()=>{if(target.isConnected&&target.dataset.word===word)context(word,target);}).catch(()=>{
+   if(exampleLoads.get(shard)===loading)exampleLoads.delete(shard);
+   if(target.isConnected&&target.dataset.word===word){target.replaceChildren(Object.assign(document.createElement('p'),{textContent:'例句暂未加载成功，释义和进度仍可使用。'}));const retry=Object.assign(document.createElement('button'),{type:'button',textContent:'重新加载例句'});retry.onclick=()=>context(word,target);target.append(retry);addFamily(word,target);}
+  });return;
+ }
+ const example=examples[word.toLowerCase()];
  if(!example){target.append(Object.assign(document.createElement('p'),{textContent:'这个词暂未收录例句。先掌握释义，也可以把它加入生词本。'}));addFamily(word,target);return;}
  const en=document.createElement('p');en.className='english';en.lang='en';
  const parts=example.en.split(new RegExp(`(\\b${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b)`,'gi'));
@@ -233,7 +251,6 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&rows.leng
 setInterval(()=>{if(rows.length&&!document.hidden){try{renderDashboard();}catch(e){sayWarning(e);}}},60000);
 document.querySelector(`[data-book="${book}"]`).setAttribute('aria-current','page');
 try{
- const response=await fetch(`./${book}.json?v=1`);if(!response.ok)throw Error('词书加载失败，请检查网络后刷新。');rows=await response.json();byWord=new Map(rows.map(r=>[r[0],r]));
+ rows=await bookReady;byWord=new Map(rows.map(r=>[r[0],r]));
  load();show('dashboard');fetchCalendar();flushRewards();
- fetch('./vocabulary-examples.json?v=hundred1').then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{examples=data;if(screen==='practice'&&!$('context').hidden)context(currentItem().word,$('context'));}).catch(()=>sayWarning('例句暂未加载成功；释义、拼写和进度保存仍可使用。刷新后可重试。'));
 }catch(e){sayWarning(e);$('book-summary').textContent='词书暂时不可用';$('start').textContent='请刷新重试';}

@@ -106,8 +106,9 @@ function frame(time){
   if(!paused&&!document.hidden&&!game.over){
     if(lastFrame)accumulator+=Math.min(time-lastFrame,100);
     while(accumulator>=1000/60){game.step();accumulator-=1000/60;}
+    if(game.over){renderStats();draw();}
   }
-  lastFrame=time;renderStats();draw();requestAnimationFrame(frame);
+  lastFrame=time;if(!paused&&!document.hidden&&!game.over){renderStats();draw();}requestAnimationFrame(frame);
 }
 renderStats();draw();requestAnimationFrame(frame);
 

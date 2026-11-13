@@ -14,7 +14,7 @@
   const prefixes = {python:'pet234-python-v1:', 'vocab-cet4':'pet234:vocab:v1:cet4:', 'vocab-cet6':'pet234:vocab:v1:cet6:', 'vocab-zhongkao':'pet234:vocab:v1:zhongkao:', 'vocab-gaokao':'pet234:vocab:v1:gaokao:'};
   const singleKeys = {animal2048:'pet234-animal2048-v1',blocks:'pet234-blocks-best','animal-drop':'pet234-animal-drop-best'};
   let session = null, stale = false, message = '', timer, running;
-  const loaded = new Set();
+  const loaded = new Set(), opening = new Map();
   const memory = new Map();
   try { session = JSON.parse(localStorage.getItem(SESSION)); } catch {}
   if (!session?.user?.id || !session?.token) session = null;
@@ -44,6 +44,7 @@
   async function checkIn() {
     if(!session||stale||document.hidden)return;
     if(checkInRunning)return checkInRunning;
+    lastActivityCheck=Date.now();
     checkInRunning=request('/v1/check-in',{method:'POST'}).then(result=>{
       updateProfile(result.profile);
       if(result.reward.awarded)notify('今日登录 +'+result.reward.amount+' 积分 · 连续 '+result.profile.streak+' 天');
@@ -80,7 +81,7 @@
   }
   async function request(path,options={}) {
     const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),path==='/v1/me'?8000:45000);
+    const timeout=setTimeout(()=>controller.abort(),['/v1/me','/v1/check-in'].includes(path)?8000:45000);
     let response;
     try {
       const keepalive=options.method==='PUT' && typeof options.body==='string' && new TextEncoder().encode(options.body).length<48000;
@@ -120,16 +121,25 @@
     await ready;
     if (!modules[m]) throw Error('未知记录类型');
     if (!loaded.has(m)) {
-      loaded.add(m);
-      try { await pull(m); } catch (error) { notify(error.message); }
+      if(!opening.has(m)) opening.set(m,pull(m).then(()=>loaded.add(m)).catch(error=>notify(error.message)).finally(()=>opening.delete(m)));
+      await opening.get(m);
     }
     schedule();
+    let cachedRaw, cachedData;
     return {
-      getItem(k) { assertOwner(); return session ? read(m).data[k] ?? null : localStorage.getItem(k); },
+      getItem(k) {
+        assertOwner();
+        if(!session)return localStorage.getItem(k);
+        // Reuse parsed data until the stored bytes change, including changes from other tabs.
+        let raw;try{raw=localStorage.getItem(key(m));}catch{}
+        if(raw!==cachedRaw||!cachedData){cachedRaw=raw;cachedData=read(m).data;}
+        return cachedData[k]??null;
+      },
       setItem(k,v) {
         assertOwner();
         if (!session) { localStorage.setItem(k,String(v)); return; }
-        const state=read(m); state.data[k]=String(v); state.dirty=true; state.revision++;
+        const state=read(m);if(state.data[k]===String(v))return;
+        state.data[k]=String(v); state.dirty=true; state.revision++;
         write(m,state); notify('已存本机 · 等待云同步'); schedule();
       }
     };
@@ -222,7 +232,8 @@
   }
   const ready=(async()=>{
     if(session) {
-      try { const data=await request('/v1/me'); updateProfile(data.profile); notify('已登录 · '+(profile?.nickname||session.user.username)); await checkIn(); }
+      // Check-in also authenticates the session and returns the complete current profile.
+      try { const result=await checkIn(); if(!result?.reward.awarded)notify('已登录 · '+(profile?.nickname||session.user.username)); }
       catch(error) { notify(error.message); }
     } else notify('游客模式 · 记录仅存本机');
   })();

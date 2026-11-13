@@ -5,12 +5,13 @@ const notice=text=>{$('social-notice').textContent=text;};
 const button=(text,fn,cls='')=>{const b=el('button',text,cls);b.type='button';b.onclick=async()=>{b.disabled=true;try{await fn();}catch(e){notice(e.message);}finally{b.disabled=b.dataset.pending==='true';}};return b;};
 const when=value=>new Date(value*1000).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
 let data=null,selected=null,refreshing=false,chatVersion=0,chatBusy=false,messages=new Map(),oldest=0,last=0,tab='chat',report=null,replayTimer;
-const drafts=new Map();let searchPeople=[];
+const drafts=new Map();let searchPeople=[],renderedKey="",lastRead=0;
 const display=f=>f.remark||f.nickname;
 const peer=()=>data?.friends.find(f=>f.uid===selected);
 function badges(p){const box=el('div',undefined,'identity-badges');box.append(el('span','Lv.'+p.level,'social-level'));if(p.title)box.append(el('span',p.title.name,'social-title'));return box;}
 function portrait(p,cls='mini-pet'){const box=el('div',undefined,cls);if(!p){box.append(el('strong','尚未领养宠物'),el('small','先去宠物小屋相遇'));return box;}const img=el('img');img.src=`./assets/pets/${p.species}-${p.stage}.webp`;img.alt=p.name;box.append(img,el('strong',`${p.name} · Lv.${p.level}`),el('small',`${p.typeName} · HP ${p.maxHp}\n基础伤害 ${p.attack}`));return box;}
 function render(){
+ const key=JSON.stringify([data,selected]);if(key===renderedKey)return;renderedKey=key;
  for(const p of searchPeople){const row=[...document.querySelectorAll('.person-result')].find(n=>n.dataset.uid===String(p.uid));if(!row)continue;const request=data.requests.find(r=>r.person.uid===p.uid);p.relation=data.friends.some(f=>f.uid===p.uid)?'friend':request?(request.incoming?'incoming':'outgoing'):'none';const b=row.querySelector('button');b.textContent={none:'添加好友',friend:'已是好友 · 聊聊天',outgoing:'申请已发送',incoming:'对方已申请 · 查看'}[p.relation];b.dataset.pending=String(p.relation==='outgoing');b.disabled=p.relation==='outgoing';}
 
  $('copy-uid').disabled=false;$('copy-uid').textContent='我的 UID：'+data.me.uid+' · 复制';
@@ -36,12 +37,12 @@ function render(){
  if(!battles.length)$('battle-list').append(el('p','还没有切磋记录。发出第一份邀请吧。','muted'));
 }
 async function refresh(){if(refreshing||!A.session||document.hidden)return;refreshing=true;try{const next=await call('');data=next;if(selected&&!peer()){selected=null;messages.clear();chatVersion++;}if(!selected&&data.friends.length){await selectFriend(data.friends[0].uid);}else render();}catch(e){notice(e.message);}finally{refreshing=false;}}
-async function selectFriend(uid){if(selected===uid)return;if(selected)drafts.set(selected,$('message-body').value);selected=uid;let pending;try{pending=JSON.parse(sessionStorage.getItem(`pet234:message-pending:${A.owner}:${uid}`));}catch{}$('message-body').value=drafts.get(uid)??pending?.body??'';chatVersion++;messages.clear();last=0;oldest=0;chatBusy=false;render();renderMessages();await loadMessages();}
+async function selectFriend(uid){if(selected===uid)return;if(selected)drafts.set(selected,$('message-body').value);selected=uid;let pending;try{pending=JSON.parse(sessionStorage.getItem(`pet234:message-pending:${A.owner}:${uid}`));}catch{}$('message-body').value=drafts.get(uid)??pending?.body??'';chatVersion++;messages.clear();last=0;oldest=0;lastRead=0;chatBusy=false;render();renderMessages();await loadMessages();}
 function renderMessages(){const box=$('messages'),atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;const ordered=[...messages.values()].sort((a,b)=>a.id-b.id);box.replaceChildren(...ordered.map(m=>{const row=el('article',undefined,'message'+(m.mine?' mine':''));row.dataset.messageId=m.id;const time=el('time',when(m.created));time.dateTime=new Date(m.created*1000).toISOString();row.append(el('p',m.body),time);return row;}));if(!ordered.length)box.append(el('p','还没有消息，打个招呼吧。','chat-empty'));if(atBottom)box.scrollTop=box.scrollHeight;}
 async function loadMessages(older=false){if(!peer()||chatBusy)return;const uid=selected,version=chatVersion;chatBusy=true;try{const query=older?'?before='+oldest:last?'?after='+last:'';const result=await call(`/friends/${uid}/messages${query}`);if(version!==chatVersion)return;
  const box=$('messages'),height=box.scrollHeight,position=box.scrollTop;for(const m of result.messages)messages.set(m.id,m);if(messages.size){const ids=[...messages.keys()];oldest=Math.min(...ids);last=Math.max(...ids);}if(!last||older||!query)$('older-messages').hidden=!result.hasMore;
  if(result.messages.length||!messages.size)renderMessages();if(older)box.scrollTop=position+(box.scrollHeight-height);
- if(tab==='chat'&&!document.hidden&&last){await call(`/friends/${uid}/read`,{through:last});if(peer()?.uid===uid&&peer().unread){peer().unread=0;render();}}
+ if(tab==='chat'&&!document.hidden&&last>lastRead){const through=last;await call(`/friends/${uid}/read`,{through});if(version===chatVersion){lastRead=through;if(peer()?.uid===uid&&peer().unread){peer().unread=0;render();}}}
  }catch(e){notice(e.message);}finally{if(version===chatVersion)chatBusy=false;}}
 function setTab(value){tab=value;$('chat-pane').hidden=value!=='chat';$('battle-pane').hidden=value!=='battle';$('chat-tab').setAttribute('aria-selected',String(value==='chat'));$('battle-tab').setAttribute('aria-selected',String(value==='battle'));if(value==='chat')loadMessages();}
 $('chat-tab').onclick=()=>setTab('chat');$('battle-tab').onclick=()=>setTab('battle');$('older-messages').onclick=()=>loadMessages(true);
@@ -62,4 +63,13 @@ function paintReport(count){const r=report.result,done=count>=r.events.length,hp
 $('replay-battle').onclick=()=>{if(!report)return;clearInterval(replayTimer);let i=0;paintReport(0);replayTimer=setInterval(()=>{paintReport(++i);if(i===report.result.events.length)clearInterval(replayTimer);},550);};
 $('skip-battle').onclick=()=>{clearInterval(replayTimer);if(report)paintReport(report.result.events.length);};$('close-battle').onclick=()=>$('battle-dialog').close();$('battle-dialog').onclose=()=>clearInterval(replayTimer);
 await A.ready;$('login-prompt').hidden=!!A.session;$('social-app').hidden=!A.session;
-if(A.session){await refresh();await loadMessages();setInterval(async()=>{if(!document.hidden){await refresh();await loadMessages();}},4000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();loadMessages();}else clearInterval(replayTimer);});window.addEventListener('online',()=>{refresh();loadMessages();});}
+if(A.session){
+ let pollTimer,polling=false;
+ async function poll(){
+  clearTimeout(pollTimer);if(polling||document.hidden||!navigator.onLine)return;polling=true;
+  try{await refresh();await loadMessages();}finally{polling=false;if(!document.hidden)pollTimer=setTimeout(poll,4000);}
+ }
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(pollTimer);clearInterval(replayTimer);}else poll();});
+ window.addEventListener('online',poll);window.addEventListener('offline',()=>clearTimeout(pollTimer));
+ await poll();
+}

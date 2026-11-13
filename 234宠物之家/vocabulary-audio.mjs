@@ -3,7 +3,9 @@ const player = new Audio();
 player.preload = 'none';
 player.setAttribute('playsinline', '');
 let clips = {}, current = 0, timer;
-export const audioReady = fetch('./vocabulary-audio.json?v=calendar3').then(r => {
+const requestedBook=new URLSearchParams(location.search).get('book');
+const book=['cet4','cet6','zhongkao','gaokao'].includes(requestedBook)?requestedBook:'cet4';
+export const audioReady = fetch(new URL(`./assets/vocabulary/${book}-audio.json?v=perf1`,import.meta.url)).then(r => {
   if (!r.ok) throw Error('音频目录加载失败');
   return r.json();
 }).then(data => { clips = data; });

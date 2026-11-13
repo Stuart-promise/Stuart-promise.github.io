@@ -38,7 +38,11 @@ function preview(target,type){
   const size=20,ox=(100-(maxX-minX+1)*size)/2,oy=(80-(maxY-minY+1)*size)/2;
   filled.forEach(([x,y])=>square(context,ox+(x-minX)*size,oy+(y-minY)*size,size,type));
 }
+let paintedBoard,paintedPiece,paintedStatus;
 function draw(){
+  const piece=JSON.stringify(game.piece);
+  if(paintedBoard===game.board&&paintedPiece===piece&&paintedStatus===game.status)return;
+  paintedBoard=game.board;paintedPiece=piece;paintedStatus=game.status;
   ctx.fillStyle="#213b35";ctx.fillRect(0,0,300,600);
   ctx.strokeStyle="#91bba012";ctx.lineWidth=1;
   for(let x=0;x<=300;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,600);ctx.stroke();}
