@@ -26,7 +26,7 @@ export class FishingAudio {
   try{const now=this.context.currentTime;this.master.gain.cancelScheduledValues(now);this.master.gain.setValueAtTime(this.master.gain.value,now);this.master.gain.linearRampToValueAtTime(this.enabled ? .42 : 0,now+.035);if(!this.enabled)for(const group of [...this.groups])this.stopGroup(group);}catch{}
  }
  play(kind){
-  if(!this.enabled||this.disposed||this.context?.state!=='running'||!['cast','reel','catch','escape'].includes(kind))return false;
+  if(!this.enabled||this.disposed||this.context?.state!=='running'||!['cast','bite','reel','catch','escape'].includes(kind))return false;
   try{
    const now=this.context.currentTime;if(now-(this.lastPlay.get(kind)??-10)<.07)return false;this.lastPlay.set(kind,now);
    while(this.groups.length>=4)this.stopGroup(this.groups[0]);
@@ -40,6 +40,13 @@ export class FishingAudio {
     this.noiseNote(group,at+.28,.13,.19,2300,650,'lowpass',1.15);
     this.tone(group,at+.29,.14,470,110,.15,'sine');
     this.tone(group,at+.32,.1,720,240,.045,'sine');
+   }else if(kind==='bite'){
+    // A compact two-note float bell, clearly separate from the longer reward chime.
+    this.noiseNote(group,at,.07,.055,2200,800,'bandpass',1.15);
+    this.tone(group,at+.012,.15,1397,1397,.15,'sine');
+    this.tone(group,at+.013,.1,2794,2794,.022,'sine');
+    this.tone(group,at+.105,.21,1760,1760,.13,'sine');
+    this.tone(group,at+.106,.12,3520,3520,.018,'sine');
    }else if(kind==='reel'||kind==='catch'){
     // A short, soft ratchet, not a continuous motor or a struggle sound.
     for(let i=0;i<5;i++){this.noiseNote(group,at+i*.037,.024,.06,1800+i*110,1300,'bandpass',1);this.tone(group,at+i*.037,.022,540+i*34,420,.025,'triangle');}

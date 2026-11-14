@@ -1,4 +1,4 @@
-import {FISH} from './model.mjs?v=1';
+import {FISH} from './model.mjs?v=4';
 import {drawFish} from './fish-art.mjs?v=1';
 // A small illustrated fishing diorama. Static scenery is painted once per map.
 const W=1000,H=600;
@@ -32,9 +32,6 @@ function anglerSprite(girl){
  oval(c,-13,172,1.3,1.3,'#dcc17f');oval(c,14,172,1.3,1.3,'#dcc17f');line(c,[[-13,181],[-9,158]],'#f5edcd88',.8);line(c,[[11,182],[10,160]],'#f5edcd88',.8);
  round(c,-16,183,32,4,1,girl?'#537e77':'#b2935f');round(c,-1,182,7,6,1,'#e0bd74');round(c,1,183,3,3,1,'#816d47');
  round(c,-5,146,14,14,5,'#e8b79b');path(c,'M-10 155 L0 152 L9 157 L1 165Z',girl?'#719c93':'#d5a55d');path(c,'M0 160 L7 162 L10 177 L2 174Z',girl?'#8eb8a9':'#e0b86d');
- // Forearms and fingers wrap naturally around the separate animated rod handle.
- path(c,'M13 159 Q21 157 26 171 L35 167 L39 171 Q33 183 22 178 L15 171Z',gradient(c,'#ffddbd','#dfad8d',158,182),'#a17e66',.8);
- path(c,'M12 156 Q20 156 25 166 L20 171 L11 166Z',girl?'#f1c3a1':'#d5e3ca','#709280',.7);path(c,'M29 168 Q35 161 39 166 L42 171 Q38 177 33 175Z','#f4c9a6','#ac8268',.7);line(c,[[35,166],[38,171]],'#cb9b7c',.7);line(c,[[32,168],[35,173]],'#cb9b7c',.7);
  // Shaped cheeks, chin, two reflective eyes, small nose and a warm expression.
  path(c,'M-21 126 Q-20 108 0 108 Q22 107 25 128 Q26 148 9 157 Q-2 161-17 148 Q-24 140-21 126Z',gradient(c,'#ffe7ca','#efbd9e',111,158),'#bd9679',.7);
  oval(c,-21,136,4,7,'#edb89b');oval(c,-22,136,1.5,3.2,'#d69d84');oval(c,21,137,3,6,'#f2c4a4');
@@ -49,8 +46,27 @@ function anglerSprite(girl){
  else{path(c,'M-24 111 L-20 94 Q-13 87 3 90 L18 95 L23 112Z',gradient(c,'#eedca6','#c3a466',90,115),'#a38e5d',.8);oval(c,0,114,35,5.3,'#d7bd7c');path(c,'M-23 108 Q0 113 22 109',null,'#4f7a65',5);path(c,'M-18 96 Q-3 92 13 98 M-19 101 Q-3 98 17 103',null,'#fff4ca88',.8);path(c,'M17 107 Q23 101 28 106 L30 103 L30 111 L27 108 Q23 112 17 107Z','#e8c775');oval(c,20,106,1,1,'#54765d');}
  return image;
 }
+// Only this small cached layer rotates. The face, clothing and planted feet stay crisp.
+function armSprite(girl){
+ const image=document.createElement('canvas');image.width=76;image.height=64;const c=image.getContext('2d');c.scale(2,2);c.translate(-8,-152);
+ path(c,'M13 159 Q21 157 26 171 L35 167 L39 171 Q33 183 22 178 L15 171Z',gradient(c,'#ffddbd','#dfad8d',158,182),'#a17e66',.8);
+ path(c,'M12 156 Q20 156 25 166 L20 171 L11 166Z',girl?'#f1c3a1':'#d5e3ca','#709280',.7);
+ path(c,'M29 168 Q35 161 39 166 L42 171 Q38 177 33 175Z','#f4c9a6','#ac8268',.7);line(c,[[35,166],[38,171]],'#cb9b7c',.7);line(c,[[32,168],[35,173]],'#cb9b7c',.7);
+ return image;
+}
+const mix=(a,b,t)=>a+(b-a)*t;
+const clamp=n=>Math.max(0,Math.min(1,n));
+const ease=n=>{n=clamp(n);return n*n*(3-2*n);};
+const MOTION_MS={cast:650,reel:600,catch:1100,escape:700};
+function splash(c,x,progress,strength=1){
+ if(progress<0||progress>1)return;
+ const fade=1-progress;c.save();c.globalAlpha=fade*.8;c.strokeStyle='#effff0';c.lineWidth=1.5;
+ // Three rings and four droplets, derived from time rather than particle objects.
+ for(let i=0;i<3;i++){const size=5+progress*24*strength+i*5;c.beginPath();c.ellipse(x,215,size,size*.19,0,0,Math.PI*2);c.stroke();}
+ for(let i=0;i<4;i++){const dx=(i-1.5)*8*progress*strength,dy=Math.sin(progress*Math.PI)*(9+(i%2)*7)*strength;oval(c,x+dx,212-dy,1.4,2.2,'#eeffef');}c.restore();
+}
 export class FishingScene{
- constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.background=document.createElement('canvas');this.time=0;this.map='';this.anglers=[anglerSprite(false),anglerSprite(true)];this.schools=[];this.resize();}
+ constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.background=document.createElement('canvas');this.time=0;this.map='';this.anglers=[anglerSprite(false),anglerSprite(true)];this.arms=[armSprite(false),armSprite(true)];this.schools=[];this.resize();}
  resize(){const w=this.canvas.clientWidth,h=this.canvas.clientHeight;this.dpr=Math.min(window.devicePixelRatio||1,1.5);this.width=Math.max(1,Math.round(w*this.dpr));this.height=Math.max(1,Math.round(h*this.dpr));if(this.canvas.width!==this.width||this.canvas.height!==this.height){this.canvas.width=this.width;this.canvas.height=this.height;}this.map='';}
  build(map){this.map=map;this.schools=Array.from({length:16},(_,i)=>{const depth=i%4,fish=FISH.filter(f=>f.map===map&&f.depth===depth)[Math.floor(i/4)%2];return {id:fish.id,depth,dir:i%2?1:-1,speed:6+i%4*2,size:(fish.shape==='long'?88:66)+(i%3)*7};});const t=THEMES[map]||THEMES.lake,b=this.background;b.width=Math.round(W*this.dpr);b.height=Math.round(H*this.dpr);const c=b.getContext('2d');c.scale(this.dpr,this.dpr);c.fillStyle=t.sky;c.fillRect(0,0,W,H);
   oval(c,742,69,35,35,t.sun);oval(c,742,69,51,51,t.sun+'45');
@@ -83,21 +99,70 @@ export class FishingScene{
   for(let i=0;i<9;i++){const x=233+i*71+Math.sin(now*.8+i)*6,y=570-((now*11+i*43)%320);c.beginPath();c.arc(x,y,1.5+i%3,0,Math.PI*2);c.strokeStyle='#e3fff32a';c.lineWidth=1;c.stroke();}
   for(let i=0;i<8;i++){const x=220+i*76,y=205+Math.sin(now*.6+i)*3;line(c,[[x,y],[x+28+Math.sin(now+i)*8,y]],'#f3ffe759',1.5);}
   const players=Array.isArray(view.players)?view.players:[];
-  for(const player of players.slice(0,2))this.player(c,player,!!view.duel);
+  const wallNow=Number.isFinite(view.now)?view.now:Date.now();
+  for(const player of players.slice(0,2))this.player(c,player,!!view.duel,wallNow);
   if(!players.some(p=>p.side===1)){c.font='12px system-ui, sans-serif';c.textAlign='center';c.fillStyle='#315e59';c.fillText('留一个位置，等朋友来',871,160);c.strokeStyle='#5c817180';c.lineWidth=1.4;c.setLineDash([4,4]);c.beginPath();c.roundRect(847,171,45,27,6);c.stroke();c.setLineDash([]);}
   if(view.duel){const pulse=.5+Math.sin(now*7)*.5;c.strokeStyle=`rgba(255,231,155,${.2+pulse*.3})`;c.lineWidth=3;c.beginPath();c.ellipse(500,247,50+pulse*8,10+pulse*2,0,0,Math.PI*2);c.stroke();}
  }
- player(c,p,duel){const right=p.side===1,x=right?863:137,d=right?-1:1,phase=p.phase||'idle',active=['waiting','bite','duel'].includes(phase),bite=phase==='bite'||phase==='duel',depth=Math.max(0,Math.min(3,Number(p.depth)||0)),hookX=duel?500:x+d*(163+depth*28),hookY=260+depth*91,now=this.time;
-  const aspect=(this.height/H)/(this.width/W),tipX=x+d*97*aspect,tipY=136+(bite?Math.sin(now*10)*3:0);
-  if(active){c.strokeStyle='#f5f2ccad';c.lineWidth=1.15;c.beginPath();c.moveTo(tipX,tipY);c.quadraticCurveTo((tipX+hookX)/2,158,hookX,216);c.lineTo(hookX,hookY);c.stroke();const bob=bite?Math.sin(now*12)*3:Math.sin(now*2)*1.5;c.beginPath();c.ellipse(hookX,215+bob,13+(bite?5:0),3,0,0,Math.PI*2);c.strokeStyle=bite?'#ffedb7':'#eaffeb8a';c.stroke();oval(c,hookX,211+bob,3.2,6,'#f8e9ba');round(c,hookX-2.6,206+bob,5.2,6,2,'#dd775c');c.beginPath();c.arc(hookX+2,hookY,4,0,Math.PI*1.45);c.strokeStyle='#f3e4a0';c.lineWidth=1.8;c.stroke();if(bite){oval(c,hookX-13,hookY,19,7,'#eddea561');c.font='bold 21px system-ui';c.fillStyle='#ffedaa';c.textAlign='center';c.fillText('!',hookX,193+Math.sin(now*8)*2);}}
+ player(c,p,duel,wallNow){
+  const right=p.side===1,x=right?863:137,d=right?-1:1,phase=p.phase||'idle',active=['waiting','bite','duel'].includes(phase),bite=phase==='bite'||phase==='duel',now=this.time,aspect=(this.height/H)/(this.width/W);
+  const motion=p.motion,duration=motion&&Math.max(1,Number(motion.duration)||MOTION_MS[motion.kind]||1),elapsed=motion?wallNow-Number(motion.startedAt):Infinity;
+  const kind=motion&&MOTION_MS[motion.kind]&&elapsed>=0&&elapsed<duration?motion.kind:'',progress=kind?clamp(elapsed/duration):0;
+  const depth=Math.max(0,Math.min(3,Number(kind?motion.depth:p.depth)||0)),hookX=duel||(kind&&motion.shared===true)?500:x+d*(163+depth*28),hookY=260+depth*91;
+  // Rotate the painted shoulder/forearm independently; boots never slide around the pier.
+  let armAngle=Math.sin(now*1.4+(right?1:0))*.022,rodAngle=bite?Math.sin(now*10)*.055:Math.sin(now*1.1)*.012;
+  if(kind==='cast'){
+   const wind=ease(progress/.28),release=ease((progress-.28)/.38),settle=ease((progress-.66)/.34);
+   armAngle=-.58*wind+.79*release-.21*settle;rodAngle=-1.13*wind+1.43*release-.3*settle;
+  }else if(kind){
+   const lift=ease(progress/.4),settle=ease((progress-.68)/.32);
+   armAngle=-.43*lift+.35*settle+Math.sin(progress*Math.PI*12)*.025;
+   rodAngle=-.72*lift+.53*settle;
+  }else if(phase==='idle'){
+   armAngle+=.08+Math.sin(now*.65)*.018;rodAngle-=.12;
+  }
+  const ac=Math.cos(armAngle),as=Math.sin(armAngle),handLX=13+22*ac-10*as,handY=159+22*as+10*ac;
+  const handX=x+d*handLX*aspect,rodA=-.49+rodAngle,tipX=handX+d*Math.cos(rodA)*70*aspect,tipY=handY+Math.sin(rodA)*70;
+  let liftX=hookX,liftY=hookY,liftFish='',liftAlpha=1,showFloat=false,floatX=hookX,floatY=211;
+  if(kind==='cast'){
+   const travel=ease((progress-.28)/.62);floatX=mix(x+d*28*aspect,hookX,travel);floatY=mix(105,211,travel)-Math.sin(travel*Math.PI)*55;showFloat=progress>.24;
+   if(showFloat){c.beginPath();c.moveTo(tipX,tipY);c.quadraticCurveTo((tipX+floatX)/2,Math.min(tipY,floatY)-12,floatX,floatY);c.strokeStyle='#faf4d3bb';c.lineWidth=1.15;c.stroke();}
+   splash(c,hookX,(progress-.89)/.22,.65);
+  }else if(kind){
+   // The caught species starts at the selected depth, breaks the surface, then arcs to the hand.
+   const rise=ease(progress/.42),air=ease((progress-.42)/.58),targetX=x+d*72*aspect;
+   liftX=mix(hookX,targetX,air);liftY=progress<.42?mix(hookY,215,rise):mix(215,183,air)-Math.sin(air*Math.PI)*58;
+   if(kind==='escape'){
+    const slip=ease((progress-.24)/.76);liftX=hookX+d*slip*80;liftY=mix(hookY,hookY+35,slip)-Math.sin(progress*Math.PI)*30;liftAlpha=1-slip;liftFish=motion.fishId||'';
+   }else if(kind==='catch')liftFish=motion.fishId||'';
+   const lineX=kind==='escape'?mix(hookX,handX,ease(progress)):liftX,lineY=kind==='escape'?mix(hookY,handY+20,ease(progress)):liftY;
+   c.beginPath();c.moveTo(tipX,tipY);c.quadraticCurveTo((tipX+lineX)/2,Math.min(tipY,lineY)-8,lineX,lineY);c.strokeStyle='#faf4d3cc';c.lineWidth=1.25;c.stroke();
+   if(kind!=='escape'){showFloat=true;floatX=liftX;floatY=progress<.42?211:liftY-12;splash(c,hookX,(progress-.4)/.36,kind==='catch'?1.15:.65);}
+  }else if(active){
+   c.strokeStyle='#f5f2ccad';c.lineWidth=1.15;c.beginPath();c.moveTo(tipX,tipY);c.quadraticCurveTo((tipX+hookX)/2,158,hookX,216);c.lineTo(hookX,hookY);c.stroke();
+   const bob=bite?Math.sin(now*12)*3:Math.sin(now*2)*1.5;floatY=211+bob;showFloat=true;
+   c.beginPath();c.ellipse(hookX,215+bob,13+(bite?5:0),3,0,0,Math.PI*2);c.strokeStyle=bite?'#ffedb7':'#eaffeb8a';c.stroke();
+   c.beginPath();c.arc(hookX+2,hookY,4,0,Math.PI*1.45);c.strokeStyle='#f3e4a0';c.lineWidth=1.8;c.stroke();
+   if(bite){oval(c,hookX-13,hookY,19,7,'#eddea561');c.font='bold 21px system-ui';c.fillStyle='#ffedaa';c.textAlign='center';c.fillText('!',hookX,193+Math.sin(now*8)*2);}
+  }
+  if(showFloat){oval(c,floatX,floatY,3.2,6,'#f8e9ba');round(c,floatX-2.6,floatY-5,5.2,6,2,'#dd775c');}
   c.save();c.translate(x,0);c.scale(d*aspect,1);c.drawImage(this.anglers[right?1:0],-58,70,135,150);
-  c.restore();line(c,[[x+d*35*aspect,169],[x+d*55*aspect,152],[tipX,tipY]],'#6f5c40',3);line(c,[[x+d*35*aspect,169],[x+d*46*aspect,160]],'#c4aa6b',4);
-  if(p.fishId){const fishX=x+d*72*aspect;line(c,[[x+d*38*aspect,170],[fishX,175]],'#a8bfa1',1);c.save();c.translate(fishX,183);c.scale(aspect,1);c.rotate(-.16*d);drawFish(c,p.fishId,0,0,64,d);c.restore();}
+  c.translate(13,159);c.rotate(armAngle);c.drawImage(this.arms[right?1:0],-5,-7,38,32);c.restore();
+  // A small reel and its moving crank reinforce the retrieve without expensive pose sheets.
+  line(c,[[handX,handY],[mix(handX,tipX,.35),mix(handY,tipY,.35)-2],[tipX,tipY]],'#6f5c40',3);
+  line(c,[[handX,handY],[mix(handX,tipX,.18),mix(handY,tipY,.18)]],'#c4aa6b',4);
+  const reelX=handX+d*7*aspect,reelY=handY+5,crank=kind&&kind!=='cast'?progress*Math.PI*12:now*.35;
+  oval(c,reelX,reelY,3.8*aspect,3.8,'#526c61');line(c,[[reelX,reelY],[reelX+Math.cos(crank)*5*aspect,reelY+Math.sin(crank)*5]],'#d5ba80',1.5);
+  if(liftFish){
+   c.save();c.globalAlpha=liftAlpha*(liftY>216?.78:1);c.translate(liftX,liftY);c.scale(aspect,1);c.rotate(-d*(.15+Math.sin(progress*Math.PI*13)*.13));drawFish(c,liftFish,0,0,64,d);c.restore();
+  }else if(!kind&&p.fishId){
+   const fishX=x+d*72*aspect,fishY=183+Math.sin(now*2)*1.2;line(c,[[handX,handY],[fishX,fishY-8]],'#a8bfa1',1);c.save();c.translate(fishX,fishY);c.scale(aspect,1);c.rotate(-.16*d);drawFish(c,p.fishId,0,0,64,d);c.restore();
+  }
   // Put readable labels beside the angler, clear of the in-scene toolbar and face.
   c.textAlign='center';const name=String(p.name||'钓鱼人').slice(0,16),label=String(p.catchText||name).slice(0,40),font=Math.min(27,Math.max(11,10*H/(this.height/this.dpr))),height=font*1.45;
   c.font=`600 ${font}px system-ui, sans-serif`;const width=Math.min(330,c.measureText(label).width+20),center=Math.max(width/2+10,Math.min(W-width/2-10,x+d*110*aspect));
   round(c,center-width/2,96-height/2,width,height,8,p.catchText?'#fff2c8':'#f8f1dce8');c.fillStyle=p.catchText?'#7a6037':'#355d53';c.fillText(label,center,96+font*.32,width-18);
 
  }
- dispose(){this.ctx=null;this.background.width=this.background.height=1;for(const image of this.anglers)image.width=image.height=1;this.anglers=[];}
+ dispose(){this.ctx=null;this.background.width=this.background.height=1;for(const image of [...this.anglers,...this.arms])image.width=image.height=1;this.anglers=[];this.arms=[];}
 }
