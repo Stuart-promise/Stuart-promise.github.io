@@ -124,6 +124,7 @@ export class FishingScene{
   const ac=Math.cos(armAngle),as=Math.sin(armAngle),handLX=13+22*ac-10*as,handY=159+22*as+10*ac;
   const handX=x+d*handLX*aspect,rodA=-.49+rodAngle,tipX=handX+d*Math.cos(rodA)*70*aspect,tipY=handY+Math.sin(rodA)*70;
   let liftX=hookX,liftY=hookY,liftFish='',liftAlpha=1,showFloat=false,floatX=hookX,floatY=211;
+  const liftTurn=-d*(.15+Math.sin(progress*Math.PI*13)*.13);
   if(kind==='cast'){
    const travel=ease((progress-.28)/.62);floatX=mix(x+d*28*aspect,hookX,travel);floatY=mix(105,211,travel)-Math.sin(travel*Math.PI)*55;showFloat=progress>.24;
    if(showFloat){c.beginPath();c.moveTo(tipX,tipY);c.quadraticCurveTo((tipX+floatX)/2,Math.min(tipY,floatY)-12,floatX,floatY);c.strokeStyle='#faf4d3bb';c.lineWidth=1.15;c.stroke();}
@@ -135,9 +136,12 @@ export class FishingScene{
    if(kind==='escape'){
     const slip=ease((progress-.24)/.76);liftX=hookX+d*slip*80;liftY=mix(hookY,hookY+35,slip)-Math.sin(progress*Math.PI)*30;liftAlpha=1-slip;liftFish=motion.fishId||'';
    }else if(kind==='catch')liftFish=motion.fishId||'';
-   const lineX=kind==='escape'?mix(hookX,handX,ease(progress)):liftX,lineY=kind==='escape'?mix(hookY,handY+20,ease(progress)):liftY;
-   c.beginPath();c.moveTo(tipX,tipY);c.quadraticCurveTo((tipX+lineX)/2,Math.min(tipY,lineY)-8,lineX,lineY);c.strokeStyle='#faf4d3cc';c.lineWidth=1.25;c.stroke();
-   if(kind!=='escape'){showFloat=true;floatX=liftX;floatY=progress<.42?211:liftY-12;splash(c,hookX,(progress-.4)/.36,kind==='catch'?1.15:.65);}
+   const lineX=kind==='escape'?mix(hookX,handX,ease(progress)):liftX+(liftFish?d*Math.cos(liftTurn)*24*aspect:0),lineY=kind==='escape'?mix(hookY,handY+20,ease(progress)):liftY+(liftFish?d*Math.sin(liftTurn)*24:0);
+   c.beginPath();c.moveTo(tipX,tipY);
+   if(kind!=='escape'&&progress<.42){c.quadraticCurveTo((tipX+hookX)/2,158,hookX,211);c.lineTo(lineX,lineY);}
+   else c.quadraticCurveTo((tipX+lineX)/2,Math.min(tipY,lineY)-8,lineX,lineY);
+   c.strokeStyle='#faf4d3cc';c.lineWidth=1.25;c.stroke();
+   if(kind!=='escape'){showFloat=true;if(progress<.42){floatX=hookX;floatY=211;}else{floatX=mix(tipX,lineX,.88);floatY=.0144*tipY+.2112*(Math.min(tipY,lineY)-8)+.7744*lineY;}splash(c,hookX,(progress-.4)/.36,kind==='catch'?1.15:.65);}
   }else if(active){
    c.strokeStyle='#f5f2ccad';c.lineWidth=1.15;c.beginPath();c.moveTo(tipX,tipY);c.quadraticCurveTo((tipX+hookX)/2,158,hookX,216);c.lineTo(hookX,hookY);c.stroke();
    const bob=bite?Math.sin(now*12)*3:Math.sin(now*2)*1.5;floatY=211+bob;showFloat=true;
@@ -154,7 +158,7 @@ export class FishingScene{
   const reelX=handX+d*7*aspect,reelY=handY+5,crank=kind&&kind!=='cast'?progress*Math.PI*12:now*.35;
   oval(c,reelX,reelY,3.8*aspect,3.8,'#526c61');line(c,[[reelX,reelY],[reelX+Math.cos(crank)*5*aspect,reelY+Math.sin(crank)*5]],'#d5ba80',1.5);
   if(liftFish){
-   c.save();c.globalAlpha=liftAlpha*(liftY>216?.78:1);c.translate(liftX,liftY);c.scale(aspect,1);c.rotate(-d*(.15+Math.sin(progress*Math.PI*13)*.13));drawFish(c,liftFish,0,0,64,d);c.restore();
+   c.save();c.globalAlpha=liftAlpha*(liftY>216?.78:1);c.translate(liftX,liftY);c.scale(aspect,1);c.rotate(liftTurn);drawFish(c,liftFish,0,0,64,d);c.restore();
   }else if(!kind&&p.fishId){
    const fishX=x+d*72*aspect,fishY=183+Math.sin(now*2)*1.2;line(c,[[handX,handY],[fishX,fishY-8]],'#a8bfa1',1);c.save();c.translate(fishX,fishY);c.scale(aspect,1);c.rotate(-.16*d);drawFish(c,p.fishId,0,0,64,d);c.restore();
   }

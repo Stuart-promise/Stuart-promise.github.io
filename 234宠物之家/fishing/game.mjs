@@ -1,5 +1,5 @@
 import {MAPS,FISH,RODS,LINES,BAITS,MAX_INVENTORY,restore,serialize,gear,unlocked,canDepth,buy,equip,baitCount,consumeBait,rollCatch,waitSeconds,land,sell} from './model.mjs?v=4';
-import {FishingScene} from './scene.mjs?v=4';
+import {FishingScene} from './scene.mjs?v=5';
 import {fishSVG} from './fish-art.mjs?v=1';
 import {FishingAudio} from './audio.mjs?v=4';
 const $=q=>document.querySelector(q),A=window.PetAccount,KEY='pet234-fishing-v1',modal=$('#modal'),fmt=n=>Number(n).toLocaleString('zh-CN'),esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
