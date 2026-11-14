@@ -1,0 +1,42 @@
+[
+  {
+    "id": "xiyou",
+    "number": 23962,
+    "sha256": "bd18088ccb70d3164e3a4bc9805a6ea72095d6cc3891e4f172ed0a3d281292bb",
+    "chapters": 100,
+    "characters": 714757,
+    "sourceBytes": 2263209,
+    "first": "第一回 靈根育孕源流出 心性修持大道生",
+    "last": "第一〇〇回 徑回東土 五聖成真"
+  },
+  {
+    "id": "sanguo",
+    "number": 23950,
+    "sha256": "ed422e10c16c19af7ca7b09ca0320012e60776b3d7cb054769b8f7d9a19aea7d",
+    "chapters": 120,
+    "characters": 590991,
+    "sourceBytes": 1863656,
+    "first": "第一回：宴桃園豪傑三結義，斬黃巾英雄首立功",
+    "last": "第一二○回：薦杜預老將獻新謀，降孫皓三分歸一統"
+  },
+  {
+    "id": "fengshen",
+    "number": 23910,
+    "sha256": "390430ad7210e038614a50fe6e435be1ebb378f86017e0ab9a29558564b064fc",
+    "chapters": 100,
+    "characters": 587897,
+    "sourceBytes": 1820341,
+    "first": "第一回 紂王女媧宮進香",
+    "last": "第一○○回 武王封列國諸侯"
+  },
+  {
+    "id": "liaozhai",
+    "number": 51828,
+    "sha256": "a904f03f4b4375a086fbea4708ea0019d1f7fd59408360ffad784c8a57537fa3",
+    "chapters": 496,
+    "characters": 476618,
+    "sourceBytes": 1473790,
+    "first": "卷一 · 考城隍",
+    "last": "卷十二 · 愛才"
+  }
+]
