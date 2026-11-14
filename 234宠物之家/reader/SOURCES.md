@@ -61,3 +61,20 @@ python scripts/build-books.py --cache <原始文件目录>
 用户明确要求接入配套服务后，增加独立只读来源适配服务。当前启用[17K小说网](https://www.17k.com/)和[SF轻小说](https://book.sfacg.com/)，以官方搜索、目录与公开文字章节为来源，按需展示于本站阅读器。使用自行编写的httpx/HTMLParser适配代码，不执行GitHub集合中的第三方JavaScript，不部署通用下载器，也不将现代小说全本打包进GitHub仓库。
 
 目录归属和VIP标记在服务端核对；登录/付费或验证受限内容明确返回相应状态。来源代码或官方网页公开可访问均不被表述成作品可任意再分发的授权。内容来源在阅读目录内标注，源站变化可能暂时影响搜索或章节读取。
+
+
+## 1.2社区书源
+
+2026-11-14，当前默认搜索使用以下3个第三方社区书源，搜索、目录、正文及书架操作均在本站完成。引用的GitHub JSON只用来发现站点及核对网页结构；程序为自行编写的固定适配器，不运行第三方规则脚本。
+
+| 书源 | GitHub出处 | 已验证内容 |
+| --- | --- | --- |
+| 开心文学网 | [tickmao/Novel固定版本](https://github.com/tickmao/Novel/blob/8cadbeedcdc64007101a0efecec169f529db24b4/sources/legado/full.json)中“开心文学网”；原kxwx.org普通跳转至kxdu.net | 《诡秘之主》搜索、1726章有序目录、单章正文；作者搜索与下一页 |
+| 错层小说 | [tickmao/Novel同一版本](https://github.com/tickmao/Novel/blob/8cadbeedcdc64007101a0efecec169f529db24b4/sources/legado/full.json)中cuoceng.org | 《诡秘之主》搜索、3页合并1417章目录、UUID章节正文 |
+| 笔趣阁7 | [luanmuc/legado-book-sources固定版本](https://github.com/luanmuc/legado-book-sources/blob/8510e6d1f184523d4f774ff596a9aadaa04bc673/books.json)中“笔趣阁151”；biquge7.top普通跳转至biquge7.xyz | 《诡秘之主》《凡人修仙传》搜索、完整目录、单章正文；作者搜索及分页 |
+
+合集内容与具体站点可用性分别核验，不把合集条数当成可用书源数。XIU2/Yuedu、aoaostar/legado与speauty/legado.sources也作为发现线索检查，但本次未从中启用未通过完整流程的来源。没有执行合集中的JavaScript、处理验证码或使用解密接口。
+
+网文不作为全本静态文件打包进仓库，服务只按需读取当前搜索、目录和章节，内容来源在阅读目录显示。第三方来源的可访问性不等于作品再分发授权；源站变更可能影响可用性。
+
+原17K/SF及起点、纵横、晋江适配代码保留用于已存书架的阅读兼容，不参与当前默认检索和来源下拉框。古典书库的原文许可和校验记录见本文前半部分。
