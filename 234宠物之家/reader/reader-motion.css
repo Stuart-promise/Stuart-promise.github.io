@@ -1,0 +1,57 @@
+.reader-motion-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  contain: layout paint style;
+  perspective-origin: 50% 50%;
+}
+.reader-motion-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--sheet);
+}
+.reader-motion-copy {
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+.reader-motion-under { z-index: 0; }
+.reader-motion-leaf {
+  z-index: 1;
+  transform-origin: 0 50%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  box-shadow: 10px 0 18px -9px #0005, inset -1px 0 var(--line);
+}
+.reader-motion-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 35%, #00000010 68%, #ffffff20 92%, #0000004d 100%);
+  pointer-events: none;
+}
+.reader-motion-cover {
+  z-index: 1;
+  will-change: clip-path;
+}
+.reader-motion-cover-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  z-index: 2;
+  background: linear-gradient(to bottom, #00000020, transparent);
+  pointer-events: none;
+  will-change: transform;
+}
+.reader-motion-layer[data-reduced-motion] .reader-motion-face {
+  transform: none;
+  box-shadow: none;
+}

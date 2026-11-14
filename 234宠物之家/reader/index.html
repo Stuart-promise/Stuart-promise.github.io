@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f5f3e9">
   <title>小说阅读 · 234宠物之家</title>
-  <link rel="stylesheet" href="./style.css?v=2">
+  <link rel="stylesheet" href="./style.css?v=3">
   <link rel="stylesheet" href="./web-library.css?v=2">
+  <link rel="stylesheet" href="./reader-motion.css?v=1">
 </head>
 <body>
   <div id="app">
@@ -32,6 +33,7 @@
       <header class="reader-top"><button id="back-shelf" class="quiet">← 书架</button><div class="reading-name"><b id="book-title"></b><span id="book-author"></span></div><button id="toc-open" class="quiet">☷ 目录</button></header>
       <div class="reader-tools" aria-label="阅读设置">
         <div class="font-tools"><button id="font-down" aria-label="缩小字体">A−</button><output id="font-size" aria-live="polite">20</output><button id="font-up" aria-label="放大字体">A+</button></div>
+        <label class="mode-label"><span class="sr-only">翻页模式</span><select id="reading-mode" aria-label="翻页模式"><option value="page">左右仿真翻页</option><option value="scroll">上下滑动</option></select></label>
         <button id="theme-toggle" aria-pressed="false">☾ 夜间</button>
         <button id="auto-toggle" aria-pressed="false">▷ 自动翻页</button>
         <label class="interval-label"><span class="sr-only">自动翻页间隔</span><select id="auto-interval" aria-label="自动翻页间隔"><option value="5">每 5 秒</option><option value="10">每 10 秒</option><option value="20">每 20 秒</option><option value="30">每 30 秒</option><option value="60">每 60 秒</option></select></label>
@@ -44,6 +46,6 @@
     </section>
     <div id="toast" role="status" hidden></div>
   </div>
-  <script type="module" src="./reader.mjs?v=3"></script>
+  <script type="module" src="./reader.mjs?v=4"></script>
 </body>
 </html>

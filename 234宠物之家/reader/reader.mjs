@@ -1,14 +1,22 @@
+import {createPageMotion} from './reader-motion.mjs?v=1';
 import {initWebLibrary,webBookDetail,webChapter} from './web-library.mjs?v=3';
 const $=s=>document.querySelector(s);
 const STORE='pet234:reader:v1',INTERVALS=[5,10,20,30,60],COLORS=['#496451','#5b6876','#9a654c','#716075'];
-const state={books:[],book:null,chapter:0,text:'',pages:[],page:0,chapterIssue:'',busy:false,revision:0,auto:false,timer:0,cache:new Map(),storageOK:true};
-const defaults=()=>({version:1,font:20,night:false,interval:20,progress:{}});
+const state={books:[],book:null,chapter:0,text:'',pages:[],page:0,chapterIssue:'',busy:false,revision:0,auto:false,timer:0,cache:new Map(),storageOK:true,turning:false,scrollFrame:0,scrollOffset:0,autoDwell:false};
+const defaults=()=>({version:1,font:20,night:false,interval:20,mode:'page',progress:{}});
 let prefs=defaults(),toastTimer=0,resizeTimer=0,lastWidth=0,lastHeight=0,bookController=null,retryAction=null,tocPage=0;
-let webLibrary;
+let webLibrary,turnRevision=0,scrollSaveTimer=0,scrollUITimer=0,lastAutoTime=0,lastScrollSave=0,autoScrollPosition=0,lastAnchorCapture=0,gesture=null;
+const motion=createPageMotion({viewport:$('#page-viewport'),textElement:$('#page-text')});
+const scrollMode=()=>prefs.mode==='scroll';
+const scrollLimit=()=>Math.max(0,$('#page-viewport').scrollHeight-$('#page-viewport').clientHeight);
+const atScrollStart=()=>$('#page-viewport').scrollTop<=2;
+const atScrollEnd=()=>$('#page-viewport').scrollTop>=scrollLimit()-2;
+function cancelMotion(){turnRevision++;state.turning=false;motion.cancel();gesture=null;controls();}
+
 function integer(n,lo,hi,fallback=lo){return Number.isFinite(n)?Math.min(hi,Math.max(lo,Math.floor(n))):fallback;}
-function readPrefs(){try{const d=JSON.parse(localStorage.getItem(STORE));if(!d||d.version!==1)return;const p=defaults();p.font=integer(d.font,14,30,20);p.night=d.night===true;p.interval=INTERVALS.includes(d.interval)?d.interval:20;if(d.progress&&typeof d.progress==='object'){for(const [id,v] of Object.entries(d.progress).sort((a,b)=>(Number(b[1]?.updatedAt)||0)-(Number(a[1]?.updatedAt)||0)).slice(0,140)){if(/^[A-Za-z0-9:_-]{1,160}$/.test(id)&&v&&typeof v==='object')p.progress[id]={chapter:integer(v.chapter,0,30000),offset:integer(v.offset,0,2000000),updatedAt:integer(v.updatedAt,0,9e15)};}}prefs=p;}catch{state.storageOK=false;}}
+function readPrefs(){try{const d=JSON.parse(localStorage.getItem(STORE));if(!d||d.version!==1)return;const p=defaults();p.font=integer(d.font,14,30,20);p.night=d.night===true;p.interval=INTERVALS.includes(d.interval)?d.interval:20;p.mode=d.mode==='scroll'?'scroll':'page';if(d.progress&&typeof d.progress==='object'){for(const [id,v] of Object.entries(d.progress).sort((a,b)=>(Number(b[1]?.updatedAt)||0)-(Number(a[1]?.updatedAt)||0)).slice(0,140)){if(/^[A-Za-z0-9:_-]{1,160}$/.test(id)&&v&&typeof v==='object')p.progress[id]={chapter:integer(v.chapter,0,30000),offset:integer(v.offset,0,2000000),updatedAt:integer(v.updatedAt,0,9e15)};}}prefs=p;}catch{state.storageOK=false;}}
 function persist(){prefs.progress=Object.fromEntries(Object.entries(prefs.progress).sort((a,b)=>b[1].updatedAt-a[1].updatedAt).slice(0,140));try{localStorage.setItem(STORE,JSON.stringify(prefs));state.storageOK=true;}catch{state.storageOK=false;}}
-function remember(){if(state.book&&state.pages.length&&!state.busy){prefs.progress[state.book.id]={chapter:state.chapter,offset:state.pages[state.page].start,updatedAt:Date.now()};persist();}}
+function remember(){if(state.book&&state.text&&!state.busy){state.scrollOffset=currentOffset();prefs.progress[state.book.id]={chapter:state.chapter,offset:state.scrollOffset,updatedAt:Date.now()};persist();}}
 function toast(text){clearTimeout(toastTimer);$('#toast').textContent=text;$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,3500);}
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
 function safeURL(value){try{const u=new URL(value);return u.protocol==='https:'?u.href:'';}catch{return '';}}
@@ -16,38 +24,130 @@ function validateManifest(data){if(!Array.isArray(data)||!data.length||data.leng
 async function fetchJSON(path){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);try{const r=await fetch(path,{signal:controller.signal,cache:'no-cache'});if(!r.ok)throw Error('内容暂时无法加载，请检查网络后重试。');return await r.json();}catch(e){if(e.name==='AbortError')throw Error('加载超时，请检查网络后重试。');throw e;}finally{clearTimeout(timer);}}
 async function loadLibrary(){const status=$('#shelf-status');status.hidden=false;status.textContent='正在整理书架…';try{state.books=validateManifest(await fetchJSON('./books/manifest.json'));renderShelf();status.hidden=true;}catch{status.textContent='书架暂时无法加载，请检查网络后重试。';const b=el('button','','重新加载');b.onclick=loadLibrary;status.append(b);}}
 function renderShelf(){const grid=$('#books');grid.replaceChildren();state.books.forEach((book,i)=>{const card=el('article','book-card'),cover=el('div','book-cover');cover.setAttribute('aria-hidden','true');cover.style.setProperty('--cover',COLORS[i%COLORS.length]);cover.append(el('span','cover-number',String(i+1).padStart(2,'0')+' / FICTION'),el('span','cover-title',book.title),el('span','cover-author',book.author));const info=el('div','book-info');info.append(el('h3','',book.title),el('span','book-byline',book.author+' · '+book.chapters.length+' 章'),el('p','',book.description));const saved=prefs.progress[book.id],progress=el('span','book-progress',saved?`上次读到 · ${book.chapters[integer(saved.chapter,0,book.chapters.length-1)].title}`:book.genre+' · 随时开始');info.append(progress);const open=el('button','book-open');open.dataset.book=book.id;open.append(el('span','',saved?'继续阅读':'翻开这本书'),el('span','','↗'));open.onclick=()=>openBook(book);info.append(open);const source=el('a','book-source','原文来源 ↗');source.href=book.source.url;source.target='_blank';source.rel='noopener noreferrer';info.append(source);card.append(cover,info);grid.append(card);});}
-function applySettings(){document.body.classList.toggle('night',prefs.night);document.documentElement.style.setProperty('--font-size',prefs.font+'px');$('#font-size').value=prefs.font;$('#font-size').textContent=prefs.font;$('#font-down').disabled=prefs.font<=14;$('#font-up').disabled=prefs.font>=30;$('#theme-toggle').setAttribute('aria-pressed',String(prefs.night));$('#theme-toggle').textContent=prefs.night?'☀ 日间':'☾ 夜间';$('#auto-interval').value=String(prefs.interval);}
+function applySettings(){
+ document.body.classList.toggle('night',prefs.night);document.documentElement.style.setProperty('--font-size',prefs.font+'px');$('#font-size').value=prefs.font;$('#font-size').textContent=prefs.font;$('#font-down').disabled=prefs.font<=14;$('#font-up').disabled=prefs.font>=30;$('#theme-toggle').setAttribute('aria-pressed',String(prefs.night));$('#theme-toggle').textContent=prefs.night?'☀ 日间':'☾ 夜间';
+ $('#reading').dataset.mode=prefs.mode;$('#reading-mode').value=prefs.mode;$('#page-position').setAttribute('aria-live',scrollMode()?'off':'polite');
+ const interval=$('#auto-interval');interval.value=String(prefs.interval);interval.setAttribute('aria-label',scrollMode()?'自动滚动速度':'自动翻页间隔');for(const option of interval.options)option.textContent=scrollMode()?`${option.value}秒 / 屏`:`每 ${option.value} 秒`;
+}
 function message(text,retry=false){$('#reader-message-text').textContent=text;$('#reader-message').hidden=false;$('#retry').hidden=!retry;}
-function currentOffset(){return state.pages[state.page]?.start||0;}
+function currentOffset(){
+ if(!scrollMode())return state.pages[state.page]?.start||0;
+ const viewport=$('#page-viewport');if(viewport.clientWidth!==lastWidth||viewport.clientHeight!==lastHeight)return state.scrollOffset;
+ const node=$('#page-text').firstChild;if(!node||node.nodeType!==Node.TEXT_NODE||!state.text)return 0;
+ const range=document.createRange(),top=$('#page-viewport').getBoundingClientRect().top+1;
+ let lo=0,hi=node.length;while(lo<hi){const mid=(lo+hi)>>1;range.setStart(node,mid);range.setEnd(node,Math.min(mid+1,node.length));if(range.getBoundingClientRect().bottom<=top)lo=mid+1;else hi=mid;}
+ return Math.min(lo,Math.max(0,node.length-1));
+}
 function shelfButton(){const b=$('#reader-add-shelf');b.hidden=!state.book?.web;b.disabled=!state.book?.web||webLibrary?.contains(state.book);b.textContent=b.disabled?'已在书架':'＋ 书架';}
-function controls(){shelfButton();const issue=!!state.chapterIssue,first=state.chapter===0&&(state.page===0||issue),last=state.book&&state.chapter===state.book.chapters.length-1&&(issue||state.page===state.pages.length-1);$('#previous-page').disabled=state.busy||(!state.pages.length&&!issue)||first;$('#next-page').disabled=state.busy||(!state.pages.length&&!issue)||last;$('#previous-page').textContent=issue?'← 上一章':'← 上一页';$('#next-page').textContent=issue?'下一章 →':'下一页 →';$('#auto-toggle').disabled=state.busy||!state.pages.length||last;$('#auto-toggle').setAttribute('aria-pressed',String(state.auto));$('#auto-toggle').textContent=state.auto?'Ⅱ 暂停翻页':'▷ 自动翻页';$('#reader-status').textContent=state.auto?`自动翻页 · 每 ${prefs.interval} 秒`:(state.storageOK?'阅读位置自动保存在本机':'无法保存到本机，当前仍可继续阅读');}
+function controls(){
+ shelfButton();const issue=!!state.chapterIssue,scroll=scrollMode(),first=state.chapter===0&&(issue||(scroll?atScrollStart():state.page===0)),last=state.book&&state.chapter===state.book.chapters.length-1&&(issue||(scroll?atScrollEnd():state.page===state.pages.length-1));
+ const disabled=state.busy||state.turning;$('#previous-page').disabled=disabled||(!state.pages.length&&!issue)||first;$('#next-page').disabled=disabled||(!state.pages.length&&!issue)||last;
+ $('#previous-page').textContent=issue?'← 上一章':scroll?'↑ 上一屏':'← 上一页';$('#next-page').textContent=issue?'下一章 →':scroll?'下一屏 ↓':'下一页 →';
+ $('#auto-toggle').disabled=state.busy||!state.pages.length||last;$('#auto-toggle').setAttribute('aria-pressed',String(state.auto));$('#auto-toggle').textContent=state.auto?'Ⅱ 暂停':scroll?'▷ 自动滚动':'▷ 自动翻页';$('#reading-mode').disabled=state.busy;
+ $('#reader-status').textContent=state.auto?(state.autoDwell?'章末停留 · 即将继续下一章':scroll?`向下滚动 · ${prefs.interval}秒/屏`:`向下覆盖 · 每 ${prefs.interval} 秒`):(state.storageOK?(scroll?'上下滑动 · 位置自动保存':'左右滑动 · 位置自动保存'):'无法保存到本机，仍可阅读');
+}
 function setBusy(value){state.busy=value;controls();}
-function clearTimer(){clearTimeout(state.timer);state.timer=0;}
+function clearTimer(){clearTimeout(state.timer);state.timer=0;cancelAnimationFrame(state.scrollFrame);state.scrollFrame=0;lastAutoTime=0;state.autoDwell=false;}
 function stopAuto(){state.auto=false;clearTimer();controls();}
-function scheduleAuto(){clearTimer();if(!state.auto||state.busy||document.hidden||!$('#toc').hidden||$('#reading').hidden)return;state.timer=setTimeout(()=>turnPage(1,true),prefs.interval*1000);}
-function toggleAuto(){if(state.busy||!state.pages.length)return;if(state.auto){stopAuto();return;}state.auto=true;controls();scheduleAuto();}
+function scheduleAuto(){
+ clearTimer();if(!state.auto||state.busy||state.turning||document.hidden||!$('#toc').hidden||$('#reading').hidden)return;
+ if(!scrollMode()){state.timer=setTimeout(()=>turnPage(1,true),prefs.interval*1000);return;}
+ if(atScrollEnd()){if(state.chapter>=state.book.chapters.length-1){stopAuto();return;}state.autoDwell=true;controls();state.timer=setTimeout(()=>turnPage(1,true),prefs.interval*1000);return;}
+ autoScrollPosition=$('#page-viewport').scrollTop;state.scrollFrame=requestAnimationFrame(autoScroll);
+}
+function autoScroll(now){
+ state.scrollFrame=0;if(!state.auto||!scrollMode()||state.busy||document.hidden||!$('#toc').hidden||$('#reading').hidden)return;
+ const box=$('#page-viewport'),elapsed=lastAutoTime?Math.min(80,now-lastAutoTime):0;lastAutoTime=now;
+ autoScrollPosition=Math.min(scrollLimit(),autoScrollPosition+box.clientHeight*.9/prefs.interval*elapsed/1000);box.scrollTop=autoScrollPosition;
+ if(now-lastScrollSave>2000){remember();lastScrollSave=now;}
+ if(atScrollEnd()){scheduleAuto();return;}state.scrollFrame=requestAnimationFrame(autoScroll);
+}
+function toggleAuto(){if(state.busy||!state.pages.length)return;if(state.auto){stopAuto();remember();return;}state.auto=true;controls();if(!state.turning)scheduleAuto();}
 async function chapterText(book,index){const entry=book.chapters[index],key=book.web?book.id+':'+entry.id:entry.path;if(state.cache.has(key)){const value=state.cache.get(key);state.cache.delete(key);state.cache.set(key,value);return value;}const data=book.web?await webChapter(book,index,bookController?.signal):await fetchJSON('./'+entry.path);if(!data||!Array.isArray(data.paragraphs)||data.paragraphs.length>10000||!data.paragraphs.every(p=>typeof p==='string'))throw Error('这一章的内容格式异常，请稍后重试。');const text=data.paragraphs.map(p=>p.trim()).filter(Boolean).join('\n\n');if(!text||text.length>2000000)throw Error('这一章暂时无法排版，请稍后重试。');state.cache.set(key,text);while(state.cache.size>3)state.cache.delete(state.cache.keys().next().value);return text;}
 const nextLayout=()=>new Promise(resolve=>requestAnimationFrame(resolve));
 // Measure real rendered text, not a guessed characters-per-screen count. The
 // saved offset remains meaningful after resizing or changing the type size.
-async function paginate(offset=0,wantLast=false){const token=++state.revision;clearTimer();setBusy(true);message('正在排版…');$('#page-text').textContent='';await nextLayout();if(token!==state.revision||$('#reading').hidden)return;
+async function paginate(offset=0,wantLast=false){if(scrollMode())return renderScroll(offset,wantLast);const token=++state.revision;clearTimer();setBusy(true);message('正在排版…');$('#page-text').textContent='';$('#page-viewport').scrollTop=0;await nextLayout();if(token!==state.revision||$('#reading').hidden)return;
  const box=$('#page-viewport'),measure=$('#measure-text'),height=box.clientHeight;lastWidth=box.clientWidth;lastHeight=height;const lineHeight=parseFloat(getComputedStyle(measure).lineHeight);if(box.clientWidth<40||height<lineHeight){message('窗口太矮，暂时放不下一行文字。请调整窗口大小或切换屏幕方向。');setBusy(false);return;}
  const text=state.text,pages=[];offset=integer(offset,0,Math.max(0,text.length-1));let start=0;while(start<text.length){let lo=start,hi=Math.min(text.length,start+6000);while(lo<hi){const mid=Math.ceil((lo+hi)/2);measure.textContent=text.slice(start,mid);if(measure.getBoundingClientRect().height<=height+.25)lo=mid;else hi=mid-1;}let end=lo;if(end>start&&end<text.length&&text.charCodeAt(end-1)>=0xD800&&text.charCodeAt(end-1)<=0xDBFF)end--;if(end<=start){message('当前字号无法完整显示，请缩小字体或调整窗口。');setBusy(false);return;}pages.push({start,end});start=end;if(pages.length%3===0){await nextLayout();if(token!==state.revision||$('#reading').hidden)return;}}
  if(token!==state.revision)return;measure.textContent='';state.pages=pages;state.page=wantLast?pages.length-1:Math.max(0,pages.findIndex(p=>p.end>offset));setBusy(false);$('#reader-message').hidden=true;drawPage();}
+async function renderScroll(offset=0,wantLast=false){
+ const token=++state.revision;clearTimer();setBusy(true);$('#measure-text').textContent='';$('#page-text').textContent=state.text;const box=$('#page-viewport');box.scrollTop=0;
+ await nextLayout();if(token!==state.revision||$('#reading').hidden)return;
+ lastWidth=box.clientWidth;lastHeight=box.clientHeight;state.pages=[{start:0,end:state.text.length}];state.page=0;
+ const node=$('#page-text').firstChild;if(wantLast)box.scrollTop=scrollLimit();else if(node&&offset){const range=document.createRange(),index=integer(offset,0,node.length-1);range.setStart(node,index);range.setEnd(node,Math.min(index+1,node.length));box.scrollTop=Math.max(0,range.getBoundingClientRect().top-box.getBoundingClientRect().top);}
+ setBusy(false);$('#reader-message').hidden=true;updateScrollPosition();remember();scheduleAuto();
+}
+function updateScrollPosition(){
+ if(!scrollMode()||state.busy||!state.text)return;
+ const box=$('#page-viewport'),limit=scrollLimit(),percent=limit?Math.min(100,Math.round(box.scrollTop/limit*100)):100;$('#page-position').textContent=`本章 ${percent}%`;controls();
+ if(state.chapter===state.book.chapters.length-1&&atScrollEnd()){stopAuto();$('#reader-status').textContent='已到全书结尾';}
+}
+async function changeMode(){
+ const offset=currentOffset();remember();stopAuto();cancelMotion();prefs.mode=$('#reading-mode').value==='scroll'?'scroll':'page';applySettings();persist();if(state.book&&state.text)await paginate(offset);else controls();
+}
 function drawPage(){const p=state.pages[state.page];if(!p)return;$('#page-text').textContent=state.text.slice(p.start,p.end);$('#page-position').textContent=`本章 ${state.page+1} / ${state.pages.length} 页`;remember();controls();if(state.chapter===state.book.chapters.length-1&&state.page===state.pages.length-1){const wasAuto=state.auto;stopAuto();$('#reader-status').textContent='已读到全书最后一页';if(wasAuto)toast('已到全书末页，自动翻页已停止。');}else scheduleAuto();}
-function prepareBook(book){remember();stopAuto();bookController?.abort();bookController=new AbortController();state.revision++;state.book=book;state.text='';state.pages=[];state.page=0;state.chapterIssue='';$('#library').hidden=true;$('#reading').hidden=false;$('#toc').hidden=true;document.body.classList.add('reading-open');$('#book-title').textContent=book.title;$('#book-author').textContent=book.author;$('#page-text').textContent='';shelfButton();}
+function prepareBook(book){remember();stopAuto();cancelMotion();clearTimeout(scrollSaveTimer);bookController?.abort();bookController=new AbortController();state.revision++;state.book=book;state.text='';state.pages=[];state.page=0;state.chapterIssue='';$('#library').hidden=true;$('#reading').hidden=false;$('#toc').hidden=true;document.body.classList.add('reading-open');$('#book-title').textContent=book.title;$('#book-author').textContent=book.author;$('#page-text').textContent='';shelfButton();}
 async function openBook(book){prepareBook(book);const saved=prefs.progress[book.id];await loadChapter(integer(saved?.chapter,0,book.chapters.length-1),integer(saved?.offset,0,2000000));if(!$('#reading').hidden)$('#toc-open').focus({preventScroll:true});}
 async function openWebBook(meta){prepareBook({...meta,chapters:[]});const token=state.revision;setBusy(true);$('#chapter-title').textContent='正在读取目录';$('#chapter-count').textContent=meta.sourceName;$('#page-position').textContent='加载中';message('正在打开小说目录…');retryAction=()=>openWebBook(meta);try{const book=await webBookDetail(meta,bookController.signal);if(token!==state.revision||$('#reading').hidden)return;state.book=book;const saved=prefs.progress[book.id],initial=saved?.chapter??Math.max(0,book.chapters.findIndex(c=>!c.locked));await loadChapter(integer(initial,0,book.chapters.length-1),integer(saved?.offset,0,2000000));if(!$('#reading').hidden)$('#toc-open').focus({preventScroll:true});}catch(e){if(token!==state.revision)return;setBusy(false);message(e.message||'目录加载失败，请重试。',true);$('#page-position').textContent='目录未能加载';}}
 async function loadChapter(index,offset=0,{keepAuto=false,wantLast=false}={}){if(!state.book?.chapters.length)return;retryAction=()=>loadChapter(index,offset,{wantLast});if(!keepAuto)stopAuto();else clearTimer();const token=++state.revision,book=state.book;state.chapter=integer(index,0,book.chapters.length-1);state.pages=[];state.page=0;state.text='';state.chapterIssue='';setBusy(true);$('#page-text').textContent='';$('#page-position').textContent='加载中';$('#chapter-title').textContent=book.chapters[state.chapter].title;$('#chapter-count').textContent=`第 ${state.chapter+1} / ${book.chapters.length} 章`;message('正在打开这一章…');try{const text=await chapterText(book,state.chapter);if(token!==state.revision||state.book!==book||$('#reading').hidden)return;state.text=text;await paginate(offset,wantLast);}catch(e){if(token!==state.revision)return;const skip=['chapter_locked','locked','no_text'].includes(e.code);state.chapterIssue=e.code||'load_failed';setBusy(false);stopAuto();message(e.code==='no_text'?'本章为插画或没有可显示的正文，请选择下一章，或从目录选择其他章节。':e.message||'加载失败，请重试。',!skip);$('#page-position').textContent=skip?'请选择其他章节':'未能加载';}}
-async function turnPage(direction,automatic=false){if(state.busy||!state.book)return;if(!state.pages.length){if(state.chapterIssue&&!automatic&&state.chapter+direction>=0&&state.chapter+direction<state.book.chapters.length)await loadChapter(state.chapter+direction);return;}clearTimer();if(direction>0&&state.page<state.pages.length-1){state.page++;drawPage();}else if(direction<0&&state.page>0){state.page--;drawPage();}else if(direction>0&&state.chapter<state.book.chapters.length-1){await loadChapter(state.chapter+1,0,{keepAuto:state.auto});}else if(direction<0&&state.chapter>0){await loadChapter(state.chapter-1,0,{keepAuto:state.auto,wantLast:true});}else if(automatic)stopAuto();}
-async function changeFont(delta){remember();const offset=currentOffset();prefs.font=integer(prefs.font+delta,14,30,20);applySettings();persist();if(state.book&&state.text)await paginate(offset);}
-async function shelf(){remember();stopAuto();bookController?.abort();state.revision++;$('#toc').hidden=true;$('#reading').hidden=true;$('#library').hidden=false;document.body.classList.remove('reading-open');state.book=null;state.pages=[];state.text='';$('#measure-text').textContent='';$('#page-text').textContent='';if(document.fullscreenElement)try{await document.exitFullscreen();}catch{}renderShelf();webLibrary?.refresh();$('#novel-query')?.focus({preventScroll:true});}
+async function turnPage(direction,automatic=false){
+ if(state.busy||state.turning||!state.book)return;if(!automatic)stopAuto();clearTimer();
+ if(!state.pages.length){if(state.chapterIssue&&!automatic&&state.chapter+direction>=0&&state.chapter+direction<state.book.chapters.length)await loadChapter(state.chapter+direction);return;}
+ if(scrollMode()){
+  const box=$('#page-viewport');if(direction>0&&!atScrollEnd()||direction<0&&!atScrollStart()){box.scrollBy({top:direction*box.clientHeight*.9,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});return;}
+  if(state.chapter+direction>=0&&state.chapter+direction<state.book.chapters.length){remember();await loadChapter(state.chapter+direction,0,{keepAuto:automatic&&state.auto,wantLast:direction<0});}else if(automatic)stopAuto();return;
+ }
+ const token=++turnRevision,previousText=$('#page-text').textContent;state.turning=true;controls();
+ try{
+  if(direction>0&&state.page<state.pages.length-1){state.page++;drawPage();}
+  else if(direction<0&&state.page>0){state.page--;drawPage();}
+  else if(direction>0&&state.chapter<state.book.chapters.length-1){await loadChapter(state.chapter+1,0,{keepAuto:automatic&&state.auto});}
+  else if(direction<0&&state.chapter>0){await loadChapter(state.chapter-1,0,{keepAuto:automatic&&state.auto,wantLast:true});}
+  else{if(automatic)stopAuto();return;}
+  if(token===turnRevision&&!state.busy&&!state.chapterIssue&&!scrollMode()&&!$('#reading').hidden)await motion.play({direction,automatic,previousText});
+ }finally{if(token===turnRevision){state.turning=false;controls();scheduleAuto();}}
+}
+async function changeFont(delta){remember();const offset=currentOffset();cancelMotion();prefs.font=integer(prefs.font+delta,14,30,20);applySettings();persist();if(state.book&&state.text)await paginate(offset);}
+async function shelf(){remember();stopAuto();cancelMotion();clearTimeout(scrollSaveTimer);bookController?.abort();state.revision++;$('#toc').hidden=true;$('#reading').hidden=true;$('#library').hidden=false;document.body.classList.remove('reading-open');state.book=null;state.pages=[];state.text='';$('#measure-text').textContent='';$('#page-text').textContent='';if(document.fullscreenElement)try{await document.exitFullscreen();}catch{}renderShelf();webLibrary?.refresh();$('#novel-query')?.focus({preventScroll:true});}
 function renderToc(){const book=state.book;if(!book?.chapters.length)return;const query=$('#chapter-filter').value.trim().toLowerCase(),all=book.chapters.map((c,i)=>({c,i})).filter(({c,i})=>!query||c.title.toLowerCase().includes(query)||String(i+1)===query),pageSize=book.web?100:5000,pages=Math.max(1,Math.ceil(all.length/pageSize));tocPage=Math.max(0,Math.min(tocPage,pages-1));const list=$('#chapter-list');list.replaceChildren();for(const {c,i} of all.slice(tocPage*pageSize,(tocPage+1)*pageSize)){const b=el('button','',c.title+(c.locked?' · 受限':''));b.dataset.chapter=String(i);b.setAttribute('aria-current',String(i===state.chapter));b.onclick=()=>{closeToc();loadChapter(i);};list.append(b);}if(!all.length)list.append(el('p','web-note','没有匹配的章节。'));$('#toc-pagination').hidden=pages===1;$('#toc-page').textContent=`${tocPage+1} / ${pages}`;$('#toc-previous').disabled=tocPage===0;$('#toc-next').disabled=tocPage>=pages-1;}
-function openToc(){if(!state.book?.chapters.length){toast('目录尚未载入，请稍后再试。');return;}stopAuto();const book=state.book;$('#toc-title').textContent=book.title;const source=$('#source-info');source.replaceChildren();if(book.web){source.textContent='书源：'+book.sourceName+' · '+book.chapters.length+' 章。公开章节在本页阅读，需登录、订阅或暂未公开的章节会单独提示。';}else{source.append(document.createTextNode(book.source.license||'公开古籍原文；保留来源版本文字。'),el('br'));const link=el('a','','原文来源：'+book.source.name);link.href=book.source.url;link.target='_blank';link.rel='noopener noreferrer';source.append(link);const notice=book.source.noticePath||book.source.licenseUrl;if(notice){source.append(document.createTextNode(' · '));const a=el('a','','来源与许可');a.href=notice;a.target='_blank';a.rel='noopener noreferrer';source.append(a);}}$('#chapter-filter').value='';tocPage=book.web?Math.floor(state.chapter/100):0;renderToc();$('#toc').hidden=false;$('#toc-close').focus();$('#chapter-list [aria-current=true]')?.scrollIntoView({block:'nearest'});}
+function openToc(){if(!state.book?.chapters.length){toast('目录尚未载入，请稍后再试。');return;}stopAuto();cancelMotion();const book=state.book;$('#toc-title').textContent=book.title;const source=$('#source-info');source.replaceChildren();if(book.web){source.textContent='书源：'+book.sourceName+' · '+book.chapters.length+' 章。公开章节在本页阅读，需登录、订阅或暂未公开的章节会单独提示。';}else{source.append(document.createTextNode(book.source.license||'公开古籍原文；保留来源版本文字。'),el('br'));const link=el('a','','原文来源：'+book.source.name);link.href=book.source.url;link.target='_blank';link.rel='noopener noreferrer';source.append(link);const notice=book.source.noticePath||book.source.licenseUrl;if(notice){source.append(document.createTextNode(' · '));const a=el('a','','来源与许可');a.href=notice;a.target='_blank';a.rel='noopener noreferrer';source.append(a);}}$('#chapter-filter').value='';tocPage=book.web?Math.floor(state.chapter/100):0;renderToc();$('#toc').hidden=false;$('#toc-close').focus();$('#chapter-list [aria-current=true]')?.scrollIntoView({block:'nearest'});}
 function closeToc(){$('#toc').hidden=true;$('#toc-open').focus({preventScroll:true});}
-$('#back-shelf').onclick=shelf;$('#next-page').onclick=()=>turnPage(1);$('#previous-page').onclick=()=>turnPage(-1);$('#font-up').onclick=()=>changeFont(2);$('#font-down').onclick=()=>changeFont(-2);$('#theme-toggle').onclick=()=>{prefs.night=!prefs.night;applySettings();persist();controls();};$('#auto-toggle').onclick=toggleAuto;$('#auto-interval').onchange=e=>{prefs.interval=Number(e.target.value);persist();controls();scheduleAuto();};$('#retry').onclick=()=>retryAction?.();$('#reader-add-shelf').onclick=()=>{if(state.book?.web&&webLibrary.add(state.book)){shelfButton();toast(webLibrary.canSave?'已加入书架，下次可继续阅读。':'已加入当前书架，但浏览器无法保存到本机。');}else toast('书架已满，请先移除一些书籍。');};$('#chapter-filter').oninput=()=>{tocPage=0;renderToc();};$('#toc-previous').onclick=()=>{tocPage--;renderToc();};$('#toc-next').onclick=()=>{tocPage++;renderToc();};$('#toc-open').onclick=openToc;$('#toc-close').onclick=closeToc;$('#toc').onclick=e=>{if(e.target===$('#toc'))closeToc();};
+$('#reading-mode').onchange=changeMode;$('#back-shelf').onclick=shelf;$('#next-page').onclick=()=>turnPage(1);$('#previous-page').onclick=()=>turnPage(-1);$('#font-up').onclick=()=>changeFont(2);$('#font-down').onclick=()=>changeFont(-2);$('#theme-toggle').onclick=()=>{cancelMotion();prefs.night=!prefs.night;applySettings();persist();controls();scheduleAuto();};$('#auto-toggle').onclick=toggleAuto;$('#auto-interval').onchange=e=>{prefs.interval=Number(e.target.value);persist();controls();scheduleAuto();};$('#retry').onclick=()=>retryAction?.();$('#reader-add-shelf').onclick=()=>{if(state.book?.web&&webLibrary.add(state.book)){shelfButton();toast(webLibrary.canSave?'已加入书架，下次可继续阅读。':'已加入当前书架，但浏览器无法保存到本机。');}else toast('书架已满，请先移除一些书籍。');};$('#chapter-filter').oninput=()=>{tocPage=0;renderToc();};$('#toc-previous').onclick=()=>{tocPage--;renderToc();};$('#toc-next').onclick=()=>{tocPage++;renderToc();};$('#toc-open').onclick=openToc;$('#toc-close').onclick=closeToc;$('#toc').onclick=e=>{if(e.target===$('#toc'))closeToc();};
 $('#fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('#reading').requestFullscreen();}catch{toast('浏览器不支持隐藏工具栏，已使用铺满页面的阅读布局。');}};document.addEventListener('fullscreenchange',()=>{$('#fullscreen').textContent=document.fullscreenElement?'↙ 退出全屏':'⛶ 全屏';scheduleResize();});
 document.addEventListener('keydown',e=>{if($('#reading').hidden)return;if(!$('#toc').hidden){if(e.key==='Escape'){e.preventDefault();closeToc();}if(e.key==='Tab'){const nodes=[...$('#toc').querySelectorAll('button:not(:disabled),a[href],input')],first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}return;}if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();turnPage(1);}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();turnPage(-1);}else if(e.code==='Space'&&!e.repeat&&!/BUTTON|A/.test(e.target.tagName)){e.preventDefault();turnPage(1);}});
-function scheduleResize(){clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if($('#reading').hidden||!state.text)return;const box=$('#page-viewport');if(box.clientWidth===lastWidth&&box.clientHeight===lastHeight)return;const offset=currentOffset();paginate(offset);},140);}
-window.addEventListener('resize',scheduleResize);if(typeof ResizeObserver!=='undefined')new ResizeObserver(scheduleResize).observe($('#page-viewport'));document.addEventListener('visibilitychange',()=>{if(document.hidden){remember();stopAuto();}});window.addEventListener('pagehide',()=>{remember();stopAuto();});
+function scheduleResize(){clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if($('#reading').hidden||!state.text)return;const box=$('#page-viewport');if(box.clientWidth===lastWidth&&box.clientHeight===lastHeight)return;const offset=scrollMode()?state.scrollOffset:currentOffset();cancelMotion();paginate(offset);},140);}
+window.addEventListener('resize',scheduleResize);if(typeof ResizeObserver!=='undefined')new ResizeObserver(scheduleResize).observe($('#page-viewport'));document.addEventListener('visibilitychange',()=>{if(document.hidden){remember();stopAuto();cancelMotion();}});window.addEventListener('pagehide',()=>{remember();stopAuto();cancelMotion();});
+
+const viewport=$('#page-viewport');
+viewport.addEventListener('scroll',()=>{
+ if(!scrollMode()||state.busy)return;
+ const now=performance.now();if(viewport.clientWidth===lastWidth&&viewport.clientHeight===lastHeight&&(!state.auto||now-lastAnchorCapture>100)){state.scrollOffset=currentOffset();lastAnchorCapture=now;}
+ if(!scrollUITimer)scrollUITimer=setTimeout(()=>{scrollUITimer=0;updateScrollPosition();},100);
+ clearTimeout(scrollSaveTimer);scrollSaveTimer=setTimeout(remember,250);
+},{passive:true});
+viewport.addEventListener('pointerdown',event=>{
+ if(!event.isPrimary||event.button!==0||state.busy||event.target.closest('button,a,select,input'))return;
+ if(state.auto){stopAuto();cancelMotion();}gesture={id:event.pointerId,x:event.clientX,y:event.clientY,top:atScrollStart(),bottom:atScrollEnd()};
+ if(!scrollMode())viewport.setPointerCapture?.(event.pointerId);
+});
+viewport.addEventListener('pointerup',event=>{
+ const g=gesture;gesture=null;if(!g||g.id!==event.pointerId||state.busy)return;
+ const dx=event.clientX-g.x,dy=event.clientY-g.y;
+ if(!scrollMode()&&Math.abs(dx)>44&&Math.abs(dx)>Math.abs(dy)*1.25){event.preventDefault();turnPage(dx<0?1:-1);}
+});
+viewport.addEventListener('pointercancel',()=>{gesture=null;});
+// Touch events survive the native scroll's pointercancel, so an additional
+// upward swipe at the bottom can deliberately move into the next chapter.
+let scrollTouch=null;
+viewport.addEventListener('touchstart',event=>{if(scrollMode()&&!state.busy&&event.touches.length===1){if(state.auto)stopAuto();scrollTouch={y:event.touches[0].clientY,top:atScrollStart(),bottom:atScrollEnd()};}else scrollTouch=null;},{passive:true});
+viewport.addEventListener('touchend',event=>{const g=scrollTouch;scrollTouch=null;if(!g||!scrollMode()||state.busy||!event.changedTouches.length)return;const dy=event.changedTouches[0].clientY-g.y;if(dy < -55&&g.bottom&&atScrollEnd())turnPage(1);else if(dy > 55&&g.top&&atScrollStart())turnPage(-1);},{passive:true});
+viewport.addEventListener('touchcancel',()=>{scrollTouch=null;},{passive:true});
+let wheelEdge=0;
+viewport.addEventListener('wheel',event=>{
+ if(state.auto)stopAuto();if(state.busy||!scrollMode())return;
+ const direction=event.deltaY>0?1:-1,edge=direction>0?atScrollEnd():atScrollStart(),now=performance.now();
+ if(edge&&Math.abs(event.deltaY)>12&&now-wheelEdge>700){wheelEdge=now;event.preventDefault();turnPage(direction);}else if(!edge)wheelEdge=now;
+},{passive:false});
+
 readPrefs();applySettings();webLibrary=initWebLibrary({onOpen:openWebBook,onChange:shelfButton,getProgress:id=>prefs.progress[id]});loadLibrary();
