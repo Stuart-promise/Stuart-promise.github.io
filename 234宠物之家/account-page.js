@@ -1,5 +1,4 @@
 const A=window.PetAccount,$=id=>document.getElementById(id);
-await A.ready;
 let mode='login',recoveryResult;
 const message=t=>{$('account-message').textContent=t;};
 function download(name,data) {
@@ -20,7 +19,8 @@ function render() {
   $('records').replaceChildren();$('guest-records').replaceChildren();
   for(const [m,title] of Object.entries(A.modules)) {
     const state=A.read(m);
-    const r=row(title,state.conflict?'有两个不同版本，需要选择':state.dirty?'已保存在本机，尚未同步':state.updated?'已同步 · '+new Date(state.updated*1000).toLocaleString():'暂时没有云端记录');
+    const status=A.syncState(m);
+    const r=row(title,state.conflict?'有两个不同版本，需要选择':status==='storage-error'?'本机空间不足 · 请先导出备份':state.dirty?'已保存在本机，尚未同步':['offline','checking'].includes(status)?'本机副本 · 等待确认云端状态':state.updated?'已同步 · '+new Date(state.updated*1000).toLocaleString():'暂时没有云端记录');
     if(state.conflict) {
       r.append(action('保留云端版本',async()=>{if(confirm('使用云端记录替换本机这项记录？本机旧版会保留备份。'))await A.resolve(m,'cloud');}),
         action('使用本机版本',async()=>{if(confirm('将本机这项记录上传为新版本？'))await A.resolve(m,'local');}));
@@ -30,6 +30,12 @@ function render() {
     if(count){const g=row(title,'此设备有 '+count+' 条游客数据');g.append(action('导入到我的账号',()=>A.importGuest(m)));$('guest-records').append(g);}
   }
   if(!$('guest-records').children.length)$('guest-records').textContent='此设备没有可导入的游客学习记录或小游戏记录。';
+}
+function renderIdentity() {
+  $('auth-panel').hidden=!!A.session||!!recoveryResult;
+  $('signed-panel').hidden=!A.session;
+  if(!A.session){$('records').replaceChildren();$('guest-records').replaceChildren();}
+  else render();
 }
 document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>{
   mode=button.dataset.mode;message('');
@@ -50,16 +56,26 @@ $('auth-form').onsubmit=async e=>{
 };
 $('download-recovery').onclick=()=>download('234宠物之家-账号恢复码.txt','用户名：'+recoveryResult.user.username+'\n恢复码：'+recoveryResult.recoveryCode+'\n请勿分享此文件。');
 $('continue-account').onclick=()=>location.reload();
-$('sync-now').onclick=async()=>{try{await A.flush();message('同步检查完成。');render();}catch(e){message(e.message);render();}};
-$('logout').onclick=()=>A.logout().catch(e=>message(e.message));
+$('sync-now').onclick=async()=>{
+  const button=$('sync-now');button.disabled=true;button.textContent='同步中…';
+  try{const result=await A.sync();message(result.message);}catch(e){if(A.session)message(e.message);}finally{button.disabled=false;button.textContent='立即同步';renderIdentity();}
+};
+$('logout').onclick=async()=>{
+  const button=$('logout');button.disabled=true;button.textContent='正在退出…';
+  try{await A.logout();}catch(e){message(e.message);}finally{button.disabled=false;button.textContent='退出登录';renderIdentity();}
+};
 $('export-account').onclick=async()=>{
   const backup={schema:1,user:A.session.user,local:{},cloud:null};
   for(const m of Object.keys(A.modules))backup.local[m]=A.read(m);
   try{backup.cloud=await A.request('/v1/export');}catch{message('未能取得云端副本，本次导出此设备的学习与小游戏记录。Probably Stolen 请使用游戏内存档备份按钮。');}
   download('pet234-records-'+new Date().toISOString().slice(0,10)+'.json',backup);
 };
-window.addEventListener('pet-account-status',e=>message(e.detail));
+window.addEventListener('pet-account-status',e=>{message(e.detail);render();});
 window.addEventListener('pet-account-data',render);
+window.addEventListener('pet-account-session',e=>{recoveryResult=null;$('recovery-panel').hidden=true;$('password').value='';$('recovery').value='';renderIdentity();message(e.detail.message);});
+renderIdentity();message(A.status);
+await A.ready;
+renderIdentity();
 if(A.session){
   $('auth-panel').hidden=true;$('signed-panel').hidden=false;$('welcome').textContent='学习与游戏存档';
   render();
