@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171522">
+  <title>七宗罪测试 · 234宠物之家</title>
+  <meta name="description" content="28道日常情境，看看你最近的七种欲望倾向。完成属于你的七宗罪档案。">
+  <link rel="stylesheet" href="../account.css?v=forum1">
+  <link rel="stylesheet" href="./style.css?v=1">
+  <script src="../account.js?v=session2"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a>
+    <a class="back-home" href="../games.html">← 游戏大厅</a>
+  </header>
+  <main class="sins-main">
+    <p id="notice" class="notice" role="status" aria-live="polite"></p>
+
+    <section id="welcome" aria-labelledby="page-title">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><i aria-hidden="true"></i> THE SEVEN DESIRES</span>
+          <h1 id="page-title">七宗罪<span>测试<span class="title-star" aria-hidden="true">✦</span></span></h1>
+          <p class="hero-line">哪一种欲望，<br>最近更容易牵动你？</p>
+          <p class="hero-description">从日常的小选择里，看见自己的七种倾向。<br>这里没有标准答案，跟随你的真实感受。</p>
+          <div class="test-meta"><span><b>28</b> 道情境题</span><span><b>≈ 4</b> 分钟</span><span><b>7</b> 维结果</span></div>
+          <div class="start-actions">
+            <button id="start-test" class="primary" type="button">打开我的欲望档案 <span aria-hidden="true">↗</span></button>
+            <button id="continue-test" class="primary" type="button" hidden>继续上次测试 <span aria-hidden="true">↗</span></button>
+            <button id="clear-progress" class="text-button" type="button" hidden>清除进度，重新开始</button>
+          </div>
+          <p id="saved-progress" class="saved-progress"></p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg class="desire-wheel" viewBox="0 0 500 500" fill="none">
+            <defs>
+              <radialGradient id="halo"><stop stop-color="#645473" stop-opacity=".2"/><stop offset="1" stop-color="#292136" stop-opacity="0"/></radialGradient>
+              <symbol id="crown" viewBox="0 0 32 32"><path d="M5 10l6 5 5-9 5 9 6-5-3 15H8L5 10Z"/><path d="M9 28h14"/></symbol>
+              <symbol id="gem" viewBox="0 0 32 32"><path d="m5 12 6-7h10l6 7-11 16L5 12Z"/><path d="M5 12h22M11 5l5 23 5-23"/></symbol>
+              <symbol id="heart" viewBox="0 0 32 32"><path d="M16 27S4 19 4 11a6 6 0 0 1 12-1 6 6 0 0 1 12 1c0 8-12 16-12 16Z"/></symbol>
+              <symbol id="eye" viewBox="0 0 32 32"><path d="M3 16s5-9 13-9 13 9 13 9-5 9-13 9S3 16 3 16Z"/><circle cx="16" cy="16" r="4"/></symbol>
+              <symbol id="flame" viewBox="0 0 32 32"><path d="M16 3c2 9-7 8-5 16 3-1 4-3 5-6 7 4 5 8 5 11 7-7 7-15 0-19 1 8-3 6-5-2Z"/><path d="M21 24c-3 6-13 5-15-2-1-4 1-7 3-9"/></symbol>
+              <symbol id="fruit" viewBox="0 0 32 32"><path d="M16 11C5 5 1 16 7 24c4 5 6 2 9 2s5 3 9-2c6-8 2-19-9-13Z"/><path d="M16 11V5m0 3c1-5 5-6 9-5-1 5-4 7-9 5Z"/></symbol>
+              <symbol id="moon" viewBox="0 0 32 32"><path d="M25 22A12 12 0 0 1 10 4a12 12 0 1 0 15 18Z"/><path d="M24 3v6m-3-3h6"/></symbol>
+            </defs>
+            <circle cx="250" cy="250" r="247" fill="url(#halo)"/>
+            <circle cx="250" cy="250" r="201" stroke="#bfa77a" stroke-opacity=".17"/>
+            <circle cx="250" cy="250" r="187" stroke="#bfa77a" stroke-opacity=".27" stroke-dasharray="1 8"/>
+            <circle cx="250" cy="250" r="145" stroke="#bfa77a" stroke-opacity=".13"/>
+            <path d="m250 63 81 355L68 208l364 0-263 210L250 63Zm0 0 182 145-101 210H169L68 208 250 63Z" stroke="#a99679" stroke-opacity=".13"/>
+            <circle cx="250" cy="250" r="76" fill="#211d2c" stroke="#c3a77b" stroke-opacity=".4"/>
+            <circle cx="250" cy="250" r="66" stroke="#c3a77b" stroke-opacity=".13"/>
+            <text class="wheel-title" x="250" y="258" fill="#e2cc9b" font-family="Georgia,serif" font-size="54" text-anchor="middle">VII</text>
+            <text class="wheel-subtitle" x="250" y="282" fill="#9f94aa" font-family="system-ui,sans-serif" font-size="8" letter-spacing="3" text-anchor="middle">KNOW YOURSELF</text>
+            <g stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <g transform="translate(250 63)" color="#c2a6e9"><circle r="30" fill="#30253f" stroke="currentColor" stroke-opacity=".55"/><use href="#crown" x="-16" y="-16" width="32" height="32" stroke="currentColor"/><text y="-43" fill="currentColor" stroke="none" text-anchor="middle">傲慢</text></g>
+              <g transform="translate(396 133)" color="#dbc17d"><circle r="30" fill="#342e24" stroke="currentColor" stroke-opacity=".55"/><use href="#gem" x="-16" y="-16" width="32" height="32" stroke="currentColor"/><text x="37" y="4" fill="currentColor" stroke="none">贪婪</text></g>
+              <g transform="translate(432 292)" color="#e5a2b7"><circle r="30" fill="#372431" stroke="currentColor" stroke-opacity=".55"/><use href="#heart" x="-16" y="-16" width="32" height="32" stroke="currentColor"/><text x="2" y="51" fill="currentColor" stroke="none" text-anchor="middle">色欲</text></g>
+              <g transform="translate(331 418)" color="#91bba2"><circle r="30" fill="#25342e" stroke="currentColor" stroke-opacity=".55"/><use href="#eye" x="-16" y="-16" width="32" height="32" stroke="currentColor"/><text y="51" fill="currentColor" stroke="none" text-anchor="middle">嫉妒</text></g>
+              <g transform="translate(169 418)" color="#df9983"><circle r="30" fill="#382925" stroke="currentColor" stroke-opacity=".55"/><use href="#flame" x="-16" y="-16" width="32" height="32" stroke="currentColor"/><text y="51" fill="currentColor" stroke="none" text-anchor="middle">暴怒</text></g>
+              <g transform="translate(68 292)" color="#d3af86"><circle r="30" fill="#342e26" stroke="currentColor" stroke-opacity=".55"/><use href="#fruit" x="-16" y="-16" width="32" height="32" stroke="currentColor"/><text y="51" fill="currentColor" stroke="none" text-anchor="middle">暴食</text></g>
+              <g transform="translate(104 133)" color="#91b4d7"><circle r="30" fill="#242e3b" stroke="currentColor" stroke-opacity=".55"/><use href="#moon" x="-16" y="-16" width="32" height="32" stroke="currentColor"/><text x="-37" y="4" fill="currentColor" stroke="none" text-anchor="end">懒惰</text></g>
+            </g>
+            <path d="M250 150v10m-5-5h10M236 349h28" stroke="#cbb589" stroke-opacity=".45"/>
+          </svg>
+          <p class="art-caption"><span></span> SEVEN SIDES OF YOU <span></span></p>
+        </div>
+      </div>
+      <div class="before-start">
+        <div><span class="step-number">01</span><h2>回想最近一个月</h2><p>想想你通常的反应，偶尔的例外不必太在意。</p></div>
+        <div><span class="step-number">02</span><h2>选择符合程度</h2><p>按真实感受回答，可以随时返回修改。</p></div>
+        <div><span class="step-number">03</span><h2>看看七面的自己</h2><p>得到七维分布、主导倾向和一条行动建议。</p></div>
+      </div>
+      <p class="quiet-note">趣味自我观察，非心理诊断或道德评价。答题进度保存在当前浏览器，答案不上传。</p>
+    </section>
+
+    <section id="quiz" hidden aria-labelledby="question-text">
+      <div class="quiz-top"><div><span class="eyebrow">YOUR DESIRE ARCHIVE</span><p>七宗罪<span> · 认识你的日常反应</span></p></div><button id="back-intro" class="text-button" type="button">暂时收起 ↗</button></div>
+      <div class="quiz-layout">
+        <div class="question-panel panel">
+          <div class="progress-heading"><span>QUESTION <b id="question-number">01 / 28</b></span><span id="answered-count">已答 0 / 28</span></div>
+          <div class="progress-track" aria-hidden="true"><span id="progress-fill" style="width:0%"></span></div>
+          <p class="question-context">回想最近一个月，这句话有多符合你？</p>
+          <h2 id="question-text" tabindex="-1">选择最接近你真实感受的答案。</h2>
+          <fieldset id="answer-options" class="answer-options" aria-labelledby="question-text"></fieldset>
+          <div class="question-actions"><button id="previous-question" class="secondary" type="button">← 上一题</button><button id="next-question" class="primary" type="button">下一题 →</button><button id="show-result" class="primary" type="button" hidden>查看我的结果 ↗</button></div>
+          <p class="answer-note">没有正确答案，凭第一感觉选择就好。</p>
+        </div>
+        <aside class="question-sidebar">
+          <span class="eyebrow">YOUR PROGRESS</span><h3>走过的每一小步</h3><p>点题号返回查看，答案可以修改。</p>
+          <nav id="question-nav" class="question-nav" aria-label="题目导航"></nav>
+          <div class="nav-legend"><span><i class="legend-current"></i>当前题</span><span><i class="legend-answered"></i>已回答</span></div>
+          <div class="sidebar-note"><span aria-hidden="true">✦</span><p>不必成为“更好的答案”。<br>只要是此刻的你。</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="result-section" hidden aria-labelledby="result-title">
+      <div class="result-heading"><span class="eyebrow">THE SEVEN · YOUR PROFILE</span><span id="dominant-badge" class="result-badge">本次较突出倾向</span><h1 id="result-title" tabindex="-1">你的七面档案</h1><p id="result-subtitle">每一种倾向，都是观察自己的一个角度。</p></div>
+      <div class="result-overview panel">
+        <div class="radar-panel"><span class="eyebrow">SEVEN-DIMENSION MAP</span><svg id="radar-svg" viewBox="0 0 400 370" role="img" aria-label="七项倾向得分雷达图"></svg><p>各项独立计分 · 0—100</p></div>
+        <div class="scores-panel"><div class="section-label"><span class="eyebrow">YOUR SEVEN SIDES</span><span>倾向分</span></div><div id="score-list" class="score-list"></div><p class="score-note">分数是本次回答的换算，不是人群排名，也不代表好坏。</p></div>
+      </div>
+      <div id="result-summary" class="result-summary"></div>
+      <div id="result-actions" class="result-actions"><button id="copy-result" class="primary" type="button">复制结果 ↗</button><button id="download-result" class="secondary" type="button">保存结果图片 ↓</button><button id="review-answers" class="secondary" type="button">回看我的答案</button><button id="retake-test" class="text-button" type="button">重新测试</button></div>
+      <div class="insight-heading"><div><span class="eyebrow">READ BETWEEN THE LINES</span><h2>七个角度，慢慢读懂</h2></div><span aria-hidden="true">✦</span></div>
+      <div id="insight-list" class="insight-list"></div>
+      <p class="quiet-note">结果仅描述你这次的自我报告，适合轻松交流与自我观察。</p>
+    </section>
+
+    <details id="sources" class="sources"><summary><span>关于题目与计分</span><span class="source-caption">参考来源 · 怎样理解结果</span><b aria-hidden="true">+</b></summary><div class="sources-body"><p>这是一套原创的中文日常情境题，参考网络七宗罪测试的七维分类与自评形式，并非经过心理测量验证的专业量表。</p><p>每项 4 题，按 0—4 分计分；反向题按 4 减去选项分计算。各项总分除以 16，再换算为 0—100。最高分相同会并列展示，七项同分时如实展示同分。</p><h3>参考阅读</h3><ul id="source-links"></ul><p class="privacy-note">答题与计分在你的浏览器内完成；进度不会随网站账号同步，也不会发送给其他人。你可以清除进度重新开始。</p></div></details>
+    <footer class="page-footer"><span>看见欲望，也看见选择。</span><a href="../games.html">回游戏大厅 ↗</a></footer>
+  </main>
+  <noscript><p class="noscript">请开启浏览器的 JavaScript 后进行测试。</p></noscript>
+  <script type="module" src="./app.mjs?v=1"></script>
+</body>
+</html>
