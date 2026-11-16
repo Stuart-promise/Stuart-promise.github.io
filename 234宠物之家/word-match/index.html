@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f4ec">
+  <title>默契猜词 · 234宠物之家</title>
+  <meta name="description" content="邀请好友，各自写下一个词。一步步靠近，直到你们想到同一个答案。">
+  <link rel="stylesheet" href="./style.css?v=1">
+  <script src="../account.js?v=session2"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a>
+    <a class="back-home" href="../games.html">← 游戏大厅</a>
+  </header>
+  <main class="match-main">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="intro-copy">
+        <span class="eyebrow">TWO MINDS, ONE WORD</span>
+        <h1 id="page-title">默契<span>猜词</span><i aria-hidden="true">。</i></h1>
+        <p>从两个想法出发，<br class="mobile-break">在同一个词里相遇。</p>
+        <div class="intro-tags"><span>双人在线</span><span>同时揭晓</span><span>不限轮数</span></div>
+      </div>
+      <div class="intro-art" aria-hidden="true">
+        <svg viewBox="0 0 300 200" fill="none">
+          <path d="M35 164C92 186 203 181 267 158" stroke="#c6cdbb" stroke-width="1.5" stroke-dasharray="4 6"/>
+          <path d="M25 78C25 40 58 19 95 25C126 29 145 48 145 78C145 115 116 137 78 130L47 149L52 121C35 111 25 97 25 78Z" fill="#e9b59a"/>
+          <path d="M145 91C145 54 177 30 215 36C250 41 275 63 273 98C271 129 244 149 212 146L244 170L199 145C167 140 145 120 145 91Z" fill="#cbdba9"/>
+          <ellipse cx="86" cy="78" rx="19" ry="21" fill="#f8f3e8"/>
+          <path d="M86 63V91M76 74L86 63L96 74" stroke="#b56a46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <ellipse cx="211" cy="94" rx="20" ry="22" fill="#f8f3e8"/>
+          <path d="M200 94L208 102L222 86" stroke="#55713b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M132 43L140 33M150 26L154 14M168 31L180 25" stroke="#83936b" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="118" cy="156" r="4" fill="#d4b686"/><path d="M176 170V180M171 175H181" stroke="#bd9f70" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <p id="notice" class="notice" role="status" aria-live="polite"></p>
+
+    <section id="lobby" class="lobby panel" aria-labelledby="lobby-title">
+      <div class="section-heading"><div><span class="eyebrow">先约一个朋友</span><h2 id="lobby-title">一起试试，我们有多默契。</h2></div><span class="tiny-orbit" aria-hidden="true">✦</span></div>
+      <label class="field-label" for="nickname">你的昵称 <span>选填</span></label>
+      <input id="nickname" class="nickname-input" type="text" maxlength="16" autocomplete="nickname" placeholder="给好友一个熟悉的称呼">
+      <div class="lobby-actions">
+        <div class="create-side"><button id="create-room" class="primary" type="button">创建双人房间 <span aria-hidden="true">↗</span></button><p>分享邀请链接或房间码，等好友入座。</p></div>
+        <span class="or-divider">或</span>
+        <form id="join-form" class="join-side">
+          <label for="room-input">已经收到好友的房间码？</label>
+          <div class="join-fields"><input id="room-input" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" placeholder="6 位房间码" aria-label="好友的六位房间码" required><button id="join-room" class="secondary" type="submit">加入 →</button></div>
+        </form>
+      </div>
+    </section>
+
+    <section id="room-panel" class="room-panel panel" hidden aria-label="当前双人房间">
+      <div class="room-identity"><span class="eyebrow">我们的房间</span><strong id="room-code">------</strong><p id="connection-status" role="status">正在连接…</p></div>
+      <div class="room-actions"><button id="copy-invite" class="primary small" type="button">复制邀请链接 ↗</button><button id="copy-code" class="secondary small" type="button">复制房间码</button><button id="leave-room" class="text-button" type="button">退出房间</button></div>
+      <input id="invitation-link" class="invitation-fallback" type="text" readonly hidden aria-label="邀请链接，长按或选中后复制">
+    </section>
+
+    <section id="game-panel" class="game-panel panel" hidden aria-labelledby="round-heading">
+      <div class="round-heading"><span class="eyebrow" id="round-heading">ROUND <b id="round-number">1</b></span><span class="round-caption">不抢答，只等一个心有灵犀。</span></div>
+      <div class="word-cards">
+        <article class="word-card mine"><div class="player-label"><span class="player-dot" aria-hidden="true"></span><h2 id="my-name">我</h2><span class="you-label">你</span></div><div class="word-space"><strong id="my-word">?</strong></div><p id="my-state">想一个词，悄悄写下来</p></article>
+        <div class="between-cards" aria-hidden="true">&amp;</div>
+        <article class="word-card theirs"><div class="player-label"><span class="player-dot" aria-hidden="true"></span><h2 id="their-name">好友</h2></div><div class="word-space"><strong id="their-word">?</strong></div><p id="their-state">等待好友的灵感</p></article>
+      </div>
+      <form id="word-form" class="word-form">
+        <label for="word-input">这一轮，你想到了什么？</label>
+        <div class="answer-fields"><input id="word-input" type="text" maxlength="40" autocomplete="off" spellcheck="false" placeholder="悄悄写下你想到的词" aria-describedby="word-help" required><button id="submit-word" class="primary" type="submit">锁定我的词 <span aria-hidden="true">→</span></button></div>
+        <p id="word-help">最多 20 个字。双方提交后一起揭晓，提交后不能修改。</p>
+      </form>
+      <section id="round-result" class="round-result" hidden aria-live="polite">
+        <div><span class="eyebrow">两个答案，一点新灵感</span><h3 id="result-title">还差一点点。</h3><p id="result-note">看看彼此的答案，下一轮也许就会相遇。</p></div>
+        <div class="next-action"><button id="next-round" class="primary" type="button">准备下一轮 →</button><p id="next-status">双方准备好后，开启下一轮。</p></div>
+      </section>
+      <section id="victory" class="victory" hidden aria-live="polite" aria-labelledby="victory-title">
+        <span class="victory-spark" aria-hidden="true">✦</span><span class="eyebrow">WE FOUND OUR WORD</span><h2 id="victory-title">这一次，想到一起了！</h2><strong id="matched-word" class="matched-word"></strong><p>经过 <b id="total-rounds">1</b> 轮，你们在这个词里相遇。</p><button id="play-again" class="primary" type="button">再测一次默契 ↗</button><small id="victory-status">双方同意后，开始一场新的测试。</small>
+      </section>
+    </section>
+
+    <section id="history-section" class="history-section panel" hidden aria-labelledby="history-title"><div class="section-heading"><div><span class="eyebrow">一点点，靠近彼此</span><h2 id="history-title">我们的联想足迹</h2></div><span class="history-symbol" aria-hidden="true">↝</span></div><ol id="history-list" class="history-list"></ol></section>
+
+    <details class="rules" id="rules"><summary><span>怎么玩？</span><span class="rule-summary">没有标准答案，只有你们的答案。</span><span class="summary-plus" aria-hidden="true">+</span></summary><div class="rules-body"><ol><li><b>两个人，各想一个词。</b>第一轮自由联想，不用约定题目。</li><li><b>都提交，才一起揭晓。</b>没猜中，就根据上一轮的两个词继续联想。</li><li><b>同一轮写出同一个词，测试完成。</b>没有倒计时，也不限制轮数，慢慢靠近就好。</li></ol><p>匹配时忽略前后空格、英文大小写和全半角差异。对局时请保持双方页面打开；离开或刷新会断开房间。</p></div></details>
+    <footer class="page-footer"><span>不必一开始就想到一起。</span><a href="../games.html">再找点一起玩的 ↗</a></footer>
+  </main>
+  <script src="../room-config.js?v=cloud1"></script>
+  <script src="../relay.js?v=cloud1"></script>
+  <script type="module" src="./game.mjs?v=1"></script>
+</body>
+</html>
