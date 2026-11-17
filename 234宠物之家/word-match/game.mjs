@@ -1,4 +1,4 @@
-import {WordMatchSession,normalizeName} from './model.mjs?v=1';
+import {WordMatchSession,normalizeName} from './model.mjs?v=crossplay2';
 
 const $=id=>document.getElementById(id);
 const RULES='234-word-match-v1-';
@@ -8,7 +8,7 @@ let lastRound='',historyKey='',nicknameEdited=false;
 const note=text=>{$('notice').textContent=text;};
 const text=(id,value)=>{const node=$(id);if(node)node.textContent=value;};
 const roomCode=value=>String(value||'').normalize('NFKC').trim().replace(/^r/i,'');
-function invitation(){const url=new URL('./',location.href);url.searchParams.set('room',code);return url.href;}
+function invitation(){const url=new URL('./',location.href);url.searchParams.set('room',code);url.searchParams.set('v','crossplay2');return url.href;}
 
 function renderHistory(){
   const entries=snapshot?.history||[];
@@ -103,7 +103,7 @@ function connect(isHost,requestedCode,attempt=0){
   const value=roomCode(requestedCode);
   if(!/^\d{6}$/.test(value)){note('请输入好友分享的 6 位房间码。');$('room-input').focus();return;}
   if(!window.ROOM_SERVER||typeof createGamePeer!=='function'){note('房间功能加载失败，请刷新页面后重试。');return;}
-  if(typeof globalThis.crypto?.subtle?.digest!=='function'||typeof globalThis.crypto?.randomUUID!=='function'){note('请通过网站的 HTTPS 地址打开，并使用新版手机浏览器。');return;}
+  if(typeof globalThis.crypto?.subtle?.digest!=='function'||typeof globalThis.crypto?.getRandomValues!=='function'){note('请通过网站的 HTTPS 地址打开，并使用新版手机浏览器。');return;}
   let name;
   try{name=normalizeName($('nickname').value.trim()||(isHost?'房主':'好友'));}
   catch(error){note(error.message);$('nickname').focus();return;}

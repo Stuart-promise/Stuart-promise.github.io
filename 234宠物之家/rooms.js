@@ -124,7 +124,8 @@ function bindLink(link) {
 function openRoom(host, code) {
   if (room.phase !== "idle" || localMode) return;
   room.color = host ? firstColor : secondColor;
-  room.code = code;
+  room.code = normalizeRoomCode(code);
+  code=room.code;
   room.round = 1;
   room.mineAgain = room.theirAgain = false;
   room.phase = "connecting";
@@ -162,10 +163,12 @@ function openRoom(host, code) {
         "rate-limited": "连接过于频繁，请稍后重试。",
         "connection-timeout": "与服务器连接超时，请重新开房。",
         "room-full": "房间已经坐满，请换一个房间。",
-        "relay-unreachable": "无法连接本站服务器，请稍后重试或使用备用直连房。",
+        "relay-unreachable": "暂时无法连接房间服务器，请检查网络后重试。",
         "peer-unavailable": "找不到这个房间，请核对邀请码，并确认房主仍在线。",
         "unavailable-id": "房间码已被占用，请返回大厅再创建一次。",
-        "browser-incompatible": "当前浏览器不支持在线连接，请使用新版浏览器。"
+        "browser-incompatible": "当前浏览器不支持在线连接，请使用新版浏览器。",
+        "offline": "网络已断开，联网后请重新创建房间。",
+        "page-left": "原页面已离开，返回后请重新开房。"
       };
       stopRoom("closed", messages[err.type] || "无法建立在线连接，请检查网络或更换网络后重试。");
     });
@@ -178,16 +181,15 @@ function openRoom(host, code) {
 }
 
 byId("create").onclick = () => openRoom(true, createRoomCode(true));
-byId("create-relay").onclick = () => openRoom(true, createRoomCode(false));
 byId("join-form").onsubmit = event => {
   event.preventDefault();
-  const code = byId("room-code").value.trim().toUpperCase();
+  const code = normalizeRoomCode(byId("room-code").value);
   if (validCode(code)) openRoom(false, code);
 };
 byId("invite").onclick = async () => {
   const url = new URL(location.pathname, location.href);
   url.searchParams.set("room", room.code);
-  url.searchParams.set("v", checkersRoom ? "duo3" : chessRoom ? "relay1" : "grid19");
+  url.searchParams.set("v", "crossplay2");
   try {
     await navigator.clipboard.writeText(url.href);
     note("邀请链接已复制，可以发给好友了。");
@@ -208,7 +210,7 @@ byId("switch-mode").onclick = () => {
   refreshLobby();
 };
 
-const invitedCode = new URLSearchParams(location.search).get("room");
+const invitedCode = normalizeRoomCode(new URLSearchParams(location.search).get("room"));
 if (validCode(invitedCode)) {
   byId("room-code").value = invitedCode;
   note("好友邀请你对战，点击「加入房间」即可入座。");

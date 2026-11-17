@@ -7,6 +7,10 @@ const INVISIBLE = /[\p{Cc}\p{Cf}\p{Cs}]/u;
 const HISTORY_LIMIT = 200;
 const hex = bytes => Array.from(bytes, value => value.toString(16).padStart(2, '0')).join('');
 const positiveInteger = value => Number.isSafeInteger(value) && value > 0;
+function randomId(){
+  const bytes=crypto.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+  const value=hex(bytes);return [value.slice(0,8),value.slice(8,12),value.slice(12,16),value.slice(16,20),value.slice(20)].join('-');
+}
 
 function cleanText(raw, maximum, label) {
   if (typeof raw !== 'string' || INVISIBLE.test(raw)) throw Error(label + '不能包含不可见字符或换行。');
@@ -41,7 +45,7 @@ function frozenSnapshot(value) {
 export class WordMatchSession {
   constructor({role, name, send, onChange = () => {}, onError = () => {}}) {
     if (!['host', 'guest'].includes(role) || typeof send !== 'function') throw Error('房间设置不正确。');
-    if (!globalThis.crypto?.subtle || !globalThis.crypto?.randomUUID) throw Error('当前浏览器不能安全开启游戏，请使用 HTTPS 网页或更新浏览器。');
+    if (!globalThis.crypto?.subtle || typeof globalThis.crypto?.getRandomValues !== 'function') throw Error('当前浏览器不能安全开启游戏，请使用 HTTPS 网页或更新浏览器。');
     this.seat = role === 'host' ? 0 : 1;
     this._sendPacket = send;
     this._onChange = onChange;
@@ -114,7 +118,7 @@ export class WordMatchSession {
     if (this._started || this._closed) return;
     this._started = true;
     if (this.seat === 0) {
-      this._gameId = crypto.randomUUID();
+      this._gameId = randomId();
       this._send('welcome', {gameId: this._gameId, name: this._names[0]});
       this._beginIfReady();
     } else this._send('hello', {name: this._names[1]});
@@ -259,7 +263,7 @@ export class WordMatchSession {
       this._send('advance', {gameId: this._gameId, fromRound, round: this._round});
       this._notify();
     } else if (this._phase === 'won') {
-      const gameId = this._gameId, round = this._round, newGameId = crypto.randomUUID();
+      const gameId = this._gameId, round = this._round, newGameId = randomId();
       this._retireCurrent(); this._gameId = newGameId; this._history = []; this._newRound(1);
       this._send('restart', {gameId, round, newGameId});
       this._notify();

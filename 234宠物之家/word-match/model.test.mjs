@@ -43,6 +43,23 @@ test('normalization ignores width, outside spaces and case but preserves distinc
   assert.throws(() => normalizeName('名'.repeat(17)));
 });
 
+test('secure sessions and replay also work without crypto.randomUUID', async () => {
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis.crypto,'randomUUID');
+  Object.defineProperty(globalThis.crypto,'randomUUID',{value:undefined,configurable:true});
+  try {
+    const p=pair();await p.start();
+    const first=p.host.snapshot().gameId;
+    assert.match(first,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+    await p.round('朋友','朋友');assert.equal(p.host.snapshot().phase,'won');
+    p.host.again();p.guest.again();await p.pump();
+    assert.notEqual(p.host.snapshot().gameId,first);assert.equal(p.host.snapshot().phase,'writing');
+    assert.deepEqual(p.errors,[]);
+  } finally {
+    if(descriptor)Object.defineProperty(globalThis.crypto,'randomUUID',descriptor);
+    else delete globalThis.crypto.randomUUID;
+  }
+});
+
 test('either opening order completes handshake once and snapshots cannot mutate state', async () => {
   for (const guestFirst of [false, true]) {
     const p = pair({guestFirst}); await p.start();

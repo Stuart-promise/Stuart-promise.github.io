@@ -227,10 +227,11 @@ function bindConnection(connection) {
   connection.on("close",disconnected);
   connection.on("error",disconnected);
 }
-function enter(host, relay = false) {
+function enter(host) {
   if(busy||room)return;
   isHost=host;
-  code=host?createRoomCode(relay):$("code").value.trim().toUpperCase();
+  code=host?createRoomCode():normalizeRoomCode($("code").value);
+  if(!code){note("请输入六位数字房间码，可以带 R 前缀。");return;}
   room={seat:host?0:1,phase:"connecting",version:0,players:host?[true,false]:[false,true],flight:null};
   render();note(host?"正在创建房间…":"正在连接房主…");
   timer=setTimeout(()=>closeRoom("连接超时，请检查网络后重新开房。"),25000);
@@ -254,7 +255,7 @@ function enter(host, relay = false) {
     });
     current.on("error",error=>{
       if(peer!==current || room.phase==="playing" && link?.open)return;
-      const messages={"rules-version":"双方的游戏版本不同，请双方刷新页面后重新开房。","room-expired":"房间等待超过 20 分钟，请重新创建。","server-busy":"房间服务暂时繁忙，请稍后重试。","rate-limited":"连接过于频繁，请稍后重试。","connection-timeout":"与服务器连接超时，请重新开房。","room-full":"房间已经坐满，请换一个房间。","relay-unreachable":"无法连接本站服务器，请稍后重试或使用备用直连房。","peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。"};
+      const messages={"rules-version":"双方的游戏版本不同，请双方刷新页面后重新开房。","room-expired":"房间等待超过 20 分钟，请重新创建。","server-busy":"房间服务暂时繁忙，请稍后重试。","rate-limited":"连接过于频繁，请稍后重试。","connection-timeout":"与服务器连接超时，请重新开房。","room-full":"房间已经坐满，请换一个房间。","relay-unreachable":"暂时无法连接房间服务器，请检查网络后重试。","peer-unavailable":"找不到房间，请确认房主在线并核对邀请码。","unavailable-id":"房间码已占用，请重新创建。","offline":"网络已断开，联网后请重新开房。","page-left":"原页面已离开，返回后请重新开房。"};
       closeRoom(messages[error.type]||"无法建立连接，请检查网络或使用新版浏览器。");
     });
     current.on("disconnected",()=>{
@@ -263,12 +264,11 @@ function enter(host, relay = false) {
   } catch { closeRoom("当前浏览器无法连接，请使用新版浏览器。"); }
 }
 $("create").onclick=()=>enter(true,true);
-$("create-relay").onclick=()=>enter(true,false);
 $("entry").onsubmit=event=>{event.preventDefault();enter(false);};
 $("start").onclick=()=>command("start");
 $("roll").onclick=()=>command("roll");
 $("invite").onclick=async()=>{
-  const url=new URL("./flight.html?v=cloud1&room="+code,location.href).href;
+  const url=new URL("./flight.html?v=crossplay2&room="+code,location.href).href;
   try{await navigator.clipboard.writeText(url);note("邀请链接已复制。");}catch{prompt("复制邀请链接",url);}
 };
 function leave() {
@@ -281,7 +281,7 @@ $("leave").onclick=leave;
 $("home-link").onclick=event=>{
   if(!cpu.level && room && !leave())event.preventDefault();
 };
-const invite=new URLSearchParams(location.search).get("room");
+const invite=normalizeRoomCode(new URLSearchParams(location.search).get("room"));
 if(/^R?[0-9]{6}$/.test(invite||""))$("code").value=invite;
 if(cpu.level){
   isHost=true;
