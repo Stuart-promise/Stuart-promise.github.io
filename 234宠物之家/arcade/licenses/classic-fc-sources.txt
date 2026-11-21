@@ -1,0 +1,17 @@
+Ice Climber (Japan) — Nintendo
+https://github.com/infoplat/jsnes/blob/d9c1397d892f6d72939c416426c3f3fa409b417d/roms/rom1/%28J%29%20Ice%20Climber.nes
+
+Circus Charlie (Japan) — Konami / Soft Pro
+https://github.com/infoplat/jsnes/blob/d9c1397d892f6d72939c416426c3f3fa409b417d/roms/rom1/%28J%29%20Circus%20Charlie%20%5B%21%5D.nes
+
+Antarctic Adventure (Japan) — Konami
+https://github.com/infoplat/jsnes/blob/d9c1397d892f6d72939c416426c3f3fa409b417d/roms/rom1/%28J%29%20Antarctic%20Adventure%20%5B%21%5D.nes
+
+Takahashi Meijin no Bouken Shima (Japan) — Hudson Soft
+https://github.com/infoplat/jsnes/blob/d9c1397d892f6d72939c416426c3f3fa409b417d/roms/rom1/%28J%29%20Takahashi%20Meijin%20no%20Bouken%20Shima%20%5B%21%5D.nes
+
+Jackal (USA) — Konami
+https://github.com/hacan359/co-op-retro-games/blob/bff6228d6cd62c464391def97d3302d5d6bcf120/roms/nes/coop/Jackal%20%28USA%29.nes
+
+Life Force (USA) — Konami
+https://github.com/infoplat/jsnes/blob/d9c1397d892f6d72939c416426c3f3fa409b417d/roms/rom2/Life%20Force%20%5B%21%5D.nes

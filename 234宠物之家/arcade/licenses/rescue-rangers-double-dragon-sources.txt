@@ -1,0 +1,9 @@
+Chip 'n Dale Rescue Rangers (USA)
+开发商：Capcom。角色与作品版权见游戏标题画面。
+GitHub 文件：https://github.com/hacan359/co-op-retro-games/blob/bff6228d6cd62c464391def97d3302d5d6bcf120/roms/nes/coop/Chip%20%27n%20Dale%20-%20Rescue%20Rangers%20%28USA%29.nes
+SHA-256：8d5e3d9ce20fa0a61b23e93dbc975606803f2d5e7a264514b02b96f832a63181
+
+Double Dragon II: The Revenge
+开发商：Technōs Japan。作品版权见游戏标题画面。
+GitHub 文件：https://github.com/infoplat/jsnes/blob/d9c1397d892f6d72939c416426c3f3fa409b417d/roms/Double%20Dragon/Double%20Dragon2.nes
+SHA-256：0a20e079573c71a7a9e5bae8de025ac7abc48b05873e5415a230a0ab49efab21

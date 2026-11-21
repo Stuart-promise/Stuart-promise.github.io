@@ -1,0 +1,4 @@
+Lode Runner - Famicom, simplified Chinese edition
+Source file: roms/淘金者 (简)
+https://github.com/tomiaa12/nesRoms/blob/c02cf3d576f4b1f6c346b9aa80b8b3c9816d3d5f/roms/%E6%B7%98%E9%87%91%E8%80%85%20%28%E7%AE%80%29
+SHA-256: a9038ecfdeb3510031a4fea6d20c984fdaaad748b2890e60b02a5dd521a11448
