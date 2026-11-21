@@ -19,6 +19,7 @@ h1 { color:#872e31; font-size:clamp(2.8rem,7vw,5.8rem); line-height:1.16; letter
 .controller-art i { color:#302e2c; font-size:clamp(2rem,5vw,5rem); line-height:1; font-style:normal; margin-right:6%; text-shadow:1px 2px #f5dfbf }
 .controller-art b { width:12%; aspect-ratio:1; border-radius:50%; background:#292725; border:2px solid #e1c9a5 }
 .shelf { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr)); gap:clamp(14px,2.2vw,26px) }
+@media(min-width:900px) { .shelf { grid-template-columns:repeat(3,minmax(0,1fr)) } }
 .cart { background:#e8dfc9; border:2px solid #493e36; border-radius:13px 13px 8px 8px; box-shadow:0 5px 0 #b3a58c; text-align:left; width:100%; padding:14px; display:flex; flex-direction:column; transition:transform .15s }
 .cart:hover { transform:translateY(-3px) }
 .label { background:var(--ink); display:block; border-radius:5px; padding:9px; width:100% }

@@ -1,18 +1,36 @@
 "use strict";
 
 const games = [
+  { id: "breakout", title: "打砖块", genre: "弹球", color: "#8e3f31", description: "用挡板接住小球，打出一条通往顶层砖墙的路线。",
+    guide: "按左、右移动挡板。看准小球落点，换个位置接球就能改变反弹角度。",
+    menu: "原版标题画面按 START 开局。", startFrames: 205, taps: [[180,"START"]] },
+  { id: "pong", title: "Pong 乒乓", genre: "人机对战", color: "#345573", description: "守住左侧边线，和电脑来一场像素乒乓赛。",
+    guide: "按上、下移动左侧球拍。让球拍的边缘碰球，可以斜着打回去。",
+    menu: "原版菜单默认选中 Player A vs. CPU，按 START 进入人机对战。", startFrames: 205, taps: [[180,"START"]] },
+  { id: "snake", title: "贪吃蛇", genre: "追分", color: "#405d39", description: "追着红苹果转弯，看看能把小蛇养多长。",
+    guide: "按方向键转弯，吃到苹果后蛇身会变长。提前给自己留一条出路。",
+    menu: "卡带载入后小蛇就会移动。点「重新开局」可从头开始。", restartOnly: true, startFrames: 18, taps: [] },
   { id: "che-man", title: "Che-Man", genre: "平台动作", color: "#593c86", description: "跳过机关，穿过地牢，把勋章逐枚送回图腾。",
     guide: "方向键移动，A 跳跃。遇到英文对白，按 A 或 B 翻过。",
     menu: "原版菜单先用方向键选择语言，按 START 确认，再选 GAME A 开始。",
-    startFrames: 411, english: true },
+    startFrames: 411, taps: [[150,"DOWN"],[180,"START"],[320,"START"]] },
   { id: "helmet", title: "头盔中士训练日", genre: "俯视冒险", color: "#375f45", description: "潜入训练基地，找到三台电脑并放置炸弹。",
     guide: "方向键移动，A 射击，B 与任务目标互动。",
     menu: "原版菜单用 SELECT 切换任务，按 START 进入。",
-    startFrames: 411 },
+    startFrames: 411, taps: [[180,"START"],[320,"START"]] },
   { id: "thwaite", title: "Thwaite 小镇防空战", genre: "防空射击", color: "#8a4132", description: "瞄准来袭的导弹，让爆炸在小镇上空连成一片。",
     guide: "方向键移动准星。B 从左侧发射，A 从右侧发射，在导弹前方布置拦截。",
     menu: "原版菜单用方向键选择 1 Player 或 Practice，按 START 确认。START 可跳过剧情。",
-    startFrames: 581, skipStory: true }
+    startFrames: 581, taps: [[180,"START"],[320,"START"],[460,"START"]] },
+  { id: "jet-paco", title: "喷气特工 Jet Paco", genre: "飞行射击", color: "#704a37", description: "点燃喷气背包，在基地的竖井和通道间寻找补给。",
+    guide: "左右移动，按住 B 喷射上升，松开下降。A 射击。",
+    menu: "原版任务菜单用 SELECT 切换任务，按 START 出发。", startFrames: 410, taps: [[180,"START"],[320,"START"]] },
+  { id: "cheril-perils", title: "谢丽尔历险记", genre: "机关跳台", color: "#6b3f65", description: "踩响共鸣器，趁敌人定住的瞬间跳到它们头上。",
+    guide: "左右移动，A 跳跃。默认模式里先踩下共鸣器，再趁倒计时踩敌人。",
+    menu: "原版标题画面可以选择共鸣器模式或简单模式，按 START 确认。", startFrames: 565, taps: [[180,"START"],[320,"START"],[480,"START"]] },
+  { id: "dveelng", title: "地牢迷阵 D’Veel’Ng", genre: "迷宫射击", color: "#385c66", description: "在骷髅围墙之间穿行，搜集散落在地牢里的十件物品。",
+    guide: "用方向键在迷宫内移动，面朝敌人按 A 射击。",
+    menu: "原版标题画面按 START 进入。", startFrames: 565, taps: [[180,"START"],[320,"START"],[480,"START"]] }
 ];
 
 const $ = selector => document.querySelector(selector);
@@ -132,9 +150,7 @@ function play() {
 
 // Advance unmodified cartridges through their original menus using controller input.
 async function quickStart(machine, game, token) {
-  const taps = new Map([[180,"START"],[320,"START"]]);
-  if (game.english) taps.set(150,"DOWN");
-  if (game.skipStory) taps.set(460,"START");
+  const taps = new Map(game.taps);
   for (let i = 0; i < game.startFrames; i++) {
     if (taps.has(i)) machine.buttonDown(1, jsnes.Controller["BUTTON_" + taps.get(i)]);
     if (taps.has(i - 5)) machine.buttonUp(1, jsnes.Controller["BUTTON_" + taps.get(i - 5)]);
@@ -156,6 +172,7 @@ async function load(game, quick) {
   $("#game-title").textContent = game.title;
   $("#guide").textContent = game.guide;
   $("#menu-guide").textContent = game.menu;
+  $("#menu").textContent = game.restartOnly ? "重新开局" : "原版菜单";
   $("#pause").disabled = true;
   $("#pause").textContent = "暂停";
   screen.fillRect(0, 0, 256, 240);
