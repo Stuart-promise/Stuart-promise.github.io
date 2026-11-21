@@ -1,0 +1,8 @@
+Super Mario Bros. (Japan, USA), NES
+Copyright 1985 Nintendo.
+
+Source file in the vmartinv/nek repository
+https://github.com/vmartinv/nek/blob/04260400ed4ee52e70106b32c0569c3416df6acb/roms/Super%20Mario%20Bros.%20%28Japan%2C%20USA%29.nes
+
+SHA-1 (including iNES header) ea343f4e445a9050d4b4fbac2c77d0693b1d0922
+CRC32 (PRG and CHR data) D445F698
