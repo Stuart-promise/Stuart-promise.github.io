@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#33281f">
+  <title>黄金矿工 · 234宠物之家</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./game.mjs"></script>
+</head>
+<body>
+  <header><a href="../games.html">‹ 游戏页面</a><span>234宠物之家</span></header>
+  <main>
+    <div class="heading"><h1>黄金矿工</h1><div class="settings"><button id="sound" aria-pressed="true">声音开</button><button id="pause" disabled>暂停</button></div></div>
+    <div class="cabinet">
+      <div class="field">
+        <div class="hud">
+          <div><span>已收金</span><strong id="money">$0</strong></div>
+          <div><span>目标</span><strong id="goal">—</strong></div>
+          <div><span>倒计时</span><strong id="seconds">60 秒</strong></div>
+        </div>
+        <div class="mine" id="mine"><canvas tabindex="-1" width="800" height="520" aria-label="矿场。使用放钩按钮抓取黄金，或使用键盘操作。"></canvas></div>
+        <div id="controls" class="controls" hidden>
+          <div class="station"><span class="badge one">1P</span><button class="drop" data-fire="0">放钩</button><button class="bomb" data-bomb="0">炸药</button></div>
+          <div class="station" id="station-two" hidden><span class="badge two">2P</span><button class="drop" data-fire="1">放钩</button><button class="bomb" data-bomb="1">炸药</button></div>
+        </div>
+      </div>
+      <aside aria-label="矿场操作台">
+        <div class="plate"><span id="level">第 1 关</span><strong id="level-name">黄金矿场</strong></div>
+        <section id="lobby" hidden>
+          <h2>选择矿工</h2>
+          <div class="switch" role="group" aria-label="游戏人数"><button id="solo" aria-pressed="true">单人</button><button id="duo" aria-pressed="false">双人同屏</button></div>
+          <p id="brief"></p>
+          <button class="primary" id="begin">开始挖矿</button>
+        </section>
+        <section id="working" hidden>
+          <h2>本关进度</h2><progress id="progress" aria-label="本关金额进度" max="100" value="0"></progress>
+          <p id="remaining"></p><p class="supply" id="supplies"></p>
+        </section>
+        <section id="paused" hidden><h2>已暂停</h2><p>矿车和计时都已停下。</p><button id="resume" class="primary">继续挖矿</button><button class="quiet" id="quit">结束本局</button></section>
+        <section id="result" hidden><h2 id="result-title"></h2><p id="result-copy"></p>
+          <button id="to-shop" class="primary">进入商店</button><button id="restart" class="primary">再玩一局</button>
+          <button class="quiet" id="back">重新选人数</button>
+        </section>
+        <section id="shop" hidden><h2>矿工商店</h2><p id="shop-note">道具从现款中扣除。</p><div id="shelves"></div><button id="next" class="primary">前往下一关</button></section>
+        <div id="hint-area"><h3>操作</h3><p id="key-hint"></p></div>
+        <div class="live" id="announcement" role="status" aria-live="polite"></div>
+      </aside>
+    </div>
+    <noscript>请启用 JavaScript 来运行游戏。</noscript>
+  </main>
+</body>
+</html>

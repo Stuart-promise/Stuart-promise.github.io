@@ -1,0 +1,68 @@
+:root{font-family:"Microsoft YaHei",system-ui,sans-serif;color:#342b21;background:#f6eed9;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 12% 0%,#fff9e9,transparent 55%),#f6eed9;min-height:100vh}
+[hidden]{display:none!important}
+header,main{width:min(1130px,94%);margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #cfbb97;font-weight:700;font-size:.95rem}
+a{color:#584330;text-decoration:none}
+button{font:inherit;font-weight:700;cursor:pointer;touch-action:manipulation;color:inherit;padding:.52rem .85rem;background:#fff8e5;border:1px solid #b39c75;border-radius:7px}
+button:focus-visible,a:focus-visible{outline:3px solid #177b8d;outline-offset:3px}
+button:disabled{opacity:.5;cursor:default}
+h1,h2,h3,p{margin:0}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:clamp(14px,3vw,28px) 0 15px}
+h1{font-size:clamp(2rem,4.5vw,3.5rem);line-height:1.1;font-family:"STIX Two Text","Microsoft YaHei",serif;letter-spacing:.04em;color:#51301d}
+.settings,.switch{display:flex;gap:6px}
+.cabinet{display:grid;grid-template-columns:minmax(0,1fr) minmax(218px,28%);gap:clamp(10px,2vw,24px);align-items:start;padding-bottom:1.4rem}
+.field{border:4px solid #4a3426;border-radius:13px;background:#3c3028;box-shadow:0 4px #b9a17d;overflow:hidden}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);color:#ffedb6;min-height:57px;background:linear-gradient(#594333,#3e3028)}
+.hud div{display:flex;align-items:baseline;justify-content:center;gap:7px;align-self:center;border-right:1px solid #81654b}
+.hud div:last-child{border:0}
+.hud span{font-size:.86rem;color:#efdbb7}
+.hud strong{font:bold clamp(1.08rem,2.2vw,1.65rem)/1.3 ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.hud .low{color:#ffb291}
+.mine{background:#754b32;position:relative;touch-action:none;-webkit-touch-callout:none;user-select:none}
+canvas{display:block;width:100%;height:auto;aspect-ratio:800/520}
+.controls{display:flex;justify-content:space-evenly;flex-wrap:wrap;padding:10px 5px;gap:10px 4px}
+.station{display:flex;gap:5px;align-items:center}
+.badge{font:800 .85rem/1.1 ui-monospace,monospace;color:#fff;border-radius:4px;padding:5px}
+.one{background:#a63e29}.two{background:#24647d}
+.drop,.bomb{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-height:44px;min-width:52px;padding:.45rem .8rem}
+.drop{background:#f5c24c;border-color:#b67d2d}.bomb{background:#e5d8c5}
+aside{background:#fff9e9;border:1px solid #ccb48a;border-radius:12px;overflow:hidden;box-shadow:0 3px #decaa6}
+.plate{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#374e47;color:#fff5d0;padding:.8rem 1rem}
+.plate span{font-size:.9rem}.plate strong{font-size:1.06rem}
+section,#hint-area{padding:clamp(12px,2vw,21px);display:grid;gap:10px}
+section h2{color:#5f3824;font-size:1.35rem}
+p{line-height:1.6}
+.switch button{flex:1}
+.switch button[aria-pressed=true]{background:#316352;color:#fff;border-color:#316352}
+.primary{width:100%;background:#eeaf32;border:1px solid #996923;color:#382915;box-shadow:0 2px #946b36;min-height:44px}
+.quiet{background:transparent}
+#hint-area{border-top:1px dashed #c8ad80;color:#66513b;gap:4px;font-size:.92rem}
+#hint-area h3{font-size:.92rem;color:#443425}
+progress{height:16px;width:100%;accent-color:#a57820}
+.supply{font-size:.9rem;color:#594735}
+#shelves{display:grid;gap:6px}
+.ware{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;padding:.5rem .65rem}
+.ware small{grid-column:1/-1;font-weight:normal;font-size:.85rem;color:#5c4935}
+.live{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(max-width:720px){
+ .cabinet{grid-template-columns:1fr}
+ .heading{margin:12px 0}
+ aside{display:grid;grid-template-columns:1fr}
+ aside section{gap:8px}
+ #lobby .switch{max-width:100%}
+ .hud{min-height:44px}
+ .hud div{gap:4px}
+ .hud span{font-size:.75rem}
+ #hint-area{padding-top:10px;padding-bottom:10px}
+ .controls{padding:7px 2px}
+ .drop,.bomb{padding:.45rem .65rem}
+}
+@media(orientation:landscape) and (max-height:570px) and (min-width:650px){
+ header{padding:3px 0}
+ .heading{margin:3px 0 5px}.heading h1{font-size:1.55rem}
+ .cabinet{grid-template-columns:minmax(0,min(60%,calc(153.8dvh - 225px))) minmax(220px,1fr);max-width:min(100%,calc(156dvh + 110px));margin:auto}
+ .hud{min-height:30px}.hud strong{font-size:1.05rem}
+ .controls{padding:4px}.drop,.bomb{min-height:35px}
+}
