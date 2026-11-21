@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f1df">
+  <title>街机游戏厅 · 234宠物之家</title>
+  <link rel="stylesheet" href="./arcade.css">
+  <script defer src="./vendor/jsnes-3.0.0.min.js"></script>
+  <script defer src="./arcade.js"></script>
+</head>
+<body>
+  <header><a href="../">234宠物之家</a><a href="../games.html">返回游戏页面</a></header>
+  <main>
+    <div class="marquee"><div><p class="overline" lang="en">FAMILY COMPUTER</p><h1>街机游戏厅</h1><p>挑一张卡带，按下开始。</p></div><div class="controller-art" aria-hidden="true"><i>✚</i><b></b><b></b></div></div>
+    <section class="shelf" aria-label="选择游戏卡带" id="shelf"></section>
+    <noscript>请开启 JavaScript 以运行红白机游戏。</noscript>
+    <footer><details><summary>原作、源码与授权</summary>
+      <p>Che-Man 与 Sgt. Helmet's Training Day 由 The Mojon Twins 制作。<a href="./licenses/MK1-README.md">作者说明</a> · <a href="./licenses/MK1-LGPL.txt">引擎许可</a> · <a href="./licenses/mk1-games-source.zip">对应版本游戏源码</a> · <a href="https://github.com/mojontwins/MK1_NES/tree/ec3fbccda9d8ca93e993568c03ba20d7d1570fb5">完整开发工具</a></p>
+      <p>Thwaite 由 Damian Yerrick 制作。<a href="./licenses/GPL-3.txt">GPL v3</a> · <a href="./licenses/thwaite-source.zip">游戏源码与手册</a></p>
+      <p>模拟器使用 JSNES 3.0.0。<a href="./licenses/JSNES.txt">Apache 2.0 许可</a></p>
+    </details></footer>
+  </main>
+  <dialog id="player" aria-labelledby="game-title">
+    <div class="player-top"><h2 id="game-title"></h2><button id="leave">返回选卡</button></div>
+    <div class="console">
+      <div class="screen"><canvas width="256" height="240" aria-label="红白机游戏画面"></canvas><div id="status" role="status" hidden></div></div>
+      <div class="panel">
+        <div><h3>游戏操作</h3><p id="guide"></p></div>
+        <div class="controls" aria-label="模拟手柄">
+          <div class="dpad"><button data-key="UP" aria-label="上">▲</button><button data-key="LEFT" aria-label="左">◀</button><button data-key="RIGHT" aria-label="右">▶</button><button data-key="DOWN" aria-label="下">▼</button></div>
+          <div class="actions"><button data-key="B">B</button><button data-key="A">A</button></div>
+        </div>
+        <div class="menu-keys"><button data-key="SELECT">SELECT</button><button data-key="START">START</button></div>
+        <p class="key-guide">电脑用方向键移动，X 对应 A，Z 对应 B。Enter 开始，Shift 选择。</p>
+        <div class="tools"><button id="pause">暂停</button><button id="sound" aria-pressed="true">声音开</button><button id="menu">原版菜单</button></div>
+        <p class="menu-guide" id="menu-guide"></p>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>
