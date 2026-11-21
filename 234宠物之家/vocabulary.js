@@ -1,16 +1,56 @@
-import {playAudio,stopAudio,audioReady} from './vocabulary-audio.mjs?v=perf1';
+import {playAudio,stopAudio,loadBookAudio} from './vocabulary-audio.mjs?v=book-switch1';
 import {dayKey,afterDays,parseRecord,dayStats,makeModuleSession,meaningChoices,completeRecall} from './vocabulary-core.mjs?v=calendar3';
-const $=id=>document.getElementById(id),requestedBook=new URLSearchParams(location.search).get('book'),book=['cet4','cet6','zhongkao','gaokao'].includes(requestedBook)?requestedBook:'cet4';
-const title=({cet4:'大学四级',cet6:'大学六级',zhongkao:'长沙中考基础词汇',gaokao:'高考英语词汇'})[book],prefix=`pet234:vocab:v1:${book}:`;
-// Start static content and account restoration together instead of chaining network waits.
-const bookReady=fetch(`./${book}.json?v=1`).then(async response=>{if(!response.ok)throw Error('词书加载失败，请检查网络后刷新。');return response.json();});
-bookReady.catch(()=>{});
-const store=await PetAccount.open('vocab-'+book),records=new Map(),favorites=new Set();
+const $=id=>document.getElementById(id);
+const titles={cet4:'大学四级',cet6:'大学六级',zhongkao:'长沙中考基础词汇',gaokao:'高考英语词汇'};
+const url=new URL(location.href), requestedBook=url.searchParams.get('book');
+const preferenceKey='pet234:vocab:last-book:'+PetAccount.owner;
+let preferredBook;
+try { preferredBook=localStorage.getItem(preferenceKey); } catch {}
+const candidate=requestedBook??preferredBook;
+const book=Object.prototype.hasOwnProperty.call(titles,candidate)?candidate:'cet4';
+const title=titles[book],prefix=`pet234:vocab:v1:${book}:`;
+if(!requestedBook){url.searchParams.set('book',book);history.replaceState(history.state,'',url);}
+const main=document.querySelector('main.vocab');
+let navigating=false, readyForPractice=false;
+function rememberBook(){
+ try { localStorage.setItem(preferenceKey,book); } catch {}
+}
+function showBookLoading(target){
+ main.dataset.loadingBook=target;
+ $('book-loading').textContent='正在载入'+titles[target]+'…';
+ for(const link of document.querySelectorAll('.books [data-book]')){
+  if(link.dataset.book===target)link.setAttribute('aria-current','page');
+  else link.removeAttribute('aria-current');
+ }
+}
+document.querySelector('.books').addEventListener('click',event=>{
+ const link=event.target.closest('a[data-book]');
+ if(!link||event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+ if(link.dataset.book===book&&!navigating&&readyForPractice){event.preventDefault();return;}
+ navigating=true;
+ stopAudio();
+ showBookLoading(link.dataset.book);
+});
+window.addEventListener('pageshow',event=>{
+ if(!event.persisted)return;
+ navigating=false;
+ showBookLoading(book);
+ if(readyForPractice){delete main.dataset.loadingBook;rememberBook();externalUpdate();}
+});
+showBookLoading(book);
+loadBookAudio(book).catch(()=>{});
+const bookReady=fetch(`./${book}.json?v=${book==='gaokao'?'school2':'1'}`).then(response=>{
+ if(!response.ok)throw Error('词书加载失败，请刷新重试。');
+ return response.json();
+});
+const storeReady=PetAccount.open('vocab-'+book);
+let store;
+const records=new Map(),favorites=new Set();
 let rows=[],byWord=new Map(),examples={},session=null,sessionRaw=null,busy=false,screen='dashboard',filter='all',listLimit=40,nowDay='',roundSummary='';
 let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),calendarData=null,calendarRequest=0,rewardBusy=false;
 const tickets=new Map();
 let snapshot=null, sessionKey='session-v3:new', lastMode='new';
-const refreshSnapshot=()=>{snapshot=PetAccount.session?{...PetAccount.read('vocab-'+book).data}:null;};
+const refreshSnapshot=()=>{snapshot=PetAccount.session?PetAccount.read('vocab-'+book).data:PetAccount.guestData('vocab-'+book);};
 const get=k=>snapshot?snapshot[prefix+k]??null:store.getItem(prefix+k);
 const put=(k,v)=>{const raw=typeof v==='string'?v:JSON.stringify(v);store.setItem(prefix+k,raw);if(snapshot)snapshot[prefix+k]=raw;};
 const parse=(raw,fallback=null)=>{try{return JSON.parse(raw)??fallback;}catch{return fallback;}};
@@ -73,7 +113,7 @@ $('calendar-next').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear
 $('calendar-today').onclick=()=>{calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderCalendar();fetchCalendar();};
 $('retry-study-sync').onclick=()=>{tickets.clear();fetchCalendar();flushRewards();};
 $('goal-form').onsubmit=e=>{e.preventDefault();const n=Number($('daily-goal').value);act(()=>{if(!Number.isInteger(n)||n<0||n>rows.length){sayWarning(`请输入 0 到 ${rows.length} 之间的整数，0 表示今天只复习。`);return;}put('daily-goal',String(n));renderDashboard();$('goal-saved').textContent='已保存，可随时调整。';});};
-window.addEventListener('online',()=>{tickets.clear();fetchCalendar();flushRewards();});
+window.addEventListener('online',()=>{if(!readyForPractice||navigating)return;tickets.clear();fetchCalendar();flushRewards();});
 function renderDashboard(){
  const now=new Date(),today=dayKey(now),stats=dayStats(rows,records,now),d=daily(stats);
  const days=Object.keys(localActivity());
@@ -139,8 +179,9 @@ function renderPractice(){
 }
 function show(next){stopAudio();$('audio-status').textContent='';screen=next;document.body.classList.toggle('learning',next==='practice');$('dashboard').hidden=next!=='dashboard';$('practice').hidden=next!=='practice';$('round-done').hidden=next!=='done';renderDashboard();if(next==='practice')renderPractice();}
 async function act(fn){
- if(busy||!rows.length)return;busy=true;document.querySelector('main').setAttribute('aria-busy','true');
+ if(busy||navigating||!readyForPractice)return;busy=true;document.querySelector('main').setAttribute('aria-busy','true');
  try{await PetAccount.locked('vocab-ui-'+book,()=>{
+  if(navigating)return;
   PetAccount.assertOwner();refreshSnapshot();if(get(sessionKey)!==sessionRaw){load();show(session?'practice':'dashboard');sayWarning('已读取另一个页面的最新学习进度，请继续。');return;}
   // A changed word record may also come from the earlier version of this page.
   for(const [word]of rows){const r=parseRecord(get('word:'+word));if(r)records.set(word,r);else records.delete(word);}
@@ -158,7 +199,7 @@ function prepareChoices(){if(session?.v===3){session.choices=currentItem().kind=
 function renderModulePractice(){
  const item=currentItem(),[word,phonetic,meaning]=byWord.get(item.word),detail=session.phase==='detail',question=session.phase==='question',isNew=item.kind==='新词';
  prepareReward(word);
- $('phase-label').textContent=`${session.mode==='new'?'新学':session.mode==='review'?'复习':'加练'} · ${session.index+1} / ${session.items.length}`;
+ $('phase-label').textContent=`${title} · ${session.mode==='new'?'新学':session.mode==='review'?'复习':'加练'} · ${session.index+1} / ${session.items.length}`;
  $('round-progress').max=session.items.length;$('round-progress').value=session.index;
  $('kind').textContent=isNew?'先回想，再选择':'先回想，再核对';
  $('favorite').textContent=favorites.has(word)?'★ 已收藏':'☆ 收藏';$('favorite').setAttribute('aria-pressed',String(favorites.has(word)));
@@ -219,12 +260,19 @@ function renderList(){
 $('browse').onclick=()=>{if(!rows.length)return;renderList();$('word-dialog').showModal();$('search').focus();};$('close-dialog').onclick=()=>$('word-dialog').close();$('search').oninput=()=>{listLimit=40;renderList();};$('more').onclick=()=>{listLimit+=40;renderList();};
 $('practice-favorites').onclick=()=>act(()=>{$('word-dialog').close();begin('favorites');});
 for(const button of document.querySelectorAll('[data-filter]'))button.onclick=()=>{filter=button.dataset.filter;listLimit=40;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));renderList();};
-function externalUpdate(){try{const old=sessionRaw;load();renderDashboard();if(old!==sessionRaw&&screen==='practice')show(session?'practice':'dashboard');if($('word-dialog').open)renderList();}catch(e){sayWarning(e);}}
+function externalUpdate(){if(!readyForPractice||navigating)return;try{const old=sessionRaw;load();renderDashboard();if(old!==sessionRaw&&screen==='practice')show(session?'practice':'dashboard');if($('word-dialog').open)renderList();}catch(e){sayWarning(e);}}
 window.addEventListener('pet-account-data',externalUpdate);window.addEventListener('storage',e=>{if(!e.key||e.key.startsWith(prefix))externalUpdate();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&rows.length){externalUpdate();renderDashboard();}else stopAudio();});
 setInterval(()=>{if(rows.length&&!document.hidden){try{renderDashboard();}catch(e){sayWarning(e);}}},60000);
-document.querySelector(`[data-book="${book}"]`).setAttribute('aria-current','page');
 try{
- rows=await bookReady;byWord=new Map(rows.map(r=>[r[0],r]));
- load();show('dashboard');fetchCalendar();flushRewards();
-}catch(e){sayWarning(e);$('book-summary').textContent='词书暂时不可用';$('start').textContent='请刷新重试';}
+ [rows,store]=await Promise.all([bookReady,storeReady]);
+ byWord=new Map(rows.map(r=>[r[0],r]));
+ load();show('dashboard');readyForPractice=true;
+ if(!navigating){
+  delete main.dataset.loadingBook;
+  rememberBook();
+ }
+ fetchCalendar();flushRewards();
+}catch(e){
+ if(!navigating){sayWarning(e);$('book-loading').textContent=title+'载入失败，请刷新重试或选择其他词书。';}
+}
