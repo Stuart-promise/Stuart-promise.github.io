@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f6f1df">
   <title>街机游戏厅 · 234宠物之家</title>
-  <link rel="stylesheet" href="./arcade.css">
+  <link rel="stylesheet" href="./arcade.css?v=pad2">
   <script defer src="./vendor/jsnes-3.0.0.min.js"></script>
-  <script defer src="./arcade.js"></script>
+  <script defer src="./arcade.js?v=pad2"></script>
 </head>
 <body>
   <header><a href="../">234宠物之家</a><a href="../games.html">返回游戏页面</a></header>
@@ -28,11 +28,22 @@
       <div class="panel">
         <div><h3>游戏操作</h3><p id="guide"></p></div>
         <div class="controls" aria-label="模拟手柄">
-          <div class="dpad"><button data-key="UP" aria-label="上">▲</button><button data-key="LEFT" aria-label="左">◀</button><button data-key="RIGHT" aria-label="右">▶</button><button data-key="DOWN" aria-label="下">▼</button></div>
-          <div class="actions"><button data-key="B">B</button><button data-key="A">A</button></div>
+          <div class="dpad">
+            <button type="button" data-key="UP" aria-label="上" aria-keyshortcuts="ArrowUp W" data-shortcut="W"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="./controller.svg#arrow"></use></svg></button>
+            <button type="button" data-key="LEFT" aria-label="左" aria-keyshortcuts="ArrowLeft A" data-shortcut="A"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="./controller.svg#arrow"></use></svg></button>
+            <button type="button" data-key="RIGHT" aria-label="右" aria-keyshortcuts="ArrowRight D" data-shortcut="D"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="./controller.svg#arrow"></use></svg></button>
+            <button type="button" data-key="DOWN" aria-label="下" aria-keyshortcuts="ArrowDown S" data-shortcut="S"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="./controller.svg#arrow"></use></svg></button>
+          </div>
+          <div class="actions">
+            <button type="button" data-key="B" aria-label="B" aria-keyshortcuts="Z J" data-shortcut="Z / J"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="./controller.svg#b"></use></svg></button>
+            <button type="button" data-key="A" aria-label="A" aria-keyshortcuts="X K" data-shortcut="X / K"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="./controller.svg#a"></use></svg></button>
+          </div>
         </div>
-        <div class="menu-keys"><button data-key="SELECT">SELECT</button><button data-key="START">START</button></div>
-        <p class="key-guide">电脑用方向键移动，X 对应 A，Z 对应 B。Enter 开始，Shift 选择。</p>
+        <div class="menu-keys">
+          <button type="button" data-key="SELECT" aria-label="选择" aria-keyshortcuts="Shift" data-shortcut="Shift"><svg aria-hidden="true" focusable="false" viewBox="0 0 64 24"><use href="./controller.svg#select"></use></svg></button>
+          <button type="button" data-key="START" aria-label="开始" aria-keyshortcuts="Enter" data-shortcut="Enter"><svg aria-hidden="true" focusable="false" viewBox="0 0 64 24"><use href="./controller.svg#start"></use></svg></button>
+        </div>
+        <p class="key-guide">方向键或 WASD 移动。按住按键可持续操作。</p>
         <div class="tools"><button id="pause">暂停</button><button id="sound" aria-pressed="true">声音开</button><button id="menu">原版菜单</button></div>
         <p class="menu-guide" id="menu-guide"></p>
       </div>

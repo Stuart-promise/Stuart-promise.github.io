@@ -24,7 +24,8 @@ const frameImage = screen.createImageData(256, 240);
 const pixels = new Uint32Array(frameImage.data.buffer);
 const controls = [...document.querySelectorAll("[data-key]")];
 const keyMap = { ArrowUp:"UP", ArrowDown:"DOWN", ArrowLeft:"LEFT", ArrowRight:"RIGHT",
-  KeyX:"A", KeyZ:"B", ShiftLeft:"SELECT", ShiftRight:"SELECT", Enter:"START" };
+  KeyW:"UP", KeyS:"DOWN", KeyA:"LEFT", KeyD:"RIGHT", KeyX:"A", KeyK:"A",
+  KeyZ:"B", KeyJ:"B", ShiftLeft:"SELECT", ShiftRight:"SELECT", Enter:"START", NumpadEnter:"START" };
 const held = new Map();
 let current, nes, generation = 0, animation = 0, running = false;
 let audio, soundOn = true, nextAudio = 0, sampleCount = 0;
@@ -177,15 +178,38 @@ async function load(game, quick) {
     if (token === generation) status("卡带载入失败，请返回选卡后重试。");
   }
 }
+// Cancel the browser's long-press gesture on the controller, including the
+// gaps between keys. Keep scrolling and text selection available elsewhere.
+for (const pad of document.querySelectorAll(".controls, .menu-keys")) {
+  for (const type of ["contextmenu", "selectstart", "dragstart"]) {
+    pad.addEventListener(type, event => event.preventDefault(), true);
+  }
+  pad.addEventListener("touchstart", event => {
+    event.preventDefault();
+    if (!window.PointerEvent) {
+      for (const touch of event.changedTouches) {
+        const key = touch.target.closest("[data-key]")?.dataset.key;
+        if (key) press(touch.identifier, key);
+      }
+    }
+  }, { passive:false });
+  if (!window.PointerEvent) {
+    for (const type of ["touchend","touchcancel"]) {
+      pad.addEventListener(type, event => {
+        for (const touch of event.changedTouches) release(touch.identifier);
+      });
+    }
+  }
+}
 for (const button of controls) {
   button.addEventListener("pointerdown", event => {
+    if (event.button !== 0) return;
     event.preventDefault();
     button.setPointerCapture(event.pointerId);
     press(event.pointerId, button.dataset.key);
   });
   for (const type of ["pointerup","pointercancel","lostpointercapture"])
     button.addEventListener(type, event => release(event.pointerId));
-  button.addEventListener("contextmenu", event => event.preventDefault());
   button.addEventListener("click", event => {
     if (event.detail !== 0) return;
     const source = Symbol();

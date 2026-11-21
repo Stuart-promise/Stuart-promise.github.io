@@ -45,11 +45,21 @@ canvas { display:block; width:100%; aspect-ratio:256/240; image-rendering:pixela
 .panel h3 { font-size:1rem; margin-bottom:3px }
 .panel p { line-height:1.5 }
 .controls { justify-content:space-between; margin:auto; width:min(100%,310px); touch-action:none }
-.dpad { display:grid; grid-template-columns:repeat(3,var(--pad)); grid-template-rows:repeat(3,var(--pad)); --pad:clamp(33px,7.5vw,44px) }
-.dpad button,.actions button,.menu-keys button { touch-action:none; user-select:none; -webkit-user-select:none }
+.dpad { display:grid; grid-template-columns:repeat(3,var(--pad)); grid-template-rows:repeat(3,var(--pad)); --pad:44px }
+.controls,.menu-keys,[data-key] { touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none }
+[data-key] { display:grid; align-content:center; justify-items:center; gap:1px; padding:0; appearance:none }
+[data-key] svg { display:block; width:20px; height:20px; pointer-events:none }
+[data-key=LEFT] svg { transform:rotate(-90deg) }
+[data-key=RIGHT] svg { transform:rotate(90deg) }
+[data-key=DOWN] svg { transform:rotate(180deg) }
+.menu-keys [data-key] { min-width:76px; min-height:44px; padding:3px 7px }
+.menu-keys svg { width:60px; height:22px }
+@media (any-hover:hover) and (any-pointer:fine) {
+  [data-key]::after { content:attr(data-shortcut); font:600 .76rem/1.1 system-ui,sans-serif; pointer-events:none }
+}
 .dpad button,.actions button { background:#383632; color:#fff4df; border:0; font-weight:750; box-shadow:0 3px #878070; border-radius:5px }
 [data-key=UP] { grid-area:1/2 } [data-key=LEFT] { grid-area:2/1 } [data-key=RIGHT] { grid-area:2/3 } [data-key=DOWN] { grid-area:3/2 }
-.actions button { background:#973f42; width:clamp(40px,10vw,52px); aspect-ratio:1; border-radius:50% }
+.actions button { background:#973f42; width:clamp(44px,10vw,52px); aspect-ratio:1; border-radius:50% }
 .actions button:last-child { transform:translateY(-9px) }
 [data-key].held { filter:brightness(1.5); box-shadow:inset 0 1px 3px #1c1815 }
 .menu-keys { justify-content:center; font-size:.9rem }
@@ -68,7 +78,7 @@ canvas { display:block; width:100%; aspect-ratio:256/240; image-rendering:pixela
 @media(orientation:landscape) and (max-height:550px) {
   .console { grid-template-columns:minmax(0,1fr) minmax(245px,1fr); gap:10px; padding:6px }
   .screen { width:min(100%,85dvh); margin:auto }
-  .panel { gap:4px } .dpad { --pad:32px } .key-guide { display:none }
+  .panel { gap:4px } .key-guide { display:none }
 }
 @media(prefers-reduced-motion:reduce) { .cart { transition:none } }
 
