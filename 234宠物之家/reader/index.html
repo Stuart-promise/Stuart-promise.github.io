@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f5f3e9">
   <title>小说阅读 · 234宠物之家</title>
   <link rel="stylesheet" href="./style.css?v=3">
-  <link rel="stylesheet" href="./web-library.css?v=2">
+  <link rel="stylesheet" href="./web-library.css?v=3">
   <link rel="stylesheet" href="./reader-motion.css?v=1">
 </head>
 <body>
@@ -17,9 +17,11 @@
         <div class="library-intro"><div><span class="eyebrow">A QUIET CHAPTER / 让时间慢下来</span><h1>小说阅读<span>翻开另一个世界。</span></h1><p>玩累了，就读一会儿。找本好书，从上次停下的地方继续。</p></div><div class="book-emblem" aria-hidden="true"><i></i><b>读</b><i></i></div></div>
         <nav class="discovery-nav" aria-label="阅读分区"><a href="#web-novels">搜索网文</a><a href="#my-shelf">我的书架</a><a href="#books">古典书库</a></nav>
         <section id="web-novels" class="web-hub" aria-labelledby="web-heading">
-          <div class="shelf-heading"><h2 id="web-heading">搜索网文</h2><span>社区书源 · 找到故事，就在这里读</span></div>
-          <form id="novel-search-form" class="novel-search"><label class="sr-only" for="novel-query">书名或作者</label><input id="novel-query" type="search" maxlength="80" placeholder="输入书名或作者…" autocomplete="off" required><label class="sr-only" for="novel-source">选择书源</label><select id="novel-source" aria-label="选择书源"><option value="all">全部书源</option></select><button id="novel-search-button" class="primary" type="submit">搜索小说</button></form>
-          <p id="source-service-status" class="web-note">正在连接书源…</p><p id="novel-search-status" role="status">搜索喜欢的小说，阅读公开章节，也可以加入自己的书架。</p><div id="novel-results" class="novel-results"></div><button id="search-more" hidden>加载更多结果</button>
+          <div class="shelf-heading"><h2 id="web-heading">搜索网文</h2><a id="fanqie-library" href="https://fanqienovel.com/library" target="_blank" rel="noopener noreferrer">番茄官方书库 ↗</a></div>
+          <form id="novel-search-form" class="novel-search"><label class="sr-only" for="novel-query">书名或作者</label><input id="novel-query" type="search" maxlength="2048" placeholder="书名、作者或番茄作品链接…" autocomplete="off" required><label class="sr-only" for="novel-source">选择书源</label><select id="novel-source" aria-label="选择书源"><option value="all">全部书源</option></select><button id="novel-search-button" class="primary" type="submit">搜索小说</button></form>
+          <p id="source-service-status" class="web-note" role="status">正在加载书源…</p>
+          <p id="fanqie-hint" class="web-note">按书名或作者可搜番茄精选作品；其他作品可从官方书库复制作品链接或书号，在这里查目录、加入书架。正文在番茄官网阅读。<a id="fanqie-search" target="_blank" rel="noopener noreferrer" hidden>去番茄官网搜索 ↗</a></p>
+          <p id="novel-search-status" role="status">按书名或作者搜索，也可以把喜欢的作品加入书架。</p><div id="novel-results" class="novel-results"></div><button id="search-more" hidden>加载更多结果</button>
         </section>
         <section id="my-shelf" aria-labelledby="my-shelf-heading"><div class="shelf-heading"><h2 id="my-shelf-heading">我的网文书架</h2><span id="my-shelf-count">0 / 100</span></div><p id="my-shelf-empty" class="shelf-empty">书架还空着。在搜索结果中点击「加入书架」，下次从这里接着读。</p><div id="my-books" class="web-shelf-grid"></div><p id="web-save-note" class="web-note">书架与阅读进度保存在本机浏览器。</p></section>
         <div class="shelf-heading"><h2>古典书库</h2><span>公开古籍 · 字号 / 夜间 / 自动翻页</span></div>
@@ -40,12 +42,20 @@
         <button id="reader-add-shelf" hidden>＋ 书架</button>
         <button id="fullscreen" aria-label="全屏阅读">⛶ 全屏</button>
       </div>
-      <main class="reading-main"><div class="chapter-meta"><span id="chapter-count"></span><h2 id="chapter-title"></h2></div><div id="page-viewport"><div id="page-text" class="page-copy"></div><div id="measure-text" class="page-copy" aria-hidden="true"></div><div id="reader-message" hidden role="status"><p id="reader-message-text"></p><button id="retry" class="primary" hidden>重新加载</button></div></div></main>
+      <main class="reading-main"><div class="chapter-meta"><span id="chapter-count"></span><h2 id="chapter-title"></h2></div><div id="page-viewport"><div id="page-text" class="page-copy"></div><div id="measure-text" class="page-copy" aria-hidden="true"></div><div id="reader-message" hidden role="status"><p id="reader-message-text"></p><button id="retry" class="primary" hidden>重新加载</button><button id="reader-find-alternatives" hidden>换个书源搜这本书</button></div></div></main>
       <footer class="reader-bottom"><button id="previous-page" aria-label="上一页">← 上一页</button><div><span id="page-position" aria-live="polite"></span><small id="reader-status">阅读位置自动保存在本机</small></div><button id="next-page" aria-label="下一页">下一页 →</button></footer>
       <div id="toc" role="dialog" aria-modal="true" aria-labelledby="toc-title" hidden><section class="toc-panel"><header><div><span class="eyebrow">CONTENTS / 章节目录</span><h2 id="toc-title"></h2></div><button id="toc-close" aria-label="关闭目录">×</button></header><div id="source-info"></div><label class="sr-only" for="chapter-filter">查找章节</label><input id="chapter-filter" type="search" placeholder="查找章节名称或序号" autocomplete="off"><div id="chapter-list"></div><div id="toc-pagination"><button id="toc-previous">上一组</button><span id="toc-page"></span><button id="toc-next">下一组</button></div></section></div>
     </section>
+    <dialog id="official-catalog" aria-labelledby="official-title">
+      <header><div><span class="eyebrow">番茄小说 · 章节目录</span><h2 id="official-title"></h2></div><button id="official-close" aria-label="关闭番茄目录" autofocus>关闭</button></header>
+      <p id="official-status" role="status"></p>
+      <div class="official-actions"><a id="official-book" target="_blank" rel="noopener noreferrer">打开官方作品页 ↗</a><a id="official-resume" target="_blank" rel="noopener noreferrer" hidden></a><button id="official-retry" hidden>重新加载目录</button></div>
+      <label class="sr-only" for="official-filter">查找番茄章节名称或序号</label><input id="official-filter" type="search" placeholder="查找章节名称或序号" hidden>
+      <div id="official-chapters"></div>
+      <div id="official-pagination" hidden><button id="official-previous">上一组</button><span id="official-page"></span><button id="official-next">下一组</button></div>
+    </dialog>
     <div id="toast" role="status" hidden></div>
   </div>
-  <script type="module" src="./reader.mjs?v=4"></script>
+  <script type="module" src="./reader.mjs?v=5"></script>
 </body>
 </html>
