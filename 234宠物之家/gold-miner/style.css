@@ -34,10 +34,24 @@ aside{background:#fff9e9;border:1px solid #ccb48a;border-radius:12px;overflow:hi
 section,#hint-area{padding:clamp(12px,2vw,21px);display:grid;gap:10px}
 section h2{color:#5f3824;font-size:1.35rem}
 p{line-height:1.6}
-.switch button{flex:1}
+.switch{flex-wrap:wrap}
+.switch button{flex:1 0 auto;padding:.55rem .42rem;font-size:.92rem;white-space:nowrap}
 .switch button[aria-pressed=true]{background:#316352;color:#fff;border-color:#316352}
 .primary{width:100%;background:#eeaf32;border:1px solid #996923;color:#382915;box-shadow:0 2px #946b36;min-height:44px}
 .quiet{background:transparent}
+#room-setup,#invitation,#join-form,#manual-copy{display:grid;gap:8px}
+#join-form{margin-top:6px}
+#join-form label,#manual-copy{font-size:.9rem;font-weight:650}
+.join-row,.room-heading,.room-number{display:flex;align-items:center;gap:7px}
+.join-row input,#invite-url{width:100%;min-width:0;border:1px solid #ad997a;background:white;border-radius:6px;padding:.65rem .55rem;color:inherit;font:inherit}
+.join-row button{flex:none;min-height:44px}
+#room-panel{display:grid;gap:8px;padding:12px clamp(12px,2vw,21px);border-top:1px dashed #c8ad80;background:#f8f1dd}
+.room-heading,.room-number{justify-content:space-between}
+#room-seat{color:#316352;font-weight:750}
+#leave-room{font-size:.85rem}
+#room-status,#room-error{font-size:.91rem}
+#room-error{color:#8b362a}
+#room-code{font:700 1.45rem/1.4 ui-monospace,monospace;letter-spacing:.12em;user-select:all}
 #hint-area{border-top:1px dashed #c8ad80;color:#66513b;gap:4px;font-size:.92rem}
 #hint-area h3{font-size:.92rem;color:#443425}
 progress{height:16px;width:100%;accent-color:#a57820}
