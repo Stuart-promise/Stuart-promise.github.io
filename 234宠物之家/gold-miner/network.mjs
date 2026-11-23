@@ -12,6 +12,7 @@ const shortText = (s, limit) => typeof s === "string" && s.length <= limit;
 const xy = o => o && bounded(o.x, -100, 900) && bounded(o.y, -100, 620);
 
 const roomErrors = {
+  "invalid-room": "云服务器尚未开放黄金矿工联机。可以先玩单人或双人同屏，稍后再来开房。",
   "peer-unavailable": "房间不存在或已结束，请核对房间码。",
   "room-full": "这个房间已有两位矿工。",
   "unavailable-id": "这个房间码已被使用，请重新创建房间。",
