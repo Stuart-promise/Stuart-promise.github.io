@@ -5,15 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#33281f">
   <title>黄金矿工 · 234宠物之家</title>
-  <link rel="stylesheet" href="./style.css?v=online1">
+  <link rel="stylesheet" href="./style.css?v=landscape1">
   <script defer src="../room-config.js"></script>
   <script defer src="../relay.js"></script>
-  <script type="module" src="./game.mjs?v=online2"></script>
+  <script type="module" src="./game.mjs?v=landscape1"></script>
 </head>
 <body>
-  <header><a href="../games.html">‹ 游戏页面</a><span>234宠物之家</span></header>
+  <div id="game-stage">
+  <header>
+    <nav aria-label="游戏导航"><button id="return-games" type="button">‹ 游戏页面</button><span class="brand">234宠物之家</span></nav>
+    <div class="heading"><h1>黄金矿工</h1><div class="settings"><button id="screen-mode" type="button" hidden>全屏</button><button id="sound" type="button" aria-pressed="true">声音开</button><button id="pause" type="button" disabled>暂停</button></div></div>
+  </header>
   <main>
-    <div class="heading"><h1>黄金矿工</h1><div class="settings"><button id="sound" aria-pressed="true">声音开</button><button id="pause" disabled>暂停</button></div></div>
     <div class="cabinet">
       <div class="field">
         <div class="hud">
@@ -21,7 +24,12 @@
           <div><span>目标</span><strong id="goal">—</strong></div>
           <div><span>倒计时</span><strong id="seconds">60 秒</strong></div>
         </div>
-        <div class="mine" id="mine"><canvas tabindex="-1" width="800" height="520" aria-label="矿场。使用放钩按钮抓取黄金，或使用键盘操作。"></canvas></div>
+        <div class="mine-space">
+          <div class="mine" id="mine">
+            <canvas tabindex="-1" width="800" height="520" aria-label="矿场。使用放钩按钮抓取黄金，或使用键盘操作。"></canvas>
+            <div id="cast-zones" hidden><button type="button" data-cast="0" tabindex="-1" aria-label="在矿场放钩"></button><button type="button" data-cast="1" tabindex="-1" aria-label="蓝衣矿工放钩"></button></div>
+          </div>
+        </div>
         <div id="controls" class="controls" hidden>
           <div class="station" id="station-one"><span class="badge one">1P</span><button class="drop" data-fire="0">放钩</button><button class="bomb" data-bomb="0">炸药</button></div>
           <div class="station" id="station-two" hidden><span class="badge two">2P</span><button class="drop" data-fire="1">放钩</button><button class="bomb" data-bomb="1">炸药</button></div>
@@ -36,9 +44,9 @@
           <button class="primary" id="begin">开始挖矿</button>
           <div id="room-setup" hidden>
             <button class="primary" id="create-room">创建房间</button>
-            <form id="join-form">
+            <form id="join-form" novalidate>
               <label for="room-input">加入好友的房间</label>
-              <div class="join-row"><input id="room-input" type="text" inputmode="numeric" autocomplete="off" placeholder="6 位房间号" required><button id="join-room" type="submit">加入</button></div>
+              <div class="join-row"><input id="room-input" type="text" inputmode="numeric" autocomplete="off" placeholder="6 位房间号" required><button type="button" id="room-entry" aria-haspopup="dialog" aria-controls="room-pad">6 位房间号</button><button id="join-room" type="submit">加入</button></div>
             </form>
           </div>
           <p id="room-error" role="status" hidden></p>
@@ -59,7 +67,7 @@
           <div id="invitation" hidden>
             <div class="room-number"><span>房间号</span><strong id="room-code"></strong></div>
             <button id="copy-room">复制邀请链接</button>
-            <label id="manual-copy" hidden>复制此链接发给好友<input id="invite-url" readonly></label>
+            <div id="manual-copy" hidden><p>好友也可以输入上方房间号加入。</p><input type="text" id="invite-url" readonly aria-label="房间邀请链接"></div>
           </div>
         </div>
         <div id="hint-area"><h3>操作</h3><p id="key-hint"></p></div>
@@ -68,5 +76,18 @@
     </div>
     <noscript>请启用 JavaScript 来运行游戏。</noscript>
   </main>
+  <div id="room-pad" role="dialog" aria-modal="true" aria-labelledby="pad-title" hidden>
+    <div class="pad-card">
+      <div class="pad-heading"><h2 id="pad-title">输入房间号</h2><output id="pad-value" aria-live="polite" aria-label="已输入的房间号"></output></div>
+      <div class="pad-keys" role="group" aria-label="数字键盘">
+        <button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button>
+        <button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button>
+        <button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button>
+        <button type="button" data-digit="0">0</button><button type="button" id="pad-delete" aria-label="删除最后一位">退格</button>
+      </div>
+      <div class="pad-actions"><button type="button" class="primary" id="pad-join" disabled>加入房间</button><button type="button" class="quiet" id="pad-cancel">取消</button></div>
+    </div>
+  </div>
+  </div>
 </body>
 </html>
