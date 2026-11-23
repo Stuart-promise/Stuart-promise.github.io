@@ -366,7 +366,7 @@ el("sound").onclick = () => {
 };
 soundLabel();
 const invitation = new URLSearchParams(location.search).get("room")?.normalize("NFKC").replace(/^R/i, "");
-if (invitation && /^\d{6}$/.test(invitation)) {
+if (!el("online").hidden && invitation && /^\d{6}$/.test(invitation)) {
   choose(2, true);
   el("room-input").value = invitation;
 } else choose(1);

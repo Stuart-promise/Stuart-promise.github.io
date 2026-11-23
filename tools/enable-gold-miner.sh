@@ -3,19 +3,23 @@
 import ast
 import asyncio
 import fcntl
+import hashlib
 import json
 import os
 import secrets
 import shutil
+import sqlite3
 import subprocess
 import tempfile
 import time
+from contextlib import closing
 from pathlib import Path
 from urllib.request import urlopen
 from websockets import connect
 
 service = Path("/opt/pet234")
 source = service / "game_relay.py"
+database = Path("/var/lib/pet234/accounts.sqlite3")
 name, version = "gold-miner", "234-gold-miner-v1-"
 
 def patched(data):
@@ -77,6 +81,26 @@ def restart():
     subprocess.run(["systemctl","restart","pet234"], check=True, timeout=60)
     healthy()
 
+def read_database(path):
+    return closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=10))
+
+def check_database(db, label):
+    if db.execute("PRAGMA quick_check").fetchall() != [("ok",)]:
+        raise RuntimeError(f"SQLite quick_check failed on {label}")
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='users'").fetchone():
+        raise RuntimeError(f"Missing accounts schema in {label}")
+
+def snapshot_database(target):
+    with read_database(database) as live:
+        check_database(live, "live database before deployment")
+        target.touch(mode=0o600, exist_ok=False)
+        with closing(sqlite3.connect(target)) as saved:
+            live.backup(saved, pages=256, sleep=.1)
+            # Leave a self-contained snapshot even if the source uses WAL.
+            saved.execute("PRAGMA journal_mode=DELETE").fetchone()
+    with read_database(target) as saved:
+        check_database(saved, "saved snapshot")
+
 lock = os.open(service, os.O_RDONLY)
 fcntl.flock(lock, fcntl.LOCK_EX)
 original = source.read_bytes()
@@ -90,7 +114,13 @@ else:
     releases = service / "releases"
     releases.mkdir(exist_ok=True)
     backup = Path(tempfile.mkdtemp(prefix="gold-miner-",dir=releases)) / source.name
+    original_digest = hashlib.sha256(original).hexdigest()
+    print(f"Current relay SHA-256: {original_digest}; backup: {backup.parent}", flush=True)
     shutil.copy2(source, backup)
+    if hashlib.sha256(backup.read_bytes()).hexdigest() != original_digest:
+        raise RuntimeError("Relay backup differs from the initially inspected source")
+    (backup.parent / "relay-before.sha256").write_text(f"{original_digest}  {source.name}\n")
+    snapshot_database(backup.parent / database.name)
     with tempfile.TemporaryDirectory(prefix=".gold-miner-",dir=service) as staging:
         new = Path(staging) / source.name
         def install(contents):
@@ -105,12 +135,14 @@ else:
         try:
             restart()
             asyncio.run(relay_check())
+            with read_database(database) as live:
+                check_database(live, "live database after deployment")
         except BaseException:
             if source.read_bytes() != updated:
                 raise RuntimeError(f"Concurrent relay edit; backup at {backup}")
-            install(backup.read_bytes())
+            install(original)
             restart()
-            print("Original relay restored", flush=True)
+            print("Original relay restored. Database was not replaced.", flush=True)
             raise
     print("Gold Miner ready. Original relay backup:", backup)
 PET234_GOLD_MINER
