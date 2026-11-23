@@ -1,5 +1,5 @@
 import {createPageMotion} from './reader-motion.mjs?v=1';
-import {initWebLibrary,webBookDetail,webChapter} from './web-library.mjs?v=4';
+import {initWebLibrary,webBookDetail,webChapter} from './web-library.mjs?v=5';
 const $=s=>document.querySelector(s);
 const STORE='pet234:reader:v1',INTERVALS=[5,10,20,30,60],COLORS=['#496451','#5b6876','#9a654c','#716075'];
 const state={books:[],book:null,chapter:0,text:'',pages:[],page:0,chapterIssue:'',busy:false,revision:0,auto:false,timer:0,cache:new Map(),storageOK:true,turning:false,scrollFrame:0,scrollOffset:0,autoDwell:false};
@@ -63,7 +63,48 @@ function autoScroll(now){
  if(atScrollEnd()){scheduleAuto();return;}state.scrollFrame=requestAnimationFrame(autoScroll);
 }
 function toggleAuto(){if(state.busy||!state.pages.length)return;if(state.auto){stopAuto();remember();return;}state.auto=true;controls();if(!state.turning)scheduleAuto();}
-async function chapterText(book,index){const entry=book.chapters[index],key=book.web?book.id+':'+entry.id:entry.path;if(state.cache.has(key)){const value=state.cache.get(key);state.cache.delete(key);state.cache.set(key,value);return value;}const data=book.web?await webChapter(book,index,bookController?.signal):await fetchJSON('./'+entry.path);if(!data||!Array.isArray(data.paragraphs)||data.paragraphs.length>10000||!data.paragraphs.every(p=>typeof p==='string'))throw Error('这一章的内容格式异常，请稍后重试。');const text=data.paragraphs.map(p=>p.trim()).filter(Boolean).join('\n\n');if(!text||text.length>2000000)throw Error('这一章暂时无法排版，请稍后重试。');state.cache.set(key,text);while(state.cache.size>3)state.cache.delete(state.cache.keys().next().value);return text;}
+let activeFace=null;
+async function chapterFace(book,url){
+ if(!url)return null;
+ const match=typeof url==='string'&&/^https:\/\/lf[36]-awef\.bytetos\.com\/obj\/awesome-font\/c\/([a-f0-9]{1,64})\.woff2$/.exec(url);
+ if(book.sourceId!=='fanqie-community'||!match)throw Error('书源返回了无法使用的正文字体，请重试或换源。');
+ let timer;
+ try{
+  const face=new FontFace('ReaderChapter-'+match[1],'url("'+url+'") format("woff2")');
+  await Promise.race([face.load(),new Promise((_,reject)=>{timer=setTimeout(reject,15000);})]);
+  return face;
+ }catch{throw Error('这章的正文字体暂时无法载入，请重试或换个书源。');}
+ finally{clearTimeout(timer);}
+}
+function setChapterFace(face,restricted=false){
+ const viewport=$('#page-viewport');
+ if(activeFace!==face){
+  if(activeFace)document.fonts.delete(activeFace);
+  if(face)document.fonts.add(face);
+  activeFace=face;
+ }
+ if(face)viewport.style.setProperty('--chapter-font',face.family);
+ else viewport.style.removeProperty('--chapter-font');
+ viewport.classList.toggle('source-font',Boolean(face));
+ viewport.classList.toggle('protected-chapter',restricted);
+}
+async function chapterText(book,index){
+ const entry=book.chapters[index],key=book.web?book.id+':'+entry.id:entry.path;
+ if(state.cache.has(key)){
+  const value=state.cache.get(key);
+  state.cache.delete(key);
+  state.cache.set(key,value);
+  return value;
+ }
+ const data=book.web?await webChapter(book,index,bookController?.signal):await fetchJSON('./'+entry.path);
+ if(!data||!Array.isArray(data.paragraphs)||data.paragraphs.length>10000||!data.paragraphs.every(p=>typeof p==='string'))throw Error('这一章的内容格式异常，请稍后重试。');
+ const text=data.paragraphs.map(p=>p.trim()).filter(Boolean).join('\n\n');
+ if(!text||text.length>2000000)throw Error('这一章暂时无法排版，请稍后重试。');
+ const result={text,face:await chapterFace(book,data.fontUrl)};
+ state.cache.set(key,result);
+ while(state.cache.size>3)state.cache.delete(state.cache.keys().next().value);
+ return result;
+}
 const nextLayout=()=>new Promise(resolve=>requestAnimationFrame(resolve));
 // Measure real rendered text, not a guessed characters-per-screen count. The
 // saved offset remains meaningful after resizing or changing the type size.
@@ -87,10 +128,10 @@ async function changeMode(){
  const offset=currentOffset();remember();stopAuto();cancelMotion();prefs.mode=$('#reading-mode').value==='scroll'?'scroll':'page';applySettings();persist();if(state.book&&state.text)await paginate(offset);else controls();
 }
 function drawPage(){const p=state.pages[state.page];if(!p)return;$('#page-text').textContent=state.text.slice(p.start,p.end);$('#page-position').textContent=`本章 ${state.page+1} / ${state.pages.length} 页`;remember();controls();if(state.chapter===state.book.chapters.length-1&&state.page===state.pages.length-1){const wasAuto=state.auto;stopAuto();$('#reader-status').textContent='已读到全书最后一页';if(wasAuto)toast('已到全书末页，自动翻页已停止。');}else scheduleAuto();}
-function prepareBook(book){remember();stopAuto();cancelMotion();clearTimeout(scrollSaveTimer);bookController?.abort();bookController=new AbortController();state.revision++;state.book=book;state.text='';state.pages=[];state.page=0;state.chapterIssue='';$('#library').hidden=true;$('#reading').hidden=false;$('#toc').hidden=true;document.body.classList.add('reading-open');$('#book-title').textContent=book.title;$('#book-author').textContent=book.author;$('#page-text').textContent='';shelfButton();}
+function prepareBook(book){remember();setChapterFace(null);stopAuto();cancelMotion();clearTimeout(scrollSaveTimer);bookController?.abort();bookController=new AbortController();state.revision++;state.book=book;state.text='';state.pages=[];state.page=0;state.chapterIssue='';$('#library').hidden=true;$('#reading').hidden=false;$('#toc').hidden=true;document.body.classList.add('reading-open');$('#book-title').textContent=book.title;$('#book-author').textContent=book.author;$('#page-text').textContent='';shelfButton();}
 async function openBook(book){prepareBook(book);const saved=prefs.progress[book.id];await loadChapter(integer(saved?.chapter,0,book.chapters.length-1),integer(saved?.offset,0,2000000));if(!$('#reading').hidden)$('#toc-open').focus({preventScroll:true});}
 async function openWebBook(meta){prepareBook({...meta,chapters:[]});const token=state.revision;setBusy(true);$('#chapter-title').textContent='正在读取目录';$('#chapter-count').textContent=meta.sourceName;$('#page-position').textContent='加载中';message('正在打开小说目录…');retryAction=()=>openWebBook(meta);try{const book=await webBookDetail(meta,bookController.signal);if(token!==state.revision||$('#reading').hidden)return;state.book=book;const saved=prefs.progress[book.id],initial=saved?.chapter??Math.max(0,book.chapters.findIndex(c=>!c.locked));await loadChapter(integer(initial,0,book.chapters.length-1),integer(saved?.offset,0,2000000));if(!$('#reading').hidden)$('#toc-open').focus({preventScroll:true});}catch(e){if(token!==state.revision)return;setBusy(false);message(e.message||'目录加载失败，请重试。',true);$('#page-position').textContent='目录未能加载';$('#reader-find-alternatives').hidden=false;}}
-async function loadChapter(index,offset=0,{keepAuto=false,wantLast=false}={}){if(!state.book?.chapters.length)return;retryAction=()=>loadChapter(index,offset,{wantLast});if(!keepAuto)stopAuto();else clearTimer();const token=++state.revision,book=state.book;state.chapter=integer(index,0,book.chapters.length-1);state.pages=[];state.page=0;state.text='';state.chapterIssue='';setBusy(true);$('#page-text').textContent='';$('#page-position').textContent='加载中';$('#chapter-title').textContent=book.chapters[state.chapter].title;$('#chapter-count').textContent=`第 ${state.chapter+1} / ${book.chapters.length} 章`;message('正在打开这一章…');try{const text=await chapterText(book,state.chapter);if(token!==state.revision||state.book!==book||$('#reading').hidden)return;state.text=text;await paginate(offset,wantLast);}catch(e){if(token!==state.revision)return;const skip=['chapter_locked','locked','no_text'].includes(e.code);state.chapterIssue=e.code||'load_failed';setBusy(false);stopAuto();message(e.code==='no_text'?'本章为插画或没有可显示的正文，请选择下一章，或从目录选择其他章节。':e.message||'加载失败，请重试。',!skip);$('#page-position').textContent=skip?'请选择其他章节':'未能加载';$('#reader-find-alternatives').hidden=!book.web;}}
+async function loadChapter(index,offset=0,{keepAuto=false,wantLast=false}={}){if(!state.book?.chapters.length)return;retryAction=()=>loadChapter(index,offset,{wantLast});if(!keepAuto)stopAuto();else clearTimer();const token=++state.revision,book=state.book;state.chapter=integer(index,0,book.chapters.length-1);state.pages=[];state.page=0;state.text='';state.chapterIssue='';setBusy(true);$('#page-text').textContent='';$('#page-position').textContent='加载中';$('#chapter-title').textContent=book.chapters[state.chapter].title;$('#chapter-count').textContent=`第 ${state.chapter+1} / ${book.chapters.length} 章`;message('正在打开这一章…');try{const content=await chapterText(book,state.chapter);if(token!==state.revision||state.book!==book||$('#reading').hidden)return;setChapterFace(content.face,book.sourceId==='fanqie-community');state.text=content.text;await paginate(offset,wantLast);}catch(e){if(token!==state.revision)return;const skip=['chapter_locked','locked','no_text'].includes(e.code);state.chapterIssue=e.code||'load_failed';setBusy(false);stopAuto();message(e.code==='no_text'?'本章为插画或没有可显示的正文，请选择下一章，或从目录选择其他章节。':e.message||'加载失败，请重试。',!skip);$('#page-position').textContent=skip?'请选择其他章节':'未能加载';$('#reader-find-alternatives').hidden=!book.web;}}
 async function turnPage(direction,automatic=false){
  if(state.busy||state.turning||!state.book)return;if(!automatic)stopAuto();clearTimer();
  if(!state.pages.length){if(state.chapterIssue&&!automatic&&state.chapter+direction>=0&&state.chapter+direction<state.book.chapters.length)await loadChapter(state.chapter+direction);return;}
@@ -98,18 +139,18 @@ async function turnPage(direction,automatic=false){
   const box=$('#page-viewport');if(direction>0&&!atScrollEnd()||direction<0&&!atScrollStart()){box.scrollBy({top:direction*box.clientHeight*.9,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});return;}
   if(state.chapter+direction>=0&&state.chapter+direction<state.book.chapters.length){remember();await loadChapter(state.chapter+direction,0,{keepAuto:automatic&&state.auto,wantLast:direction<0});}else if(automatic)stopAuto();return;
  }
- const token=++turnRevision,previousText=$('#page-text').textContent;state.turning=true;controls();
+ const token=++turnRevision,previousText=$('#page-text').textContent,previousFamily=activeFace?.family;state.turning=true;controls();
  try{
   if(direction>0&&state.page<state.pages.length-1){state.page++;drawPage();}
   else if(direction<0&&state.page>0){state.page--;drawPage();}
   else if(direction>0&&state.chapter<state.book.chapters.length-1){await loadChapter(state.chapter+1,0,{keepAuto:automatic&&state.auto});}
   else if(direction<0&&state.chapter>0){await loadChapter(state.chapter-1,0,{keepAuto:automatic&&state.auto,wantLast:true});}
   else{if(automatic)stopAuto();return;}
-  if(token===turnRevision&&!state.busy&&!state.chapterIssue&&!scrollMode()&&!$('#reading').hidden)await motion.play({direction,automatic,previousText});
+  if(token===turnRevision&&previousFamily===activeFace?.family&&!state.busy&&!state.chapterIssue&&!scrollMode()&&!$('#reading').hidden)await motion.play({direction,automatic,previousText});
  }finally{if(token===turnRevision){state.turning=false;controls();scheduleAuto();}}
 }
 async function changeFont(delta){remember();const offset=currentOffset();cancelMotion();prefs.font=integer(prefs.font+delta,14,30,20);applySettings();persist();if(state.book&&state.text)await paginate(offset);}
-async function shelf(){remember();stopAuto();cancelMotion();clearTimeout(scrollSaveTimer);bookController?.abort();state.revision++;$('#toc').hidden=true;$('#reading').hidden=true;$('#library').hidden=false;document.body.classList.remove('reading-open');state.book=null;state.pages=[];state.text='';$('#measure-text').textContent='';$('#page-text').textContent='';if(document.fullscreenElement)try{await document.exitFullscreen();}catch{}renderShelf();webLibrary?.refresh();$('#novel-query')?.focus({preventScroll:true});}
+async function shelf(){remember();setChapterFace(null);stopAuto();cancelMotion();clearTimeout(scrollSaveTimer);bookController?.abort();state.revision++;$('#toc').hidden=true;$('#reading').hidden=true;$('#library').hidden=false;document.body.classList.remove('reading-open');state.book=null;state.pages=[];state.text='';$('#measure-text').textContent='';$('#page-text').textContent='';if(document.fullscreenElement)try{await document.exitFullscreen();}catch{}renderShelf();webLibrary?.refresh();$('#novel-query')?.focus({preventScroll:true});}
 function renderToc(){const book=state.book;if(!book?.chapters.length)return;const query=$('#chapter-filter').value.trim().toLowerCase(),all=book.chapters.map((c,i)=>({c,i})).filter(({c,i})=>!query||c.title.toLowerCase().includes(query)||String(i+1)===query),pageSize=book.web?100:5000,pages=Math.max(1,Math.ceil(all.length/pageSize));tocPage=Math.max(0,Math.min(tocPage,pages-1));const list=$('#chapter-list');list.replaceChildren();for(const {c,i} of all.slice(tocPage*pageSize,(tocPage+1)*pageSize)){const b=el('button','',c.title+(c.locked?' · 受限':''));b.dataset.chapter=String(i);b.setAttribute('aria-current',String(i===state.chapter));b.onclick=()=>{closeToc();loadChapter(i);};list.append(b);}if(!all.length)list.append(el('p','web-note','没有匹配的章节。'));$('#toc-pagination').hidden=pages===1;$('#toc-page').textContent=`${tocPage+1} / ${pages}`;$('#toc-previous').disabled=tocPage===0;$('#toc-next').disabled=tocPage>=pages-1;}
 function openToc(){if(!state.book?.chapters.length){toast('目录尚未载入，请稍后再试。');return;}stopAuto();cancelMotion();const book=state.book;$('#toc-title').textContent=book.title;const source=$('#source-info');source.replaceChildren();if(book.web){source.textContent='书源：'+book.sourceName+' · '+book.chapters.length+' 章。公开章节在本页阅读，需登录、订阅或暂未公开的章节会单独提示。';}else{source.append(document.createTextNode(book.source.license||'公开古籍原文；保留来源版本文字。'),el('br'));const link=el('a','','原文来源：'+book.source.name);link.href=book.source.url;link.target='_blank';link.rel='noopener noreferrer';source.append(link);const notice=book.source.noticePath||book.source.licenseUrl;if(notice){source.append(document.createTextNode(' · '));const a=el('a','','来源与许可');a.href=notice;a.target='_blank';a.rel='noopener noreferrer';source.append(a);}}$('#chapter-filter').value='';tocPage=book.web?Math.floor(state.chapter/100):0;renderToc();$('#toc').hidden=false;$('#toc-close').focus();$('#chapter-list [aria-current=true]')?.scrollIntoView({block:'nearest'});}
 function closeToc(){$('#toc').hidden=true;$('#toc-open').focus({preventScroll:true});}
@@ -158,10 +199,6 @@ viewport.addEventListener('wheel',event=>{
 
 readPrefs();applySettings();
 webLibrary=initWebLibrary({
- onOpen:openWebBook,onChange:shelfButton,getProgress:id=>prefs.progress[id],
- rememberOfficialChapter(id,chapter){
-  prefs.progress[id]={chapter,offset:0,updatedAt:Date.now()};
-  persist();
- }
+ onOpen:openWebBook,onChange:shelfButton,getProgress:id=>prefs.progress[id]
 });
 loadLibrary();
