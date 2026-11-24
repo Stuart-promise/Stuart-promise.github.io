@@ -1,1 +1,0 @@
-import{t as e}from"./react-ELCeG0ZZ.js";var t=e(e=>({run:null,start:t=>e({run:t}),clear:()=>e({run:null})}));export{t};

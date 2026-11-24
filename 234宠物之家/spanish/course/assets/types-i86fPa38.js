@@ -1,1 +1,0 @@
-var e=[{id:`es-pop`,label:`西班牙流行`,icon:`🇪🇸`},{id:`latam-pop`,label:`拉美流行`,icon:`🌎`},{id:`cantautor`,label:`唱作人 / 民谣`,icon:`🎸`},{id:`rock`,label:`摇滚 / 经典`,icon:`🤘`}],t={ES:{flag:`🇪🇸`,zh:`西班牙`},MX:{flag:`🇲🇽`,zh:`墨西哥`},CO:{flag:`🇨🇴`,zh:`哥伦比亚`},AR:{flag:`🇦🇷`,zh:`阿根廷`},UY:{flag:`🇺🇾`,zh:`乌拉圭`},CU:{flag:`🇨🇺`,zh:`古巴`},CL:{flag:`🇨🇱`,zh:`智利`},FR:{flag:`🇫🇷`,zh:`法国`}};export{e as n,t};

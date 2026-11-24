@@ -1,16 +1,11 @@
-/* Website account bridge shared by the course, speaking practice and the study hub. */
+/* Save the current curriculum alongside older records in the Spanish account module. */
 (() => {
   'use strict';
   const account = window.PetAccount;
   const base = new URL('.', document.currentScript.src);
-  const prefix = 'pet234:spanish:v1:';
+  const prefix = 'pet234:spanish:v1:vamos-courses:';
   const moduleName = 'spanish';
-  const keys = new Set(['course.progress', 'course.settings', 'course.resume', 'speaking.progress',
-    ...['cards', 'reviews', 'mistakes', 'notebook', 'exams', 'chats', 'aiDict', 'aiReadings',
-      'papers', 'userSongs', 'songLyrics'].map(table => 'course.table.' + table)]);
-  const sharedSettings = ['name', 'theme', 'custom', 'mode', 'fontScale', 'voiceURI', 'rate',
-    'autoplay', 'sfx', 'dailyGoal', 'newWordsPerDay', 'strictAccents', 'freeMode',
-    'showZh', 'onboarded', 'hqVoice', 'hqVoiceName'];
+  const keys = new Set(['progress', 'settings', 'review']);
   const labels = {
     guest: '游客 · 仅存本机', checking: '正在读取学习记录', synced: '云端已同步',
     pending: '已存本机 · 等待同步', offline: '离线 · 已存本机',
@@ -61,7 +56,7 @@
     });
   }
   function checkConflict() {
-    if (account.read(moduleName).conflict) {
+    if (account.session && account.read(moduleName).conflict) {
       throw Error('本机和云端都有新的西语学习记录。请在账号中心选择要继续使用的版本。');
     }
   }
@@ -90,19 +85,29 @@
     account.assertOwner();
     if (account.session) {
       checkConflict();
-      if (!Object.keys(account.read(moduleName).data).length) {
-        if (account.syncState(moduleName) !== 'synced') {
-          throw Error('此设备还没有当前账号的西语学习记录，请联网读取后再开始。');
-        }
-        const guest = account.guestData(moduleName);
-        const optionKey = 'pet234:spanish:guest-choice:' + account.owner;
-        if (Object.keys(guest).length && sessionStorage.getItem(optionKey) !== 'new') {
+      const data = account.read(moduleName).data;
+      if (!Object.keys(data).length && account.syncState(moduleName) !== 'synced') {
+        throw Error('此设备还没有当前账号的西语学习记录，请联网读取后再开始。');
+      }
+      const currentKeys = Array.from(keys, name => prefix + name);
+      const hasCurrentRecords = () => currentKeys.some(key => opened.getItem(key) !== null);
+      if (!hasCurrentRecords() && account.syncState(moduleName) === 'synced') {
+        const guestKeys = currentKeys.filter(key => localStorage.getItem(key) !== null);
+        const optionKey = prefix + 'guest-choice:' + account.owner;
+        if (guestKeys.length && sessionStorage.getItem(optionKey) !== 'new') {
           const name = account.profile?.nickname || account.session.user.username;
-          const choice = await promptChoice('继续使用游客学习记录？', '这台设备上有西语学习记录。可以导入到账号「' + name + '」，游客原记录会保留在这台设备。', ['导入到我的账号', '从头开始']);
+          const choice = await promptChoice('继续使用游客学习记录？', '这台设备上有新版西语课程的游客记录。可以导入到账号「' + name + '」，游客原记录会保留在这台设备。', ['导入到我的账号', '从头开始']);
           account.assertOwner();
           if (choice === '导入到我的账号') {
-            await account.importGuest(moduleName);
             checkConflict();
+            if (!hasCurrentRecords()) {
+              for (const key of guestKeys) {
+                const value = localStorage.getItem(key);
+                if (value !== null) opened.setItem(key, value);
+              }
+              await account.flush();
+              checkConflict();
+            }
           } else sessionStorage.setItem(optionKey, 'new');
         }
       }
@@ -122,15 +127,7 @@
     setItem(name, value) {
       const scoped = key(name);
       if (typeof value !== 'string') throw Error('西语学习记录必须是字符串');
-      if (name === 'course.settings') {
-        const settings = JSON.parse(value);
-        // The course keeps model credentials and endpoint settings in an owner-scoped device key.
-        const state = {};
-        for (const field of sharedSettings) {
-          if (Object.hasOwn(settings?.state || {}, field)) state[field] = settings.state[field];
-        }
-        value = JSON.stringify({state, version: settings?.version});
-      }
+      checkConflict();
       checkPrevious(name, scoped, value);
       try {
         store.setItem(scoped, value);
@@ -142,6 +139,7 @@
     },
     removeItem(name) {
       const scoped = key(name);
+      checkConflict();
       checkPrevious(name, scoped, null);
       store.removeItem(scoped);
       observed.set(name, null);
