@@ -1,4 +1,4 @@
-/* Shared account storage. Guest keys are never moved or deleted implicitly. */
+/* Shared account storage for learning progress and games. */
 (() => {
   'use strict';
   const base = new URL('.', document.currentScript?.src || new URL('./account.js',location.href));
@@ -9,10 +9,10 @@
   const SESSION = 'pet234:session:v1';
   const PENDING_LOGOUT = 'pet234:logout-pending:v1';
   const modules = {
-    'chinese-changsha':'长沙中考古诗文', 'chinese-gaokao':'高考古诗文', python:'Python 闯关', spanish:'西语学习', 'vocab-cet4':'四级单词', 'vocab-cet6':'六级单词', 'vocab-zhongkao':'长沙中考单词', 'vocab-gaokao':'高考单词',
+    'chinese-changsha':'长沙中考古诗文', 'chinese-gaokao':'高考古诗文', spanish:'西语学习', 'vocab-cet4':'四级单词', 'vocab-cet6':'六级单词', 'vocab-zhongkao':'长沙中考单词', 'vocab-gaokao':'高考单词',
     fishing:'钓鱼模拟器', 'coin-tycoon':'金币大亨', 'zhaoyun-adou':'赵云与阿斗', animal2048:'动物 2048', blocks:'俄罗斯方块最高分', 'animal-drop':'动物合成最高分'
   };
-  const prefixes = {'chinese-changsha':'pet234:chinese:v1:changsha:', 'chinese-gaokao':'pet234:chinese:v1:gaokao:',python:'pet234-python-v1:', 'vocab-cet4':'pet234:vocab:v1:cet4:', 'vocab-cet6':'pet234:vocab:v1:cet6:', 'vocab-zhongkao':'pet234:vocab:v1:zhongkao:', 'vocab-gaokao':'pet234:vocab:v1:gaokao:'};
+  const prefixes = {'chinese-changsha':'pet234:chinese:v1:changsha:', 'chinese-gaokao':'pet234:chinese:v1:gaokao:', 'vocab-cet4':'pet234:vocab:v1:cet4:', 'vocab-cet6':'pet234:vocab:v1:cet6:', 'vocab-zhongkao':'pet234:vocab:v1:zhongkao:', 'vocab-gaokao':'pet234:vocab:v1:gaokao:'};
   const singleKeys = {fishing:'pet234-fishing-v1','coin-tycoon':'pet234-coin-tycoon-v1',animal2048:'pet234-animal2048-v1',blocks:'pet234-blocks-best','animal-drop':'pet234-animal-drop-best'};
   prefixes.spanish = 'pet234:spanish:v1:';
   const zhaoKeys = new Set(['zyad.learning.profile.v1','zyad.learning.profile.v1.backup','zyad.friend.history.v1']);
@@ -21,6 +21,14 @@
   const loaded = new Set(), opening = new Map();
   const controllers = new Set();
   const memory = new Map();
+  // Remove the retired course's guest drafts, account saves and conflict backups on this device.
+  try {
+    for (const name of Object.keys(localStorage)) {
+      if (name.startsWith('pet234-python-v1:') || /^pet234:account:v1:[^:]+:python(?::before-conflict)?$/.test(name)) {
+        localStorage.removeItem(name);
+      }
+    }
+  } catch { /* Storage can be unavailable in private browsing. */ }
   function storedSession() {
     try { const value=JSON.parse(localStorage.getItem(SESSION)); return value?.user?.id&&typeof value.token==='string'&&value.token?value:null; } catch { return null; }
   }
