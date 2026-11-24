@@ -1,0 +1,21 @@
+{
+  "startScene": "4b378c79-69cc-437e-9f2c-83bfddbbd389",
+  "sourceMaps": false,
+  "buildPath": "project://build",
+  "outputName": "web-mobile",
+  "platform": "web-mobile",
+  "name": "zhaoyun-adou",
+  "scenes": [
+    {
+      "uuid": "4b378c79-69cc-437e-9f2c-83bfddbbd389",
+      "url": "db://assets/scenes/Game.scene"
+    }
+  ],
+  "packages": {
+    "web-mobile": {
+      "orientation": "portrait"
+    }
+  },
+  "debug": false,
+  "md5Cache": true
+}

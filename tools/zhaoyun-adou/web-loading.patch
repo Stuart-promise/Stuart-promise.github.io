@@ -1,0 +1,176 @@
+diff --git a/assets/resources.meta b/assets/resources.meta
+index 46e0184..de9e3ac 100644
+--- a/assets/resources.meta
++++ b/assets/resources.meta
+@@ -7,7 +7,7 @@
+   "subMetas": {},
+   "userData": {
+     "isBundle": true,
+-    "bundleConfigID": "default",
++    "bundleConfigID": "pet234-web-metadata",
+     "bundleName": "resources",
+     "priority": 8
+   }
+diff --git a/assets/scripts/app/AssetLoader.ts b/assets/scripts/app/AssetLoader.ts
+index 7b6dd8e..b2f80ce 100644
+--- a/assets/scripts/app/AssetLoader.ts
++++ b/assets/scripts/app/AssetLoader.ts
+@@ -49,22 +49,51 @@ export const PREPARATION_IMAGES: readonly string[] = [
+ export class AssetLoader {
+     private epoch = 0;
+     private readonly cache = new Map<string, Asset>();
++    private drained: Promise<void> = Promise.resolve();
+
+     cancel(): void { this.epoch++; }
+
+-    async loadStartup(onProgress: (completed: number, total: number) => void,
+-        probePath = ''): Promise<boolean> {
++    /** Drain outstanding engine callbacks before starting a replacement load. */
++    private run<T>(cancelled: T, operation: (epoch: number) => Promise<T>): Promise<T> {
+         const epoch = ++this.epoch;
++        const result = this.drained.then(() => epoch === this.epoch ? operation(epoch) : cancelled);
++        this.drained = result.then(() => {}, () => {});
++        return result;
++    }
++
++    private async loadImages(paths: readonly string[], epoch: number, onLoaded?: () => void): Promise<SpriteFrame[] | null> {
++        const frames = new Array<SpriteFrame>(paths.length);
++        let next = 0;
++        let failure: { error: unknown } | undefined;
++        const worker = async (): Promise<void> => {
++            while (!failure && epoch === this.epoch && next < paths.length) {
++                const index = next++;
++                try {
++                    frames[index] = await this.loadImage(paths[index]);
++                    if (!failure && epoch === this.epoch) onLoaded?.();
++                } catch (error) {
++                    failure ??= { error };
++                }
++            }
++        };
++        await Promise.all(Array.from({ length: Math.min(6, paths.length) }, worker));
++        if (failure) throw failure.error;
++        return epoch === this.epoch ? frames : null;
++    }
++
++    loadStartup(onProgress: (completed: number, total: number) => void,
++        probePath = ''): Promise<boolean> {
++        return this.run(false, epoch => this.startup(epoch, onProgress, probePath));
++    }
++
++    private async startup(epoch: number, onProgress: (completed: number, total: number) => void,
++        probePath: string): Promise<boolean> {
+         const images = STARTUP_IMAGES.map(path => `${path}/spriteFrame`);
+         if (probePath) images.push(probePath);
+         const total = images.length + STARTUP_MUSIC.length;
+         let completed = 0;
+         onProgress(0, total);
+-        for (const path of images) {
+-            await this.loadImage(path);
+-            if (epoch !== this.epoch) return false;
+-            onProgress(++completed, total);
+-        }
++        if (!await this.loadImages(images, epoch, () => onProgress(++completed, total))) return false;
+         for (const path of STARTUP_MUSIC) {
+             await this.loadMusic(path);
+             if (epoch !== this.epoch) return false;
+@@ -74,36 +103,25 @@ export class AssetLoader {
+     }
+
+     /** Matching readiness uses the same exact typed battle assets, without a second cache. */
+-    async loadBattle(probePath = ''): Promise<BattleAnimations | null> {
+-        const epoch = ++this.epoch;
++    loadBattle(probePath = ''): Promise<BattleAnimations | null> {
++        return this.run<BattleAnimations | null>(null, epoch => this.battle(epoch, probePath));
++    }
++
++    private async battle(epoch: number, probePath: string): Promise<BattleAnimations | null> {
+         if (probePath) await this.loadImage(probePath);
+         if (epoch !== this.epoch) return null;
+-        for (const path of STARTUP_IMAGES.filter(path => path.includes('/map/') || path.includes('/gameObject/'))) {
+-            await this.loadImage(`${path}/spriteFrame`);
+-            if (epoch !== this.epoch) return null;
+-        }
+-        for (const path of PREPARATION_IMAGES) {
+-            await this.loadImage(`${path}/spriteFrame`);
+-            if (epoch !== this.epoch) return null;
+-        }
++        const shared = STARTUP_IMAGES.filter(path => path.includes('/map/') || path.includes('/gameObject/'));
++        const preparation = [...shared, ...PREPARATION_IMAGES].map(path => `${path}/spriteFrame`);
++        if (!await this.loadImages(preparation, epoch)) return null;
+         await this.loadMusic('zyad_intro/audio/music/bg_battleScene_0');
+         if (epoch !== this.epoch) return null;
+         const index = await this.loadAnimationIndex();
+         if (epoch !== this.epoch) return null;
+         const paths = animationPaths(index.json);
+-        const loadSequence = async (keys: readonly string[]): Promise<SpriteFrame[] | null> => {
+-            const frames: SpriteFrame[] = [];
+-            for (const key of keys) {
+-                const frame = await this.loadImage(key);
+-                if (epoch !== this.epoch) return null;
+-                frames.push(frame);
+-            }
+-            return frames;
+-        };
+-        const knifeAttack = await loadSequence(paths.knifeAttack); if (!knifeAttack) return null;
+-        const knifeIdle = await loadSequence(paths.knifeIdle); if (!knifeIdle) return null;
+-        const bowAttack = await loadSequence(paths.bowAttack); if (!bowAttack) return null;
+-        const bowIdle = await loadSequence(paths.bowIdle); if (!bowIdle) return null;
++        const knifeAttack = await this.loadImages(paths.knifeAttack, epoch); if (!knifeAttack) return null;
++        const knifeIdle = await this.loadImages(paths.knifeIdle, epoch); if (!knifeIdle) return null;
++        const bowAttack = await this.loadImages(paths.bowAttack, epoch); if (!bowAttack) return null;
++        const bowIdle = await this.loadImages(paths.bowIdle, epoch); if (!bowIdle) return null;
+         const zhaoYunAttack = await this.loadImage('zyad_intro/textures/characters/zhaoYun_attack1/spriteFrame');
+         if (epoch !== this.epoch) return null;
+         return { knife: { attack: knifeAttack, idle: knifeIdle }, bow: { attack: bowAttack, idle: bowIdle }, zhaoYunAttack };
+diff --git a/settings/v2/packages/builder.json b/settings/v2/packages/builder.json
+index 7526e40..dd7cb42 100644
+--- a/settings/v2/packages/builder.json
++++ b/settings/v2/packages/builder.json
+@@ -1,3 +1,45 @@
+ {
+-  "__version__": "1.3.9"
++  "__version__": "1.3.9",
++  "bundleConfig": {
++    "custom": {
++      "pet234-web-metadata": {
++        "displayName": "Web resources: merged metadata",
++        "configs": {
++          "web": {
++            "preferredOptions": {
++              "isRemote": false,
++              "compressionType": "merge_all_json"
++            },
++            "fallbackOptions": {
++              "isRemote": false,
++              "compressionType": "merge_all_json"
++            },
++            "configMode": "auto"
++          },
++          "native": {
++            "preferredOptions": {
++              "isRemote": false,
++              "compressionType": "merge_dep"
++            },
++            "fallbackOptions": {
++              "isRemote": false,
++              "compressionType": "merge_dep"
++            },
++            "configMode": "auto"
++          },
++          "miniGame": {
++            "preferredOptions": {
++              "isRemote": false,
++              "compressionType": "merge_dep"
++            },
++            "fallbackOptions": {
++              "isRemote": false,
++              "compressionType": "merge_dep"
++            },
++            "configMode": "auto"
++          }
++        }
++      }
++    }
++  }
+ }
