@@ -1,0 +1,13 @@
+.spanish-storage-dialog {
+  width: min(28rem, calc(100% - 2rem)); box-sizing: border-box;
+  background: #fffdf7; color: #24392e; border: 1px solid #a4ac99; border-radius: 14px;
+  padding: 1.25rem; font: 1rem/1.6 system-ui, sans-serif;
+}
+.spanish-storage-dialog::backdrop { background: rgb(24 36 29 / 62%); }
+.spanish-storage-dialog h2 { font-size: 1.25rem; margin: 0; }
+.spanish-storage-dialog p { margin: .65rem 0 1rem; }
+.spanish-storage-dialog button {
+  margin: .2rem .5rem .2rem 0; padding: .45rem .8rem; font: inherit; cursor: pointer;
+  color: #294b36; border: 1px solid #9aab94; background: #f6f8f1; border-radius: .45rem;
+}
+.spanish-storage-dialog button:first-of-type { color: #fff; background: #365b43; }

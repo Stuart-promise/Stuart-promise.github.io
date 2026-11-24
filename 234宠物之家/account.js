@@ -9,11 +9,12 @@
   const SESSION = 'pet234:session:v1';
   const PENDING_LOGOUT = 'pet234:logout-pending:v1';
   const modules = {
-    'chinese-changsha':'长沙中考古诗文', 'chinese-gaokao':'高考古诗文', python:'Python 闯关', 'vocab-cet4':'四级单词', 'vocab-cet6':'六级单词', 'vocab-zhongkao':'长沙中考单词', 'vocab-gaokao':'高考单词',
+    'chinese-changsha':'长沙中考古诗文', 'chinese-gaokao':'高考古诗文', python:'Python 闯关', spanish:'西语学习', 'vocab-cet4':'四级单词', 'vocab-cet6':'六级单词', 'vocab-zhongkao':'长沙中考单词', 'vocab-gaokao':'高考单词',
     fishing:'钓鱼模拟器', 'coin-tycoon':'金币大亨', 'zhaoyun-adou':'赵云与阿斗', animal2048:'动物 2048', blocks:'俄罗斯方块最高分', 'animal-drop':'动物合成最高分'
   };
   const prefixes = {'chinese-changsha':'pet234:chinese:v1:changsha:', 'chinese-gaokao':'pet234:chinese:v1:gaokao:',python:'pet234-python-v1:', 'vocab-cet4':'pet234:vocab:v1:cet4:', 'vocab-cet6':'pet234:vocab:v1:cet6:', 'vocab-zhongkao':'pet234:vocab:v1:zhongkao:', 'vocab-gaokao':'pet234:vocab:v1:gaokao:'};
   const singleKeys = {fishing:'pet234-fishing-v1','coin-tycoon':'pet234-coin-tycoon-v1',animal2048:'pet234-animal2048-v1',blocks:'pet234-blocks-best','animal-drop':'pet234-animal-drop-best'};
+  prefixes.spanish = 'pet234:spanish:v1:';
   const zhaoKeys = new Set(['zyad.learning.profile.v1','zyad.learning.profile.v1.backup','zyad.friend.history.v1']);
   let session = null, stale = false, message = '', timer, running, syncing, signingIn, signingOut, revoking;
   let connection = 'checking';
@@ -114,7 +115,9 @@
       const keepalive=fetchOptions.method==='PUT' && typeof fetchOptions.body==='string' && new TextEncoder().encode(fetchOptions.body).length<48000;
       response=await fetch(API+path,{...fetchOptions,signal:controller.signal,cache:'no-store',keepalive,
         headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...fetchOptions.headers}});
-      const data=await response.json();
+      const data=response.status===413
+        ? {detail:'存档超出大小限制，请先导出本地备份'}
+        : await response.json();
       if(identity(storedSession())!==expected||(!anonymous&&stale))throw Object.assign(Error('账号已在其他页面切换，请刷新后继续。'),{identityChanged:true});
       if (!response.ok) {
         const error=Error(typeof data.detail==='string'?data.detail:'请检查输入后重试');
@@ -181,15 +184,45 @@
         const state=read(m);if(state.data[k]===String(v))return;
         state.data[k]=String(v); state.dirty=true; state.revision++;
         write(m,state); notify('已存本机 · 等待云同步'); schedule();
+      },
+      removeItem(k) {
+        assertOwner();
+        if (!session) { localStorage.removeItem(k); return; }
+        const state=read(m);
+        if (!Object.hasOwn(state.data,k)) return;
+        delete state.data[k]; state.dirty=true; state.revision++;
+        write(m,state); notify('已存本机 · 等待云同步'); schedule();
       }
     };
   }
   function schedule() { clearTimeout(timer); if(session&&!stale&&!signingOut) timer=setTimeout(()=>flush().catch(()=>{}),1500); }
+  const leavingUploads = new Map();
+  function flushBeforeExit(m) {
+    if (!session || stale || signingOut || !modules[m]) return;
+    const state = read(m);
+    if (!state.dirty || state.conflict || leavingUploads.get(m) === state.revision) return;
+    const body = JSON.stringify({baseVersion:state.version, data:state.data});
+    // An unloading document may never acquire the usual Web Lock. Small saves can
+    // start a version-checked keepalive immediately. Larger ones stay queued on disk.
+    if (new TextEncoder().encode(body).length >= 48000) return;
+    leavingUploads.set(m, state.revision);
+    request('/v1/data/'+m, {method:'PUT', body}).then(result => {
+      const latest = read(m);
+      if (latest.version > result.version || latest.conflict) return;
+      latest.version = result.version; latest.updated = result.updated;
+      if (latest.revision === state.revision) latest.dirty = false;
+      write(m, latest); loaded.add(m);
+    }).catch(() => {
+      // The normal upload queue handles offline retries and shows version conflicts.
+    }).finally(() => {
+      if (leavingUploads.get(m) === state.revision) leavingUploads.delete(m);
+    });
+  }
   async function flushModule(m) {
     return locked(m,async()=>{
       assertOwner();
       const state=read(m);
-      if (!state.dirty || state.conflict) return;
+      if (!state.dirty || state.conflict || (m==='spanish' && state.tooLargeRevision===state.revision)) return;
       const revision=state.revision;
       try {
         const result=await request('/v1/data/'+m,{method:'PUT',body:JSON.stringify({baseVersion:state.version,data:state.data})});
@@ -201,6 +234,7 @@
         loaded.add(m);
       } catch (error) {
         if (error.status===409) { const latest=read(m); latest.conflict=error.current; write(m,latest); }
+        if (m==='spanish' && error.status===413) { const latest=read(m); latest.tooLargeRevision=revision; write(m,latest); }
         throw error;
       }
     });
@@ -243,7 +277,7 @@
     if(stale)return 'expired';
     if(!session)return 'guest';
     const state=read(m);
-    return state.conflict?'conflict':memory.has(m)?'storage-error':connection==='offline'?'offline':state.dirty?'pending':loaded.has(m)?'synced':'checking';
+    return state.conflict?'conflict':memory.has(m)?'storage-error':m==='spanish'&&state.dirty&&state.tooLargeRevision===state.revision?'too-large':connection==='offline'?'offline':state.dirty?'pending':loaded.has(m)?'synced':'checking';
   }
   async function ensureGameClosed() {
     let lease;try{lease=JSON.parse(localStorage.getItem('pet234:unity-lease')||'null');}catch{}
@@ -409,7 +443,7 @@
   window.addEventListener('pageshow',event=>{
     if(event.persisted&&identity(storedSession())!==pageIdentity){stale=true;stopRequests();location.reload();}
   });
-  window.PetAccount={ready,open,flush,sync,syncState,request,authenticate,logout,modules,read,resolve,guestData,importGuest,
+  window.PetAccount={ready,open,flush,flushBeforeExit,sync,syncState,request,authenticate,logout,modules,read,resolve,guestData,importGuest,
     notify,locked,ensureGameClosed,assertOwner,owner,base,checkIn,updateProfile,get session(){return session;},get profile(){return profile;},get status(){return message;}};
   revokePending().catch(()=>{});
 })();

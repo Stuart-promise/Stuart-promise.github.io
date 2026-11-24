@@ -20,7 +20,7 @@ function render() {
   for(const [m,title] of Object.entries(A.modules)) {
     const state=A.read(m);
     const status=A.syncState(m);
-    const r=row(title,state.conflict?'有两个不同版本，需要选择':status==='storage-error'?'本机空间不足 · 请先导出备份':state.dirty?'已保存在本机，尚未同步':['offline','checking'].includes(status)?'本机副本 · 等待确认云端状态':state.updated?'已同步 · '+new Date(state.updated*1000).toLocaleString():'暂时没有云端记录');
+    const r=row(title,state.conflict?'有两个不同版本，需要选择':status==='too-large'?'存档过大，请先导出备份，缩减后可继续同步':status==='storage-error'?'本机空间不足 · 请先导出备份':state.dirty?'已保存在本机，尚未同步':['offline','checking'].includes(status)?'本机副本 · 等待确认云端状态':state.updated?'已同步 · '+new Date(state.updated*1000).toLocaleString():'暂时没有云端记录');
     if(state.conflict) {
       r.append(action('保留云端版本',async()=>{if(confirm('使用云端记录替换本机这项记录？本机旧版会保留备份。'))await A.resolve(m,'cloud');}),
         action('使用本机版本',async()=>{if(confirm('将本机这项记录上传为新版本？'))await A.resolve(m,'local');}));

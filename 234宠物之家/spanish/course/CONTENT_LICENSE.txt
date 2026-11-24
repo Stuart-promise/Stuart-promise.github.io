@@ -1,0 +1,29 @@
+# Course content license / 课程内容许可
+
+The course content in `src/content/` — units, grammar notes, word lists, example sentences,
+readings, role-play scenarios, the placement material and the song notes — is licensed under
+**Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**.
+
+`src/content/` 目录下的课程内容（单元、语法讲解、词表、例句、短文、情景对话、分级测试材料和歌曲学习提示）
+采用 **知识共享 署名-非商业性使用-相同方式共享 4.0 国际（CC BY-NC-SA 4.0）** 许可：
+
+- **署名**：使用或改编时注明出处（Oliva 项目及链接）。
+- **非商业性使用**：不得用于商业目的。
+- **相同方式共享**：改编后的作品须以相同许可发布。
+
+Full license text / 完整许可文本: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+The source code is licensed under the MIT License (see `LICENSE`).
+代码部分采用 MIT 许可（见 `LICENSE`）。
+
+## Third-party material / 第三方内容
+
+This repository contains **no song lyrics, audio or video**. The song catalog only stores
+titles, artists, YouTube video ids and LRCLIB record ids; lyrics are fetched from
+[LRCLIB](https://lrclib.net) at play time, videos are embedded from YouTube, artist summaries
+come from Wikipedia and track lists from the iTunes Search API. All of those remain the
+property of their respective owners and are subject to their own terms.
+
+本仓库不包含任何歌词、音频或视频。歌曲目录只记录歌名、歌手、YouTube 视频编号和 LRCLIB 记录编号；
+歌词在播放时从 LRCLIB 获取，视频嵌入自 YouTube，歌手简介摘要来自维基百科，作品列表来自 iTunes，
+这些内容的版权归各自所有者，并受其各自条款约束。
