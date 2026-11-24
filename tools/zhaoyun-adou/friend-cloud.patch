@@ -1,0 +1,533 @@
+diff --git a/assets/prefabs/dialogs/NoticeDialog.prefab b/assets/prefabs/dialogs/NoticeDialog.prefab
+index a2667e3461bd6ed575b32dad4449c042eaf0589e..f1aa23d6306fcb2be8afa2605cfb72c0c9fcfac4 100644
+--- a/assets/prefabs/dialogs/NoticeDialog.prefab
++++ b/assets/prefabs/dialogs/NoticeDialog.prefab
+@@ -1584,7 +1584,7 @@
+       "b": 28,
+       "a": 255
+     },
+-    "_string": "赵云与阿斗 · 本地学习版\n内容版本：level1-v1\n\n双路守关：你与本地陪练各自防守一路，布阵抵御五波来敌。\n\n征兵与合成：使用局内粮食征兵，将同类同阶兵种合成为更强的单位。\n\n粮食与金币不同：粮食用于本局征兵；金币属于局外档案，不可当作局内粮食。\n\n本地记录：设置、头像和战绩仅保存在本机，不代表联网排名；清理存储可能丢失档案。\n\n练习体力：每300秒恢复1点，上限30。开始守关消耗5点，匹配取消不消耗；未满时可领取练习补给+10，不含广告。\n\n素材仅用于个人学习与技术研究，相关权利归原权利人所有。本项目非官方产品，未获得素材商业使用或再分发授权。",
++    "_string": "赵云与阿斗 · 守关玩法\n内容版本：level1-v1\n\n单人守关时，你和陪练各守一路，抵御五波来敌。从页面上方进入“好友对战”，可以开房邀请好友一起布阵比拼。\n\n征兵与合成：使用局内粮食征兵，将同类同阶兵种合成为更强的单位。\n\n粮食与金币不同：粮食用于本局征兵；金币属于局外档案，不可当作局内粮食。\n\n登录网站账号后，体力、金币、装备、设置和战绩会自动保存到云端。游客进度保存在本机。好友战绩可在“好友对战”中查看。\n\n练习体力：每300秒恢复1点，上限30。开始守关消耗5点，匹配取消不消耗；未满时可领取练习补给+10，不含广告。\n\n素材仅用于个人学习与技术研究，相关权利归原权利人所有。本项目非官方产品，未获得素材商业使用或再分发授权。",
+     "_horizontalAlign": 0,
+     "_verticalAlign": 0,
+     "_actualFontSize": 25,
+diff --git a/assets/prefabs/dialogs/SettingsDialog.prefab b/assets/prefabs/dialogs/SettingsDialog.prefab
+index 9940ec25424852b03002f83323f70d55fb64aed5..fef7f9ecd0cf0b7b32be9ba3473faa9e0e48635a 100644
+--- a/assets/prefabs/dialogs/SettingsDialog.prefab
++++ b/assets/prefabs/dialogs/SettingsDialog.prefab
+@@ -2827,7 +2827,7 @@
+       "b": 25,
+       "a": 255
+     },
+-    "_string": "本地档案",
++    "_string": "游戏档案",
+     "_horizontalAlign": 0,
+     "_verticalAlign": 1,
+     "_actualFontSize": 23,
+diff --git a/assets/prefabs/pages/LobbyPage.prefab b/assets/prefabs/pages/LobbyPage.prefab
+index 3282f7a4955261f091b5e82cc1862338e3978684..e14ea691d3ed9ae91c74088a5e9faebd0c2db373 100644
+--- a/assets/prefabs/pages/LobbyPage.prefab
++++ b/assets/prefabs/pages/LobbyPage.prefab
+@@ -4171,7 +4171,7 @@
+       "b": 21,
+       "a": 255
+     },
+-    "_string": "本地战绩",
++    "_string": "单人战绩",
+     "_horizontalAlign": 1,
+     "_verticalAlign": 1,
+     "_actualFontSize": 24,
+diff --git a/assets/prefabs/pages/RecordsPage.prefab b/assets/prefabs/pages/RecordsPage.prefab
+index 029f72fd9b8f8d665d8a0d6c67d40ec3812efa64..3b854211a03f7a9b1d2d002127ee025d69fff10b 100644
+--- a/assets/prefabs/pages/RecordsPage.prefab
++++ b/assets/prefabs/pages/RecordsPage.prefab
+@@ -700,7 +700,7 @@
+       "b": 22,
+       "a": 255
+     },
+-    "_string": "本地战绩",
++    "_string": "单人战绩",
+     "_horizontalAlign": 1,
+     "_verticalAlign": 1,
+     "_actualFontSize": 32,
+diff --git a/assets/scripts/app/GameRoot.ts b/assets/scripts/app/GameRoot.ts
+index a494173dc815de6c27f0c52daa925c39a15ee4f1..f57259cfcc413f34cc7dbc3fac013b3ee7bbc314 100644
+--- a/assets/scripts/app/GameRoot.ts
++++ b/assets/scripts/app/GameRoot.ts
+@@ -11,7 +11,7 @@ import { RecycleDialogView } from '../views/RecycleDialogView';
+ import { ReviewDialogView } from '../views/ReviewDialogView';
+ import { previewRecycle } from '../model/Progression';
+ import type { RecyclePreview } from '../model/Progression';
+-import type { SaveResult } from './ProfileStore';
++import type { ProfileStorage, SaveResult } from './ProfileStore';
+ import { createStage05Draw, isStage05Scenario, Stage05ProfileFixture } from '../testing/Stage05ProfileFixture';
+ import { ResponsiveLayout } from '../views/ResponsiveLayout';
+ import { SettingsDialogView } from '../views/SettingsDialogView';
+@@ -22,6 +22,8 @@ import { MatchFlow } from './MatchFlow';
+ import { BattleController } from '../views/BattleController';
+ import { TutorialController } from '../views/TutorialController';
+ import { BattleModel } from '../model/BattleModel';
++import { duelChannel, FriendBattle } from '../model/FriendBattle';
++import type { FormationAction, FriendSeat, PlayableBattle } from '../model/FriendBattle';
+ import type { LevelConfig, Quality, Side, UnitKind } from '../model/GameTypes';
+ import type { RunRecord, SaveDataV1 } from '../model/SaveData';
+ import type { BattleResult } from '../model/BattleTypes';
+@@ -84,7 +86,9 @@ export class GameRoot extends Component {
+     private lobby: LobbyView | null = null;
+     private matching: MatchView | null = null;
+     private battle: BattleController | null = null;
+-    private battleModel: BattleModel | null = null;
++    private battleModel: PlayableBattle | null = null;
++    private friendMatch: string | null = null;
++    private advertisedAvailability: boolean | null = null;
+     private pendingBattleResult: BattleResult | null = null;
+     private resultView: ResultView | null = null;
+     private bagView: WeaponBagView | null = null;
+@@ -124,13 +128,24 @@ export class GameRoot extends Component {
+         const storage = isStage06Scenario(scenario)
+             ? new Stage06ProfileFixture(window.sessionStorage, scenario, Date.now())
+             : isStage05Scenario(scenario) ? new Stage05ProfileFixture(window.sessionStorage, scenario, Date.now())
+-            : isStage02ProfileScenario(scenario) ? new Stage02ProfileFixture(scenario, Date.now()) : sys.localStorage;
++            : isStage02ProfileScenario(scenario) ? new Stage02ProfileFixture(scenario, Date.now()) : this.playerStorage();
+         this.profile = new ProfileStore(storage,
+             () => `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`);
+         if (this.initialLobby) this.initialLobby.active = false;
+         profiler.hideStats();
+     }
++    private playerStorage(): ProfileStorage {
++        // The website resolves the active account and its save before loading this frame.
++        if (typeof window !== 'undefined' && window.parent !== window) {
++            try {
++                const host = window.parent as Window & { PetZhaoSave?: { storage: ProfileStorage } };
++                if (host.PetZhaoSave) return host.PetZhaoSave.storage;
++            } catch { /* Standalone builds may be embedded by a different origin. */ }
++        }
++        return sys.localStorage;
++    }
+     onEnable(): void {
++        if (typeof window !== 'undefined') window.addEventListener('message', this.onFriendMessage);
+         this.retryButton?.node.on(Button.EventType.CLICK, this.retry, this);
+         this.recoveryButton?.node.on(Button.EventType.CLICK, this.recover, this);
+         game.on(Game.EVENT_HIDE, this.onHide, this);
+@@ -144,6 +159,7 @@ export class GameRoot extends Component {
+     }
+     start(): void { void this.boot(); }
+     onDisable(): void {
++        if (typeof window !== 'undefined') window.removeEventListener('message', this.onFriendMessage);
+         this.retryButton?.node.off(Button.EventType.CLICK, this.retry, this);
+         this.recoveryButton?.node.off(Button.EventType.CLICK, this.recover, this);
+         game.off(Game.EVENT_HIDE, this.onHide, this);
+@@ -213,7 +229,7 @@ export class GameRoot extends Component {
+         this.config = parsed.config;
+         const read = this.profile?.read();
+         if (!read || read.ok === false) {
+-            this.showError('profile-error', '本地档案读取失败', read && read.ok === false ? read.errors.join('\n') : 'ProfileStore unavailable');
++            this.showError('profile-error', '游戏档案读取失败', read && read.ok === false ? read.errors.join('\n') : 'ProfileStore unavailable');
+             if (read && read.ok === false && read.status === 'confirmation-required') {
+                 this.recoveryAvailable = true;
+                 if (this.recoveryButton) this.recoveryButton.node.active = true;
+@@ -533,7 +549,79 @@ export class GameRoot extends Component {
+             });
+         } catch (error) { console.error('[Matching]', String(error)); this.showLobby('匹配页面绑定失败，未扣体力'); }
+     }
++    private get friendAvailable(): boolean {
++        return this.state === 'ready' && !!this.lobby && !this.dialogNode && !this.friendMatch && !this.matching && !this.battle;
++    }
++    private notifyFriend(type: string, fields: Record<string, unknown> = {}): void {
++        if (typeof window !== 'undefined' && window.parent !== window) {
++            window.parent.postMessage({ channel: duelChannel, type, ...fields }, window.location.origin);
++        }
++    }
++    private onFriendMessage = (event: MessageEvent): void => {
++        const d = event.data;
++        if (event.source !== window.parent || window.parent === window || event.origin !== window.location.origin || !d || d.channel !== duelChannel) return;
++        if (d.type === 'probe') { this.notifyFriend('availability', { available: this.friendAvailable }); return; }
++        if (typeof d.matchId !== 'string' || !/^[a-f0-9]{24}$/.test(d.matchId)) return;
++        if (d.type === 'start') {
++            if (d.matchId === this.friendMatch) return;
++            if (!this.friendAvailable || !['host','guest'].includes(d.seat) || !Number.isInteger(d.seed) || d.seed < 1 || d.seed > 0xffffffff) {
++                this.notifyFriend('error', { matchId: d.matchId, message: '请先回到赵云与阿斗的大厅再加入对战' }); return;
++            }
++            void this.beginFriendMatch(d.matchId, d.seed, d.seat);
++            return;
++        }
++        if (d.matchId !== this.friendMatch) return;
++        if (d.type === 'end') { this.finishFriendMatch(typeof d.message === 'string' ? d.message.slice(0,120) : '好友对战已结束'); return; }
++        if (d.type === 'battle') {
++            try {
++                if (!this.battle) throw new Error('战场尚未就绪');
++                this.battle.launchFriendWave(d.round, d.host as FormationAction[], d.guest as FormationAction[]);
++            } catch (error) { this.failFriendMatch(String(error)); }
++        }
++    };
++    private finishFriendMatch(message: string): void {
++        this.friendMatch = null; this.loader?.cancel();
++        this.showLobby(message);
++    }
++    private failFriendMatch(message: string): void {
++        this.notifyFriend('error', { matchId: this.friendMatch, message });
++        this.finishFriendMatch(message);
++    }
++    private async beginFriendMatch(matchId: string, seed: number, seat: FriendSeat): Promise<void> {
++        this.friendMatch = matchId;
++        try {
++            if (!this.loader || !this.config || !this.battlePage || !this.dragOverlay) throw new Error('战场未准备好');
++            if (this.pageNode) this.pageNode.active = false;
++            if (this.loadingPanel) this.loadingPanel.active = true;
++            if (this.statusLabel) this.statusLabel.string = '好友已就位，正在载入战场…';
++            const animations = await this.loader.loadBattle();
++            if (this.friendMatch !== matchId) return;
++            if (!animations) throw new Error('战场素材未能载入');
++            const node = this.replacePage(this.battlePage);
++            const controller = node.getComponent(BattleController);
++            if (!controller) throw new Error('好友战场未能打开');
++            const layout = this.pageHost?.getComponent(ResponsiveLayout);
++            if (layout) { layout.designHeight = 1280; layout.refresh(); }
++            const model = new FriendBattle(this.config, seat, matchId, seed, (round, actions) => {
++                this.notifyFriend('submit', { matchId, round, actions });
++            });
++            this.battle = controller; this.battleModel = model;
++            controller.bind(model, this.config, this.dragOverlay, { animations, audio: this.audioController,
++                showDamage: this.profile?.snapshot?.settings.showDamage, finished: () => {
++                    const report = model.report();
++                    if (report && this.friendMatch === matchId) this.notifyFriend('result', { matchId, ...report });
++                } });
++            this.setBackground(this.battleBackground);
++            this.notifyFriend('entered', { matchId });
++        } catch (error) {
++            if (this.friendMatch === matchId) this.failFriendMatch('好友对战加载失败：' + String(error));
++        }
++    }
+     update(dt: number): void {
++        if (this.advertisedAvailability !== this.friendAvailable) {
++            this.advertisedAvailability = this.friendAvailable;
++            this.notifyFriend('availability', { available: this.advertisedAvailability });
++        }
+         if (this.appHidden) return;
+         // Defer navigation until the controller has returned from rendering its finish event.
+         if (this.pendingBattleResult && !this.settlementAttempted) this.submitBattleResult();
+diff --git a/assets/scripts/app/ProfileStore.ts b/assets/scripts/app/ProfileStore.ts
+index 9a1c4277248260b41e4099eb17d7cf98581b4d97..51857a32347a98b4443eb032cfbae439aad6bc47 100644
+--- a/assets/scripts/app/ProfileStore.ts
++++ b/assets/scripts/app/ProfileStore.ts
+@@ -55,7 +55,7 @@ export class ProfileStore {
+             const data = backup && backup.ok === true ? backup.data : null;
+             this.recovery = { kind: data ? 'backup' : 'rebuild', activeRaw, backupRaw, data };
+             return { ok: false, status: 'confirmation-required', recovery: this.recovery.kind,
+-                errors: [data ? '当前档案无效；确认后恢复备份。' : '当前档案与备份均无效；可重试读取或确认重建本地档案。'] };
++                errors: [data ? '当前档案无效；确认后恢复备份。' : '当前档案与备份均无效；可重试读取或确认重建游戏档案。'] };
+         } catch (error) { return { ok: false, status: 'storage-error', errors: [String(error)] }; }
+     }
+ 
+diff --git a/assets/scripts/model/BattleModel.ts b/assets/scripts/model/BattleModel.ts
+index fbf777041a98c88d7d5695c63936c4e06a9708c7..755649c9c5443106ec75c19dcb7edbfd8e5dbf45 100644
+--- a/assets/scripts/model/BattleModel.ts
++++ b/assets/scripts/model/BattleModel.ts
+@@ -48,6 +48,15 @@ export class BattleModel {
+         }
+     }
+     get snapshot(): BattleSession { return clone(this.state); }
++    /** The room holds each preparation phase until both players lock their formations. */
++    startFriendWave(): BattleEvent[] {
++        const s = this.state;
++        if (s.phase !== 'PREPARING' && s.phase !== 'INTERMISSION') throw new Error('当前阶段不能开始守关');
++        if (s.phase === 'INTERMISSION') { s.waveIndex++; s.waveTick = 0; s.spawnedInWave = 0; }
++        const events: BattleEvent[] = [];
++        this.phase(s, 'COUNTDOWN', events);
++        return events;
++    }
+     /** Call once before step at the controller boundary; reassign the global commandId, then dispatch once.
+      * Taking a decision consumes its slot even when null/rejected. This method never dispatches. */
+     takeAiDecision(): BattleCommand | null {
+diff --git a/assets/scripts/model/FriendBattle.ts b/assets/scripts/model/FriendBattle.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..f4edb3247ea14c760fc5abbd6462caea88c5ab57
+--- /dev/null
++++ b/assets/scripts/model/FriendBattle.ts
+@@ -0,0 +1,131 @@
++import { BattleModel } from './BattleModel';
++import type { BattleCommand, BattleEvent, BattleInit, BattleResult, BattleSession, CommandResult, UnitLocation } from './BattleTypes';
++import type { LevelConfig, Side } from './GameTypes';
++import { sameLocation } from './GridRules';
++
++export type FriendSeat = 'host' | 'guest';
++export type FormationAction = ['r'] | ['m' | 'u', number, number];
++export type PlayableBattle = Pick<BattleModel, 'snapshot' | 'dispatch' | 'step' | 'takeAiDecision'>;
++export const duelChannel = 'pet234-zhao-duel-v1';
++export interface FriendReport {
++    round: number; wave: number; winner: FriendSeat | 'draw'; hearts: number[]; kills: number[];
++}
++const reverse = (side: Side): Side => side === 'player' ? 'ai' : 'player';
++function rotate(location: UnitLocation): UnitLocation {
++    return location.kind === 'board' ? { kind: 'board', c: 7 - location.c, r: 9 - location.r } : location;
++}
++function slotOf(location: UnitLocation): number {
++    return location.kind === 'reserve' ? location.slot : 5 + (location.r - 7) * 3 + location.c - 2;
++}
++function locationOf(slot: number, side: Side): UnitLocation {
++    if (!Number.isInteger(slot) || slot < 0 || slot > 10) throw new Error('布阵格子无效');
++    if (slot < 5) return { kind: 'reserve', slot };
++    const location: UnitLocation = { kind: 'board', c: 2 + (slot - 5) % 3, r: 7 + Math.floor((slot - 5) / 3) };
++    return side === 'player' ? location : rotate(location);
++}
++function guestResult(result: BattleResult): BattleResult {
++    const swap = <T>(value: Record<Side, T>): Record<Side, T> => ({ player: value.ai, ai: value.player });
++    return { ...result, outcome: result.outcome === 'win' ? 'lose' : result.outcome === 'lose' ? 'win' : result.outcome,
++        hearts: swap(result.hearts), kills: swap(result.kills), clearTicksByWave: swap(result.clearTicksByWave) };
++}
++
++/** The simulation always runs host on the lower lane. Only the guest's view and inputs rotate. */
++export class FriendBattle implements PlayableBattle {
++    private readonly init: BattleInit;
++    private sim: BattleModel;
++    private baseline: BattleSession;
++    private actions: FormationAction[] = [];
++    locked = false;
++    round = 1;
++
++    constructor(private readonly config: LevelConfig, readonly seat: FriendSeat, id: string, seed: number,
++        private readonly submitFormation: (round: number, actions: FormationAction[]) => void) {
++        const equipment = { bow: 1, pike: 1, cavalry: 1, knife: 1 };
++        this.init = { runId: id, runSeq: 1, seed, tutorial: false, equipmentSnapshot: { player: equipment, ai: equipment } };
++        this.sim = new BattleModel(config, this.init);
++        this.baseline = this.sim.snapshot;
++    }
++    get snapshot(): BattleSession {
++        const s = this.sim.snapshot;
++        if (this.seat === 'host') return s;
++        [s.player, s.ai] = [s.ai, s.player];
++        [s.equipmentSnapshot.player, s.equipmentSnapshot.ai] = [s.equipmentSnapshot.ai, s.equipmentSnapshot.player];
++        for (const side of ['player', 'ai'] as const) for (const unit of s[side].units) {
++            unit.side = side; unit.location = rotate(unit.location);
++        }
++        for (const item of [...s.enemies, ...s.projectiles]) { item.lane = reverse(item.lane); item.x = -item.x; item.y = -item.y; }
++        if (s.result) s.result = guestResult(s.result);
++        return s;
++    }
++    private project(events: BattleEvent[]): BattleEvent[] {
++        if (this.seat === 'host') return events;
++        return events.map(e => ({ ...e, side: reverse(e.side), x: e.x === undefined ? undefined : -e.x,
++            y: e.y === undefined ? undefined : -e.y, result: e.result ? guestResult(e.result) : undefined }));
++    }
++    takeAiDecision(): null { return null; }
++    step(): BattleEvent[] {
++        const phase = this.sim.snapshot.phase;
++        if (phase === 'PREPARING' || phase === 'INTERMISSION') return [];
++        const events = this.sim.step();
++        if (events.some(e => e.type === 'PhaseChanged' && e.phase === 'INTERMISSION')) {
++            this.baseline = this.sim.snapshot;
++            this.actions = []; this.locked = false; this.round = this.baseline.waveIndex + 2;
++        }
++        return this.project(events);
++    }
++    private apply(sim: BattleModel, side: Side, op: FormationAction): CommandResult {
++        const s = sim.snapshot, header = { side, runId: s.runId, commandId: s.commandId + 1 };
++        if (!Array.isArray(op)) throw new Error('布阵指令格式错误');
++        if (op[0] === 'r' && op.length === 1) return sim.dispatch({ ...header, type: 'Recruit' });
++        if (!(op[0] === 'm' || op[0] === 'u') || op.length !== 3) throw new Error('未知布阵操作');
++        const sourceLocation = locationOf(op[1], side), targetLocation = locationOf(op[2], side);
++        const source = s[side].units.find(u => sameLocation(u.location, sourceLocation));
++        if (!source) return { ok: false, reason: 'SOURCE_CHANGED', events: [] };
++        const cmd = { ...header, sourceUnitId: source.id, sourceLocation };
++        if (op[0] === 'm') return sim.dispatch({ ...cmd, type: 'MoveUnit', targetLocation });
++        const target = s[side].units.find(u => sameLocation(u.location, targetLocation));
++        if (!target) return { ok: false, reason: 'INVALID_TARGET', events: [] };
++        return sim.dispatch({ ...cmd, type: 'MergeUnit', targetUnitId: target.id });
++    }
++    dispatch(command: BattleCommand): CommandResult {
++        const reject = (reason: string): CommandResult => ({ ok: false, reason, events: [] });
++        const s = this.snapshot;
++        if (command.runId !== s.runId || this.locked || !['PREPARING','INTERMISSION'].includes(s.phase)) return reject('INVALID_PHASE');
++        if (command.type === 'StartCountdown') {
++            if (!s.player.units.some(u => u.location.kind === 'board')) return reject('FORMATION_EMPTY');
++            this.locked = true; this.submitFormation(this.round, this.actions.slice());
++            return { ok: true, reason: '', events: [] };
++        }
++        if (this.actions.length >= 200) return reject('FORMATION_LIMIT');
++        let op: FormationAction;
++        if (command.type === 'Recruit') op = ['r'];
++        else if (command.type === 'MergeUnit' || command.type === 'MoveUnit') {
++            const source = s.player.units.find(u => u.id === command.sourceUnitId);
++            if (!source || !sameLocation(source.location, command.sourceLocation)) return reject('SOURCE_CHANGED');
++            const target = command.type === 'MergeUnit' ? s.player.units.find(u => u.id === command.targetUnitId)?.location : command.targetLocation;
++            if (!target || target.kind === 'board' && !this.config.board.playerCells.some(([c,r]) => c === target.c && r === target.r)) return reject('INVALID_TARGET');
++            op = [command.type === 'MergeUnit' ? 'u' : 'm', slotOf(source.location), slotOf(target)];
++        } else return reject('INVALID_PHASE');
++        const result = this.apply(this.sim, this.seat === 'host' ? 'player' : 'ai', op);
++        if (result.ok && result.events.length) this.actions.push(op);
++        return { ...result, events: this.project(result.events) };
++    }
++    launch(round: number, host: FormationAction[], guest: FormationAction[]): BattleEvent[] {
++        if (round !== this.round || !this.locked || !['PREPARING','INTERMISSION'].includes(this.sim.snapshot.phase)) throw new Error('布阵进度与房间不一致');
++        if (!Array.isArray(host) || !Array.isArray(guest) || host.length > 200 || guest.length > 200 ||
++            JSON.stringify(this.seat === 'host' ? host : guest) !== JSON.stringify(this.actions)) throw new Error('收到的阵容与提交记录不一致');
++        const model = new BattleModel(this.config, this.init, this.baseline);
++        for (const [side, ops] of [['player', host], ['ai', guest]] as const) {
++            for (const op of ops) if (!this.apply(model, side, op).ok) throw new Error('对局中的布阵指令无效');
++            if (!model.snapshot[side].units.some(u => u.location.kind === 'board')) throw new Error('对方尚未部署士兵');
++        }
++        this.sim = model;
++        return this.project(model.startFriendWave());
++    }
++    report(): FriendReport | null {
++        const r = this.sim.snapshot.result;
++        if (!r) return null;
++        return { round: this.round, wave: r.wave, winner: r.outcome === 'win' ? 'host' : r.outcome === 'lose' ? 'guest' : 'draw',
++            hearts: [r.hearts.player, r.hearts.ai], kills: [r.kills.player, r.kills.ai] };
++    }
++}
+diff --git a/assets/scripts/model/FriendBattle.ts.meta b/assets/scripts/model/FriendBattle.ts.meta
+new file mode 100644
+index 0000000000000000000000000000000000000000..82503e50c33024abfffdcb12b8a463a065643555
+--- /dev/null
++++ b/assets/scripts/model/FriendBattle.ts.meta
+@@ -0,0 +1,9 @@
++{
++  "ver": "4.0.24",
++  "importer": "typescript",
++  "imported": true,
++  "uuid": "684defe3-86d5-417e-a12a-e825e0c264d7",
++  "files": [],
++  "subMetas": {},
++  "userData": {}
++}
+diff --git a/assets/scripts/views/BattleController.ts b/assets/scripts/views/BattleController.ts
+index 8f130b419cd2941cfa9d702593c6aabe1302162d..c5aa4e2fd2dcfa1ff13b6b1c1a7b5e60569ff4dc 100644
+--- a/assets/scripts/views/BattleController.ts
++++ b/assets/scripts/views/BattleController.ts
+@@ -1,5 +1,6 @@
+ import { _decorator, AudioClip, BlockInputEvents, Button, Component, EventKeyboard, game, Game, input, Input, instantiate, KeyCode, Label, Node, Prefab, Sprite, SpriteFrame } from 'cc';
+-import { BattleModel } from '../model/BattleModel';
++import { FriendBattle } from '../model/FriendBattle';
++import type { FormationAction, PlayableBattle } from '../model/FriendBattle';
+ import type { BattleCommand, BattleEvent, BattleResult, BattleSession, DismissRequest, UnitState } from '../model/BattleTypes';
+ import type { LevelConfig } from '../model/GameTypes';
+ import { getRecruitOffer } from '../model/Recruitment';
+@@ -17,6 +18,7 @@ type WithoutHeader<T> = T extends unknown ? Omit<T, 'runId' | 'commandId' | 'sid
+ type Action = WithoutHeader<BattleCommand>;
+ interface BattleBindings { animations?: BattleAnimations; tutorial?: TutorialController | null; tutorialCompleted?: () => boolean; audio?: AudioController | null; showDamage?: boolean; finished?: (result: BattleResult) => void }
+ const REASONS: Record<string, string> = {
++    FORMATION_EMPTY: '先征兵，再将至少一名士兵拖到下方白格', FORMATION_LIMIT: '本波布阵操作已满，请确认出战',
+     INSUFFICIENT_GRAIN: '粮食不足', RESERVE_FULL: '候补已满，请部署或合成', INVALID_PHASE: '当前阶段不能调阵',
+     INVALID_TARGET: '无法放置到这里', SOURCE_CHANGED: '来源已变化，请重新操作', UNIT_MAX_TIER: '已经满级',
+     TUTORIAL_REQUIRED: '请先完成当前引导', TUTORIAL_PROTECTED: '请先完成当前引导', WRONG_RUN: '对局已切换',
+@@ -45,7 +47,9 @@ export class BattleController extends Component {
+     @property(Prefab) pauseDialogPrefab: Prefab | null = null;
+     @property(AudioClip) battleMusic: AudioClip | null = null;
+     @property({ type: [AudioClip], tooltip: '征兵/部署/合成/弓/刀/受击/死亡/失心，按此顺序' }) soundEffects: AudioClip[] = [];
+-    private model: BattleModel | null = null;
++    private model: PlayableBattle | null = null;
++    private friend: FriendBattle | null = null;
++    private readyLabel: Label | null = null;
+     private config: LevelConfig | null = null;
+     private queue: BattleCommand[] = [];
+     private commandId = 0;
+@@ -75,8 +79,10 @@ export class BattleController extends Component {
+         if (!confirm || !pause || !enemy) throw new Error('BattleController: required template component missing');
+         confirm.validateBindings(); pause.validateBindings(); enemy.validateBindings();
+     }
+-    bind(model: BattleModel, config: LevelConfig, dragOverlay: Node, bindings: BattleBindings = {}): void {
++    bind(model: PlayableBattle, config: LevelConfig, dragOverlay: Node, bindings: BattleBindings = {}): void {
+         this.unbind(); this.validateBindings(); this.model = model; this.config = config; this.bindings = bindings;
++        this.friend = model instanceof FriendBattle ? model : null;
++        if (this.friend) this.readyLabel = this.prepareButton?.getComponentInChildren(Label) ?? null;
+         this.commandId = model.snapshot.commandId; this.accumulator = 0; this.droppedSteps = 0; this.finishedDelivered = false; this.lastAudioEvent = 0;
+         this.waveRecords = []; this.commands = []; this.inspectedUnitId = null; this.damageEvidence = [];
+         this.tutorialSaveFailed = false; this.secondMergeHintShown = false; this.secondMergeHintUntil = 0;
+@@ -124,7 +130,7 @@ export class BattleController extends Component {
+         this.bindings.tutorial?.unbind();
+         this.effects?.dispose(); this.effects = null;
+         if (this.model) this.boardView?.unbind();
+-        this.model = null; this.config = null; this.bindings = {}; this.queue = []; this.accumulator = 0;
++        this.model = null; this.friend = null; this.readyLabel = null; this.config = null; this.bindings = {}; this.queue = []; this.accumulator = 0;
+     }
+     onDestroy(): void { this.unbind(); }
+     private enqueue(action: Action, runId?: string): void {
+@@ -154,6 +160,11 @@ export class BattleController extends Component {
+     update(dt: number): void {
+         if (!this.model || !this.config) return;
+         if (this.model.snapshot.phase === 'FINISHED') return;
++        if (this.friend && ['PREPARING','INTERMISSION'].includes(this.model.snapshot.phase)) {
++            this.processInputs(); this.accumulator = 0;
++            this.boardView?.render(this.model.snapshot, [], dt);
++            return;
++        }
+         if (this.model.snapshot.phase === 'PAUSED') { this.processInputs(); this.accumulator = 0; return; }
+         const step = 1 / this.config.level.stepHz;
+         this.droppedSteps += Math.floor(Math.max(0, dt - 0.25) / step);
+@@ -177,6 +188,7 @@ export class BattleController extends Component {
+     }
+     /** HIDE is an immediate command boundary: no pending input or background dt is replayed. */
+     pause(): void {
++        if (this.friend) return;
+         if (!this.model || this.model.snapshot.phase === 'FINISHED') return;
+         this.dragController?.cancel(); this.queue.length = 0; this.accumulator = 0;
+         this.bindings.audio?.pauseAll();
+@@ -195,7 +207,15 @@ export class BattleController extends Component {
+         if (e.keyCode !== KeyCode.ESCAPE) return;
+         if (this.dialog) this.cancelConfirm(); else this.pause();
+     }
+-    private requestDismiss(request: DismissRequest): void { this.dragController?.cancel(); this.enqueue({ type: 'Pause', dismiss: request }); }
++    private requestDismiss(request: DismissRequest): void {
++        this.dragController?.cancel();
++        if (!this.friend) this.enqueue({ type: 'Pause', dismiss: request });
++    }
++    launchFriendWave(round: number, host: FormationAction[], guest: FormationAction[]): void {
++        if (!this.friend) throw new Error('尚未进入好友战场');
++        this.dragController?.cancel(); this.queue = []; this.accumulator = 0; this.inspectedUnitId = null;
++        this.render(this.friend.launch(round, host, guest));
++    }
+     private openPause(): void {
+         if (this.pauseDialog || !this.pauseDialogPrefab || !this.dialogHost || !this.model) return;
+         const node = instantiate(this.pauseDialogPrefab); node.parent = this.dialogHost;
+@@ -295,6 +315,24 @@ export class BattleController extends Component {
+             if (this.tutorialSaveFailed) this.hintLabel.string = '教程标记保存失败；本局已解冻，结算时重试';
+             else if (this.secondMergeHintShown && state.runTick < this.secondMergeHintUntil) this.hintLabel.string = '两名二级枪兵可合成赵云！';
+         }
++        if (this.friend) {
++            const planning = state.phase === 'PREPARING' || state.phase === 'INTERMISSION';
++            const canMove = planning && !this.friend.locked;
++            if (this.dragController) this.dragController.enabled = canMove;
++            if (this.pauseButton) this.pauseButton.node.active = false;
++            if (this.prepareButton) {
++                this.prepareButton.node.active = planning;
++                this.prepareButton.interactable = canMove;
++            }
++            if (this.readyLabel) this.readyLabel.string = this.friend.locked ? '已就绪' : '确认出战';
++            if (this.recruitButton) this.recruitButton.interactable = canMove && offer.ok;
++            if (this.recruitBackground) this.recruitBackground.spriteFrame = canMove && offer.ok ? this.recruitNormal : this.recruitDisabled;
++            if (this.waveLabel) this.waveLabel.string = `第${this.friend.round}/${level.maxWaves}波`;
++            if (planning && this.countdownLabel) this.countdownLabel.string = this.friend.locked ? '等待好友' : '好友布阵';
++            if (this.hintLabel && this.inspectedUnitId === null) this.hintLabel.string = planning
++                ? this.friend.locked ? '阵容已提交，等待好友确认出战' : '下方是你的阵地。征兵后拖到白格，确认出战锁定本波阵容'
++                : state.phase === 'FINISHED' ? '守关结束，正在核对双方战果…' : '上方是好友的阵地，下方是你的阵地';
++        }
+         this.publish(state);
+     }
+     private publish(s: BattleSession): void {
+diff --git a/assets/scripts/views/NoticeDialogView.ts b/assets/scripts/views/NoticeDialogView.ts
+index 3dbe8c4a452cd0c6de3ce0cf876c77118e836013..cc49bcc4d77de771226263854dc866fe5810f60d 100644
+--- a/assets/scripts/views/NoticeDialogView.ts
++++ b/assets/scripts/views/NoticeDialogView.ts
+@@ -1,7 +1,7 @@
+ import { _decorator, Button, Component, Label } from 'cc';
+ const { ccclass, property } = _decorator;
+ 
+-export const LEARNING_NOTICE = '赵云与阿斗 · 本地学习版\n内容版本：level1-v1\n\n双路守关：你与本地陪练各自防守一路，布阵抵御五波来敌。\n\n征兵与合成：使用局内粮食征兵，将同类同阶兵种合成为更强的单位。\n\n粮食与金币不同：粮食用于本局征兵；金币属于局外档案，不可当作局内粮食。\n\n本地记录：设置、头像和战绩仅保存在本机，不代表联网排名；清理存储可能丢失档案。\n\n练习体力：每300秒恢复1点，上限30。开始守关消耗5点，匹配取消不消耗；未满时可领取练习补给+10，不含广告。\n\n素材仅用于个人学习与技术研究，相关权利归原权利人所有。本项目非官方产品，未获得素材商业使用或再分发授权。';
++export const LEARNING_NOTICE = '赵云与阿斗 · 守关玩法\n内容版本：level1-v1\n\n单人守关时，你和陪练各守一路，抵御五波来敌。从页面上方进入“好友对战”，可以开房邀请好友一起布阵比拼。\n\n征兵与合成：使用局内粮食征兵，将同类同阶兵种合成为更强的单位。\n\n粮食与金币不同：粮食用于本局征兵；金币属于局外档案，不可当作局内粮食。\n\n登录网站账号后，体力、金币、装备、设置和战绩会自动保存到云端。游客进度保存在本机。好友战绩可在“好友对战”中查看。\n\n练习体力：每300秒恢复1点，上限30。开始守关消耗5点，匹配取消不消耗；未满时可领取练习补给+10，不含广告。\n\n素材仅用于个人学习与技术研究，相关权利归原权利人所有。本项目非官方产品，未获得素材商业使用或再分发授权。';
+ 
+ @ccclass('NoticeDialogView')
+ export class NoticeDialogView extends Component {
+diff --git a/assets/scripts/views/SettingsDialogView.ts b/assets/scripts/views/SettingsDialogView.ts
+index e238588b35267fc52a0b4ebca811949b630f2bcc..dc4598f996adc6b149d280e6f2f5b963450e041f 100644
+--- a/assets/scripts/views/SettingsDialogView.ts
++++ b/assets/scripts/views/SettingsDialogView.ts
+@@ -33,7 +33,7 @@ export class SettingsDialogView extends Component {
+         // Fill sprites must use FILLED/HORIZONTAL with fillStart=0 in the Prefab.
+         this.saved = { ...profile.settings };
+         this.draft = { ...profile.settings };
+-        this.profileText = `本地档案：${profile.profileId}`;
++        this.profileText = `游戏档案：${profile.profileId}`;
+         this.callbacks = callbacks;
+         this.renderDraft();
+         this.require(this.profileLabel, 'profileLabel').string = this.profileText;

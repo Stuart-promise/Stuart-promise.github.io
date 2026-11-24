@@ -1,0 +1,33 @@
+#game [hidden] { display: none; }
+.tools #zyad-save-status { margin-inline: auto 6px; color: #bfcbba; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tools #open-duel { flex: none; color: #f1d4a3; font-weight: 650; }
+.tools > :first-child, .tools #fullscreen { flex: none; }
+#duel-dialog { box-sizing: border-box; position: fixed; inset: 0; width: min(370px, calc(100% - 28px)); max-height: 86dvh; margin: auto; border: 1px solid #837454; border-radius: 12px; padding: 0; background: #262a25; color: #f1ead8; font: 15px/1.55 system-ui, "Microsoft YaHei", sans-serif; color-scheme: dark; box-shadow: 0 16px 64px #0008; }
+#duel-dialog::backdrop { background: rgb(9 13 10 / 74%); }
+.duel-panel { padding: 21px; }
+.duel-heading, .join-fields, .room-id { display: flex; align-items: center; gap: 10px; }
+.duel-heading { justify-content: space-between; }
+.duel-heading h1 { margin: 0; font: bold 25px/1.4 Georgia, "Songti SC", "SimSun", serif; letter-spacing: .065em; }
+#duel-dialog button, #duel-dialog input { font: inherit; box-sizing: border-box; border-radius: 6px; }
+#duel-dialog button { min-height: 42px; border: 1px solid #777760; padding: 6px 14px; color: #efe7d1; background: #353b33; cursor: pointer; }
+#duel-dialog button:disabled { opacity: .55; cursor: default; }
+#duel-dialog :focus-visible { outline: 2px solid #f4c76f; outline-offset: 2px; }
+#duel-dialog #dismiss-duel { background: none; border-color: transparent; padding-inline: 5px; color: #c3c8bd; }
+#duel-note { margin: 10px 0 18px; color: #ced1c4; }
+#duel-dialog .duel-primary { width: 100%; background: #eccb8e; border-color: #eccb8e; color: #302719; font-weight: 650; }
+#join-form { margin-top: 20px; }
+#join-form label { display: block; margin-bottom: 6px; color: #e1decf; }
+.join-fields input, #share-url { min-width: 0; width: 100%; min-height: 42px; background: #191e1a; border: 1px solid #666e60; color: #fff8e8; padding: 8px 10px; }
+.join-fields button { flex: none; }
+.room-id { margin-block: 9px 15px; justify-content: space-between; }
+.room-id strong { color: #f5d79d; font-size: 22px; font-variant-numeric: tabular-nums; letter-spacing: .1em; }
+#share-url, #leave-room { margin-top: 10px; }
+#leave-room { width: 100%; }
+#duel-history { border-top: 1px solid #4e564b; margin-top: 20px; padding-top: 13px; }
+#duel-history summary { cursor: pointer; color: #d2d6c7; }
+#duel-records { padding-left: 1.4em; margin-bottom: 0; }
+#duel-records li { margin-block: 6px; overflow-wrap: anywhere; }
+.zyad-save-prompt { max-width: min(28rem, 90vw); background: #20241f; color: #ece5cf; border: 1px solid #72654c; border-radius: 8px; padding: 16px; }
+.zyad-save-prompt::backdrop { background: #171a17cc; }
+.zyad-save-prompt button { margin: 4px; padding: 6px 12px; }
+@media (max-width: 380px) { #game .tools { padding-inline: 4px; } #game .tools a, #game .tools button { padding-inline: 5px; } }
