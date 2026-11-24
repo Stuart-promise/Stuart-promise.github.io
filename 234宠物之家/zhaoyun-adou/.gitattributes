@@ -1,0 +1,2 @@
+# Preserve the exact output of the Cocos web build, including hashed assets.
+play/** -text

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#191c19">
+  <title>赵云与阿斗 · 234宠物之家</title>
+  <!-- 原工程 https://github.com/qq865738120/zhaoyun_adou/tree/634f93f03ab9860ab828e1a4a09875b76772bbc1 · Cocos Creator 3.8.8 -->
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; }
+    body { background: #191c19; color: #ece5cf; font: 14px/1.4 system-ui, "Microsoft YaHei", sans-serif; }
+    main { height: 100%; height: 100dvh; display: flex; flex-direction: column; }
+    nav { flex: none; background: #20241f; }
+    .tools { min-height: 36px; padding: max(3px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 3px max(12px, env(safe-area-inset-left)); display: flex; align-items: center; justify-content: space-between; }
+    .tools a, .tools button { color: inherit; font: inherit; text-decoration: none; background: none; border: 0; cursor: pointer; padding: 5px 8px; }
+    .tools :focus-visible { outline: 2px solid #f4c76f; outline-offset: -2px; }
+    .stage { flex: 1; min-height: 0; display: grid; justify-items: center; container-type: size; padding-bottom: env(safe-area-inset-bottom); }
+    iframe { display: block; width: 100%; max-width: 640px; height: 100%; border: 0; background: #151714; }
+    @supports (width: 1cqh) { iframe { width: min(100cqw, 46.176cqh); } }
+  </style>
+</head>
+<body>
+  <main id="game">
+    <nav aria-label="游戏导航"><div class="tools">
+      <a href="../games.html">‹ 游戏大厅</a>
+      <button type="button" id="fullscreen" hidden>全屏</button>
+    </div></nav>
+    <div class="stage"><iframe src="./play/index.html" title="赵云与阿斗游戏" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
+  </main>
+  <script>
+    const game = document.getElementById('game');
+    const fullscreen = document.getElementById('fullscreen');
+    if (document.fullscreenEnabled && game.requestFullscreen) {
+      fullscreen.hidden = false;
+      fullscreen.addEventListener('click', async () => {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else await game.requestFullscreen();
+        } catch { /* The browser can decline fullscreen. */ }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        fullscreen.textContent = document.fullscreenElement ? '退出全屏' : '全屏';
+      });
+    }
+  </script>
+</body>
+</html>
