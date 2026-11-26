@@ -1,0 +1,265 @@
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -8,7 +8,7 @@
+ 
+ async function start(): Promise<void> {
+   const { app } = readStoredOptions() as { app?: { language?: unknown } };
+-  const language = resolveLanguage(app?.language);
++  const language = resolveLanguage(app?.language ?? "zh");
+   document.documentElement.lang = language;
+   await Catalog.load(language).catch(error => log.error("Interface strings failed to load", error));
+   document.title = t("Azgaar's Fantasy Map Generator");
+--- a/src/index.html
++++ b/src/index.html
+@@ -1,6 +1,8 @@
+ <!doctype html>
+ <html lang="en">
+   <head>
++    <script src="../frame.js"></script>
++    <link rel="stylesheet" href="../frame.css" />
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>Azgaar's Fantasy Map Generator</title>
+--- a/src/app/lifecycle.ts
++++ b/src/app/lifecycle.ts
+@@ -20,7 +20,11 @@
+ import { declareDefaultFonts } from "@/services/fonts";
+ import { adoptLegacyIconSlots } from "@/services/io/styles-legacy";
+ import { registerServiceWorker } from "@/services/platform";
+-import { checkLoadParameters } from "@/services/url-params";
++import { generateMapOnLoad } from "@/services/url-params";
++import { Save } from "@/services/io/save";
++import { Load } from "@/services/io/load";
++import { viewport } from "@/renderers/viewport/viewport";
++import { zoomTo } from "@/ui/map/zoom";
+ import { cleanupData } from "@/services/versioning";
+ import type { GridGraph } from "@/types/grid-graph";
+ import { Dialog } from "@/ui/dialog/dialog";
+@@ -36,7 +40,7 @@
+ /** Bring the app up */
+ export async function boot(): Promise<void> {
+   stashCallbackToken(); // before anything reads the URL: the OAuth fragment is not a load parameter
+-  registerServiceWorker();
++  // Offline resources are served by the host; keep the account shell out of upstream caches.
+   initShell();
+   declareDefaultFonts();
+ 
+@@ -50,7 +54,30 @@
+ 
+   if (!warnIfServerless()) {
+     hideLoading();
+-    await checkLoadParameters();
++    const host = window.MapWorkshop;
++    try {
++      const snapshot = host.initial;
++      if (snapshot?.map) {
++        await Load.restoreProject(snapshot.map);
++        const v = snapshot.view;
++        if (v && [v.x, v.y, v.k].every(Number.isFinite) && v.k > 0) zoomTo(v.x, v.y, v.k, 0);
++      } else {
++        await generateMapOnLoad();
++      }
++      if (!pack.cells?.i?.length) throw new Error("地图尚未成功生成。");
++      host.ready(() => {
++        if (options.app.mode) throw new Error("请先点编辑器里的完成，再保存地图。");
++        Options.persist();
++        const k = viewport.scale || 1;
++        return {
++          map: Save.prepareMapData(),
++          view: {x: (viewport.width / 2 - viewport.x) / k, y: (viewport.height / 2 - viewport.y) / k, k}
++        };
++      });
++    } catch (error) {
++      host.failed(error);
++      return;
++    }
+   }
+ 
+   initiateAutosave();
+@@ -139,6 +166,7 @@
+ 
+   fitMapToScreen();
+   shouldShowLoading && hideLoading();
++  window.MapWorkshop.changed();
+   clearMainTip();
+ }, 250);
+ 
+--- a/src/app/loading.ts
++++ b/src/app/loading.ts
+@@ -11,7 +11,7 @@
+ }
+ 
+ export function hideLoading(): void {
+-  fade("loading", 0, 3000);
+-  fade("optionsContainer", 1, 2000);
+-  fade("tooltip", 1, 3000);
++  fade("loading", 0, 180);
++  fade("optionsContainer", 1, 180);
++  fade("tooltip", 1, 180);
+ }
+--- a/src/data/graph-density.ts
++++ b/src/data/graph-density.ts
+@@ -19,7 +19,7 @@
+ const DENSITY_STEPS = Object.keys(POINTS_BY_DENSITY).map(Number);
+ export const MIN_DENSITY = Math.min(...DENSITY_STEPS);
+ export const MAX_DENSITY = Math.max(...DENSITY_STEPS);
+-export const DEFAULT_DENSITY = 4;
++export const DEFAULT_DENSITY = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches ? 2 : 4;
+ 
+ export function getPointsNumber(density: number): number {
+   return POINTS_BY_DENSITY[density] ?? POINTS_BY_DENSITY[DEFAULT_DENSITY];
+--- a/src/model/options/options-model.ts
++++ b/src/model/options/options-model.ts
+@@ -112,7 +112,7 @@
+         emblems: { showAll: false, shape: "culture" },
+         labels: { showAll: false },
+         heightmapEditor: { renderOcean: false, showDrainage: false, allowErosion: true },
+-        performance: { shapeRendering: "optimizeSpeed", stateHalos: false, viewportRedraw: "continuous" }, // "balance"
++        performance: { shapeRendering: "optimizeSpeed", stateHalos: false, viewportRedraw: window.matchMedia("(max-width: 760px), (pointer: coarse)").matches ? "settled" : "continuous" }, // adaptive balance
+         onLoad: "random",
+         debug: [],
+         language: "",
+--- a/src/services/fonts.ts
++++ b/src/services/fonts.ts
+@@ -274,6 +274,7 @@
+ ];
+ 
+ /** Register a font so the app can use and export it */
++const localFontURLs: Record<string,string> = {"https://fonts.gstatic.com/s/arimamadurai/v14/t5tmIRoeKYORG0WNMgnC3seB3T7Prw.woff2":"fonts/arimamadurai.woff2","https://fonts.gstatic.com/s/almendrasc/v13/Iure6Yx284eebowr7hbyTaZOrLQ.woff2":"fonts/almendrasc.woff2","https://fonts.gstatic.com/s/amarante/v22/xMQXuF1KTa6EvGx9bp-wAXs.woff2":"fonts/amarante.woff2","https://fonts.gstatic.com/s/amaticsc/v11/TUZ3zwprpvBS1izr_vOMscGKfrUC.woff2":"fonts/amaticsc.woff2","https://fonts.gstatic.com/s/architectsdaughter/v8/RXTgOOQ9AAtaVOHxx0IUBM3t7GjCYufj5TXV5VnA2p8.woff2":"fonts/architectsdaughter.woff2","https://fonts.gstatic.com/s/bitter/v12/zfs6I-5mjWQ3nxqccMoL2A.woff2":"fonts/bitter.woff2","https://fonts.gstatic.com/s/caesardressing/v6/yYLx0hLa3vawqtwdswbotmK4vrRHdrz7.woff2":"fonts/caesardressing.woff2","https://fonts.gstatic.com/s/cinzel/v7/zOdksD_UUTk1LJF9z4tURA.woff2":"fonts/cinzel.woff2","https://fonts.gstatic.com/s/dancingscript/v9/KGBfwabt0ZRLA5W1ywjowUHdOuSHeh0r6jGTOGdAKHA.woff2":"fonts/dancingscript.woff2","https://fonts.gstatic.com/s/eaglelake/v24/ptRMTiqbbuNJDOiKj9wG1On4KCFtpe4.woff2":"fonts/eaglelake.woff2","https://fonts.gstatic.com/s/fasterone/v17/H4ciBXCHmdfClFb-vWhf-LyYhw.woff2":"fonts/fasterone.woff2","https://fonts.gstatic.com/s/forum/v16/6aey4Ky-Vb8Ew8IROpI.woff2":"fonts/forum.woff2","https://fonts.gstatic.com/s/frederickathegreat/v6/9Bt33CxNwt7aOctW2xjbCstzwVKsIBVV--Sjxbc.woff2":"fonts/frederickathegreat.woff2","https://fonts.gstatic.com/s/gloriahallelujah/v9/CA1k7SlXcY5kvI81M_R28cNDay8z-hHR7F16xrcXsJw.woff2":"fonts/gloriahallelujah.woff2","https://fonts.gstatic.com/s/greatvibes/v5/6q1c0ofG6NKsEhAc2eh-3Y4P5ICox8Kq3LLUNMylGO4.woff2":"fonts/greatvibes.woff2","https://fonts.gstatic.com/s/hennypenny/v17/wXKvE3UZookzsxz_kjGSfPQtvXI.woff2":"fonts/hennypenny.woff2","https://fonts.gstatic.com/s/iceberg/v26/8QIJdijAiM7o-qnZiI8EqprnEO0.woff2":"fonts/iceberg.woff2","https://fonts.gstatic.com/s/imfellenglish/v7/xwIisCqGFi8pff-oa9uSVAkYLEKE0CJQa8tfZYc_plY.woff2":"fonts/imfellenglish.woff2","https://fonts.gstatic.com/s/kellyslab/v15/-W_7XJX0Rz3cxUnJC5t6fkQLfg.woff2":"fonts/kellyslab.woff2","https://fonts.gstatic.com/s/kranky/v24/hESw6XVgJzlPsFn8oR2F.woff2":"fonts/kranky.woff2","https://fonts.gstatic.com/s/lobstertwo/v18/BngMUXZGTXPUvIoyV6yN5-fN5qU.woff2":"fonts/lobstertwo.woff2","https://fonts.gstatic.com/s/lugrasimo/v4/qkBXXvoF_s_eT9c7Y7au455KsgbLMA.woff2":"fonts/lugrasimo.woff2","https://fonts.gstatic.com/s/kaushanscript/v6/qx1LSqts-NtiKcLw4N03IEd0sm1ffa_JvZxsF_BEwQk.woff2":"fonts/kaushanscript.woff2","https://fonts.gstatic.com/s/macondo/v21/RrQQboN9-iB1IXmOe2LE0Q.woff2":"fonts/macondo.woff2","https://fonts.gstatic.com/s/medievalsharp/v9/EvOJzAlL3oU5AQl2mP5KdgptMqhwMg.woff2":"fonts/medievalsharp.woff2","https://fonts.gstatic.com/s/metalmania/v22/RWmMoKWb4e8kqMfBUdPFJdXFiaQ.woff2":"fonts/metalmania.woff2","https://fonts.gstatic.com/s/metamorphous/v7/Wnz8HA03aAXcC39ZEX5y133EOyqs.woff2":"fonts/metamorphous.woff2","https://fonts.gstatic.com/s/montez/v8/aq8el3-0osHIcFK6bXAPkw.woff2":"fonts/montez.woff2","https://fonts.gstatic.com/s/novascript/v10/7Au7p_IpkSWSTWaFWkumvlQKGFw.woff2":"fonts/novascript.woff2","https://fonts.gstatic.com/s/orbitron/v9/HmnHiRzvcnQr8CjBje6GQvesZW2xOQ-xsNqO47m55DA.woff2":"fonts/orbitron.woff2","https://fonts.gstatic.com/s/oregano/v13/If2IXTPxciS3H4S2oZDVPg.woff2":"fonts/oregano.woff2","https://fonts.gstatic.com/s/pirataone/v22/I_urMpiDvgLdLh0fAtofhi-Org.woff2":"fonts/pirataone.woff2","https://fonts.gstatic.com/s/sail/v16/DPEjYwiBxwYJJBPJAQ.woff2":"fonts/sail.woff2","https://fonts.gstatic.com/s/satisfy/v8/2OzALGYfHwQjkPYWELy-cw.woff2":"fonts/satisfy.woff2","https://fonts.gstatic.com/s/shadowsintolight/v7/clhLqOv7MXn459PTh0gXYFK2TSYBz0eNcHnp4YqE4Ts.woff2":"fonts/shadowsintolight.woff2","https://fonts.gstatic.com/s/snowburstone/v21/MQpS-WezKdujBsXY3B7I-UT7SZiePgSfLbs.woff2":"fonts/snowburstone.woff2","https://fonts.gstatic.com/s/uncialantiqua/v5/N0bM2S5WOex4OUbESzoESK-i-MfWQZQ.woff2":"fonts/uncialantiqua.woff2","https://fonts.gstatic.com/s/underdog/v6/CHygV-jCElj7diMroWSlWV8.woff2":"fonts/underdog.woff2","https://fonts.gstatic.com/s/unifrakturmaguntia/v16/WWXPlieVYwiGNomYU-ciRLRvEmK7oaVemGZM.woff2":"fonts/unifrakturmaguntia.woff2","https://fonts.gstatic.com/s/yellowtail/v8/GcIHC9QEwVkrA19LJU1qlPk_vArhqVIZ0nv9q090hN8.woff2":"fonts/yellowtail.woff2"};
+ const declaredFonts = new Set<string>(); // font definitions already declared to the document
+ 
+ export function declareFont(font: FontDefinition): void {
+@@ -283,7 +284,7 @@
+   declaredFonts.add(key);
+ 
+   if (!src) return;
+-  const fontFace = new FontFace(family, src, { ...rest, display: "block" });
++  const fontFace = new FontFace(family, src.replace(/https:\/\/fonts\.gstatic\.com\/[^)'"]+/g, url => localFontURLs[url] ?? url), { ...rest, display: "swap" });
+   document.fonts.add(fontFace);
+ }
+ 
+@@ -332,7 +333,7 @@
+     const url = font.src?.match(/url\(['"]?(.+?)['"]?\)/)?.[1];
+     if (!url) return font;
+     try {
+-      const resp = await fetch(url);
++      const resp = await fetch(localFontURLs[url] ?? url);
+       const blob = await resp.blob();
+       return { ...font, src: `url('${await readBlobAsDataURL(blob)}')` };
+     } catch (error) {
+--- a/src/services/io/load.ts
++++ b/src/services/io/load.ts
+@@ -272,7 +272,7 @@
+   });
+ }
+ 
+-async function parseLoadedData(data: string[], mapVersion: string | null): Promise<void> {
++async function parseLoadedData(data: string[], mapVersion: string | null, strict = false): Promise<void> {
+   let isLogGroupOpen = false;
+ 
+   try {
+@@ -437,6 +437,7 @@
+     const mapCreatedAt = +data[0].split("|")[6] || Date.now();
+     registerMap(mapCreatedAt);
+     MapRepair.report(repairs);
++    window.MapWorkshop.changed();
+     const loaded = t("Map is successfully loaded");
+     tip(
+       options.map.viewOnly ? sentences(loaded, t("It is view-only: editing is disabled")) : loaded,
+@@ -445,6 +446,7 @@
+       7000
+     );
+   } catch (error) {
++    if (strict) throw error;
+     log.error(error);
+     clearMainTip();
+ 
+@@ -480,7 +482,16 @@
+   }
+ }
+ 
++async function restoreProject(text: string): Promise<void> {
++  const {mapData, mapVersion} = await parseLoadedResult(new TextEncoder().encode(text));
++  if (!mapData || !mapVersion || mapData.length < 10 || mapVersion !== VERSION) {
++    throw new Error("无法读取这份云端地图，请使用原始 .map 文件恢复。");
++  }
++  await parseLoadedData(mapData, mapVersion, true);
++}
++
+ export const Load = {
++  restoreProject,
+   quickLoad,
+   loadFromBrowser,
+   loadFromDropbox,
+--- a/src/services/local-db.ts
++++ b/src/services/local-db.ts
+@@ -1,52 +1,7 @@
+-// A key-value store over IndexedDB, for blobs too large for localStorage
+-const DATABASE_NAME = "d2";
+-const STORE_NAME = "s";
+-
+-let opening: Promise<IDBDatabase> | undefined;
+-
+-const isSupported = (): boolean => typeof indexedDB !== "undefined";
+-
+-function openDatabase(): Promise<IDBDatabase> {
+-  opening ??= new Promise((resolve, reject) => {
+-    if (!isSupported()) return reject(new Error("IndexedDB is not supported"));
+-    const request = indexedDB.open(DATABASE_NAME);
+-    request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME, { keyPath: "key" });
+-    request.onsuccess = () => resolve(request.result);
+-    request.onerror = () => {
+-      opening = undefined;
+-      reject(request.error ?? new Error("IndexedDB request error"));
+-    };
+-  });
+-  return opening;
+-}
+-
+-/** Any value IndexedDB can clone; null when the key is missing */
+-async function get<T = Blob>(key: string): Promise<T | null> {
+-  const db = await openDatabase();
+-  if (!db.objectStoreNames.contains(STORE_NAME)) throw new Error("IndexedDB: no store found");
+-  return new Promise((resolve, reject) => {
+-    const request = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(key);
+-    request.onsuccess = () => resolve(request.result?.value || null);
+-    request.onerror = () => reject(request.error);
+-  });
+-}
+-
+-async function set(key: string, value: unknown): Promise<void> {
+-  const db = await openDatabase();
+-  return new Promise((resolve, reject) => {
+-    const request = db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put({ key, value });
+-    request.onsuccess = () => resolve();
+-    request.onerror = () => reject(request.error);
+-  });
+-}
+-
+-async function remove(key: string): Promise<void> {
+-  const db = await openDatabase();
+-  return new Promise((resolve, reject) => {
+-    const request = db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).delete(key);
+-    request.onsuccess = () => resolve();
+-    request.onerror = () => reject(request.error);
+-  });
+-}
+-
+-export const LocalDB = { isSupported, get, set, remove };
++// Account-isolated storage provided by the host, including the six native map slots.
++export const LocalDB = {
++  isSupported: () => true,
++  get: <T = Blob>(key: string): Promise<T | null> => window.MapWorkshop.database.get(key),
++  set: (key: string, value: unknown): Promise<void> => window.MapWorkshop.database.set(key, value),
++  remove: (key: string): Promise<void> => window.MapWorkshop.database.remove(key)
++};
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -99,6 +99,7 @@
+   base: mode === "electron" ? "./" : process.env.NETLIFY ? "/" : "/Fantasy-Map-Generator/",
+   plugins: [slimEnglish, preloadApp(), latestUpdate, ...(mode === "electron" ? [stripWebOnlyTags] : [])],
+   build: {
++    license: { fileName: "THIRD-PARTY-LICENSES.md" },
+     outDir: mode === "electron" ? "../dist-electron/renderer" : "../dist",
+     assetsDir: "./",
+     emptyOutDir: true, // outDir sits outside root, so Vite would otherwise keep every past build's chunks

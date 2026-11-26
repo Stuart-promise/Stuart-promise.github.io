@@ -1,0 +1,17 @@
+Azgaar's Fantasy Map Generator v1.158.0
+Upstream https://github.com/Azgaar/Fantasy-Map-Generator/tree/v1.158.0
+Release commit 18795e9b8884b86787190993e6a41b55487b97af
+Copyright 2017–2024 Max Haniyeu (Azgaar) and contributors. See LICENSE-Azgaar.txt.
+Bundled library notices are in editor/THIRD-PARTY-LICENSES.md.
+The bundled Google Fonts are unmodified font files from the URLs in the upstream font catalog.
+Individual licenses are included beside the fonts in editor/fonts/. Arima Madurai's
+license is distributed by @fontsource/arima-madurai. All other font license files
+come from https://github.com/google/fonts.
+
+This site integrates the native editable .map serializer and loader with its
+account service, including workspace preferences, custom assets and native save slots.
+The editor is a static browser build. To reproduce it, check out v1.158.0,
+apply upstream.patch, place editor/fonts into public/fonts, install pinned
+dependencies with npm ci, then run npx vite build --mode electron --base ./.
+Copy dist-electron/renderer into editor/. Electron mode here produces relative
+asset URLs and excludes analytics. The application runs in a normal web browser.

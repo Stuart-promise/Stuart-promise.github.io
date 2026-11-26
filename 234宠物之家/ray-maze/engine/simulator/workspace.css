@@ -1,0 +1,4 @@
+html,body,#vue-root,canvas,button,label,nav,.btn,.dropdown-menu,.popover{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+canvas{touch-action:none}
+textarea,input:not([type=button]):not([type=range]),[contenteditable=true],[contenteditable=true] *,.ace_text-input,.mq-editable-field,.mq-editable-field *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+@media(pointer:coarse){.popover{max-height:60vh}}

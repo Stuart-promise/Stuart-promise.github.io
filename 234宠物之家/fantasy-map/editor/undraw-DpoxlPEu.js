@@ -1,0 +1,1 @@
+import{J as e,X as t,c as n,t as r}from"./layers-CL47Bw7b.js";import{r as i}from"./node-utils-C10yOMSQ.js";function a(){r.eraseAll();for(let e of i(`deftemp`).querySelectorAll(`path, clipPath, svg`))e.remove();t(),i(`coas`).innerHTML=``,n(),e.releaseAll()}export{a as t};

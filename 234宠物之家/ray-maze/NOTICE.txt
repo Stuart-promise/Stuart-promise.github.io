@@ -1,0 +1,8 @@
+Ray Optics Simulation, version 5.5
+Copyright the Ray Optics Simulation authors and contributors. Apache License 2.0 (LICENSE.txt).
+Official repository: https://github.com/ricktu288/ray-optics
+Official source: 9dd7706097ec8b93171e04e7985be12c3309533c
+Official published build: fb22782606f90119c2529180c8183b194fbd00b7
+Maze Solution by Stas Fainer and Yi-Ting Tu, from cn/gallery/maze-solution.json.
+The bundled notices for the simulator dependencies are in engine/simulator/main.js.LICENSE.txt.
+Site modifications include same-origin account storage, preference isolation, a touch-friendly direction control, an adaptive viewport and rendering resolution, local module imports, and Chinese game navigation.

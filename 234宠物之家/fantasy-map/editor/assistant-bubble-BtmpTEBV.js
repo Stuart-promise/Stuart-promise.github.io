@@ -1,0 +1,1 @@
+import{i as e}from"./node-utils-C10yOMSQ.js";function t(t=options.app.ui.assistant===`show`){let n=e(`assistantBubble`);n&&(n.style.display=t?`flex`:`none`)}function n(t){let n=e(`assistantBubble`);n?.classList.toggle(`open`,t),n?.setAttribute(`aria-expanded`,String(t))}export{t as n,n as t};

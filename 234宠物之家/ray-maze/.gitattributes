@@ -1,0 +1,3 @@
+engine/** -text -diff
+engine/simulator/workspace-init.js text diff
+engine/simulator/workspace.css text diff

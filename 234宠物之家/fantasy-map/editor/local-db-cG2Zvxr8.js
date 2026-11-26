@@ -1,0 +1,1 @@
+var e={isSupported:()=>!0,get:e=>window.MapWorkshop.database.get(e),set:(e,t)=>window.MapWorkshop.database.set(e,t),remove:e=>window.MapWorkshop.database.remove(e)};export{e as t};

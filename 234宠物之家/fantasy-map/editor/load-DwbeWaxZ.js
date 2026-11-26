@@ -1,0 +1,1 @@
+export{h as Load}from"./app-CFYgDB_k.js";

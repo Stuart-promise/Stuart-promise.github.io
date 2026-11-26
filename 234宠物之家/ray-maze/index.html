@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101b20">
+  <title>射线光学模拟 · 光线迷宫</title>
+  <link rel="stylesheet" href="./workspace.css">
+  <script defer src="../account.js?v=creative1"></script>
+  <script defer src="../creative-save.js?v=1"></script>
+  <script defer src="./workspace.js"></script>
+</head>
+<body>
+  <div class="bar" role="banner">
+    <a class="back" href="../games.html" aria-label="返回游戏大厅">‹ 大厅</a>
+    <h1>光线迷宫</h1>
+    <button id="save" disabled>保存</button>
+    <a class="account" href="../account.html" data-creative-status>读取存档…</a>
+  </div>
+  <main>
+    <div class="controls" aria-label="迷宫操作">
+      <label for="angle">光线方向</label>
+      <input id="angle" aria-label="光线方向角度" type="range" min="-180" max="180" step="0.1" value="0" disabled>
+      <output for="angle" id="degrees">—</output>
+      <button id="fit" disabled>整图</button>
+      <button id="reset" disabled>重开迷宫</button>
+    </div>
+    <div class="stage"><iframe title="射线光学模拟编辑器" id="studio" hidden allow="fullscreen"></iframe>
+      <div class="loading" id="loading" role="status">正在读取作品…</div>
+    </div>
+  </main>
+  <dialog id="confirm-reset">
+    <h2>重新开始光线迷宫？</h2>
+    <p>当前场景会替换成初始迷宫。需要保留另一个版本时，可先在模拟器的文件菜单中导出。</p>
+    <button id="cancel-reset" autofocus>取消</button><button id="confirm">重新开始</button>
+  </dialog>
+</body>
+</html>

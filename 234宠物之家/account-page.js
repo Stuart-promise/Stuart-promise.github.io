@@ -1,5 +1,9 @@
 const A=window.PetAccount,$=id=>document.getElementById(id);
 let mode='login',recoveryResult;
+let creativeRecords;
+async function loadCreativeRecords(){
+  try {creativeRecords=await A.request('/v1/creative');} catch {creativeRecords=null;}
+}
 const message=t=>{$('account-message').textContent=t;};
 function download(name,data) {
   const url=URL.createObjectURL(new Blob([typeof data==='string'?data:JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}));
@@ -28,6 +32,16 @@ function render() {
     $('records').append(r);
     const count=Object.keys(A.guestData(m)).length;
     if(count){const g=row(title,'此设备有 '+count+' 条游客数据');g.append(action('导入到我的账号',()=>A.importGuest(m)));$('guest-records').append(g);}
+  }
+  for(const [module,title] of Object.entries(CreativeSave.titles)) {
+    const local=CreativeSave.metadata(A.owner,module), cloud=creativeRecords?.[module];
+    const subtitle=local.conflict?'有不同设备的作品版本，请打开工具选择':local.dirty?'已保存在本机，等待云同步':cloud?'云端版本 '+cloud.version+' · '+new Date(cloud.updated*1000).toLocaleString():creativeRecords?'暂无云端作品':'等待确认云端作品';
+    const entry=row(title,subtitle),open=document.createElement('a');
+    open.href='./'+module+'/';open.textContent='打开作品';entry.append(open);$('records').append(entry);
+    if(CreativeSave.metadata('guest',module).exists && !cloud && !local.exists) {
+      const guest=row(title,'此设备有一份游客作品');
+      const importLink=open.cloneNode();importLink.textContent='打开工具导入';guest.append(importLink);$('guest-records').append(guest);
+    }
   }
   if(!$('guest-records').children.length)$('guest-records').textContent='此设备没有可导入的游客学习记录或小游戏记录。';
 }
@@ -58,7 +72,17 @@ $('download-recovery').onclick=()=>download('234宠物之家-账号恢复码.txt
 $('continue-account').onclick=()=>location.reload();
 $('sync-now').onclick=async()=>{
   const button=$('sync-now');button.disabled=true;button.textContent='同步中…';
-  try{const result=await A.sync();message(result.message);}catch(e){if(A.session)message(e.message);}finally{button.disabled=false;button.textContent='立即同步';renderIdentity();}
+  try{
+    const result=await A.sync();
+    let pending=false;
+    for(const module of Object.keys(CreativeSave.titles)){
+      if(CreativeSave.metadata(A.owner,module).dirty){
+        const saved=await (await CreativeSave.open(module)).flush();
+        if(saved.state==='pending')pending=true;
+      }
+    }
+    await loadCreativeRecords();message(pending?'作品已存本机，云同步待重试':result.message);
+  }catch(e){if(A.session)message(e.message);}finally{button.disabled=false;button.textContent='立即同步';renderIdentity();}
 };
 $('logout').onclick=async()=>{
   const button=$('logout');button.disabled=true;button.textContent='正在退出…';
@@ -67,6 +91,7 @@ $('logout').onclick=async()=>{
 $('export-account').onclick=async()=>{
   const backup={schema:1,user:A.session.user,local:{},cloud:null};
   for(const m of Object.keys(A.modules))backup.local[m]=A.read(m);
+  try {Object.assign(backup.local,await CreativeSave.exportLocal());}catch(e){message('本机作品读取失败：'+e.message);}
   try{backup.cloud=await A.request('/v1/export');}catch{message('未能取得云端副本，本次导出此设备的学习与小游戏记录。Probably Stolen 请使用游戏内存档备份按钮。');}
   download('pet234-records-'+new Date().toISOString().slice(0,10)+'.json',backup);
 };
@@ -79,5 +104,5 @@ renderIdentity();
 if(A.session){
   $('auth-panel').hidden=true;$('signed-panel').hidden=false;$('welcome').textContent='学习与游戏存档';
   render();
-  await Promise.all(Object.keys(A.modules).map(m=>A.open(m)));render();
+  await Promise.all([loadCreativeRecords(),...Object.keys(A.modules).map(m=>A.open(m))]);render();
 }

@@ -1,0 +1,1 @@
+import{t as e}from"./environment-SLab_1Xt.js";import{a as t,i as n}from"./index-4OdfBWhp.js";var r=r=>e()?t(`{{file}} is saved`,{file:r}):n(t(`{{file}} is saved`,{file:r}),t(`Open “Downloads” screen (CTRL + J) to check`));export{r as t};

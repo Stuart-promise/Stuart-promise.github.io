@@ -1,0 +1,9 @@
+html,body,body *:not(input):not(textarea):not([contenteditable=true]):not([contenteditable=plaintext-only]){-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+input:not([type=range]),textarea,[contenteditable=true],[contenteditable=plaintext-only]{-webkit-user-select:text;user-select:text}
+svg#map{touch-action:none}
+@media (max-width:760px),(pointer:coarse){
+  .dialog-window,#optionsContainer{max-width:calc(100vw - 8px)!important;max-height:calc(100dvh - 8px)!important}
+  .dialog-content{max-width:100%;overflow:auto;overscroll-behavior:contain}
+  input[type=text],input[type=search],textarea{font-size:max(16px,1em)}
+  #optionsTrigger{min-width:40px;min-height:40px}
+}

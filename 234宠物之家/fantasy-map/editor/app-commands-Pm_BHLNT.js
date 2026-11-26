@@ -1,0 +1,1 @@
+var e={};function t(t){Object.assign(e,t)}export{t as n,e as t};

@@ -1,0 +1,6 @@
+atlas.webp is a screenshot of an original generated map made with Azgaar's Fantasy Map Generator.
+https://github.com/Azgaar/Fantasy-Map-Generator
+
+light.webp is a cropped and resized version of the Ray Optics Simulation gallery illustration "Maze Solution" by Stas Fainer and Yi-Ting Tu.
+Source: https://phydemo.app/ray-optics/cn/gallery/maze-solution
+License: Apache-2.0, https://www.apache.org/licenses/LICENSE-2.0

@@ -1,0 +1,23 @@
+:root{color-scheme:dark;font-family:system-ui,"Microsoft YaHei",sans-serif;background:#101b20;color:#f4f4ec}
+*{box-sizing:border-box}
+body{height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;margin:0}
+body,button,a,input[type=range]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+input:not([type=range]),textarea,[contenteditable=true]{-webkit-user-select:text;user-select:text}
+.bar,.controls{display:flex;align-items:center;gap:12px;padding:6px max(12px,env(safe-area-inset-right)) 6px max(12px,env(safe-area-inset-left));min-height:43px}
+.bar{background:#14252a;padding-top:max(6px,env(safe-area-inset-top));border-bottom:1px solid #345155;flex-wrap:wrap}
+.bar a{color:#f2f8ed;text-decoration:none}.bar .back{padding:4px 2px;font-size:14px}
+h1{font-size:18px;line-height:1.2;margin:0 auto 0 0;white-space:nowrap}
+button{font:inherit;font-size:14px;background:#233b3f;color:#f3f9f3;border:1px solid #527373;border-radius:5px;padding:4px 12px;min-height:32px;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.55}.bar #save{background:#bce7bd;color:#183c28;border-color:#d8efcd;font-weight:700}
+.account{font-size:12px;line-height:1.3;max-width:min(35vw,330px)}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+.controls{font-size:13px;background:#101b20;min-height:40px;border-bottom:1px solid #304245}
+.controls input{width:clamp(60px,24vw,340px);min-width:40px;accent-color:#a5dfb4;touch-action:none}
+.controls output{min-width:49px;color:#bce7bd;font-variant-numeric:tabular-nums}
+.stage{flex:1;min-height:0;position:relative;background:#000}
+iframe{display:block;width:100%;height:100%;border:0}iframe[hidden]{display:none}
+.loading{position:absolute;inset:0;display:grid;place-content:center;gap:12px;text-align:center;padding:20px;color:#e9f0e8}.loading[hidden]{display:none}
+dialog{max-width:min(420px,90vw);color:#eff4ed;background:#18282a;border:1px solid #56726e;border-radius:9px;padding:20px}dialog::backdrop{background:#0009}dialog h2{font-size:19px;margin:0}dialog button+button{margin-left:10px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #c1ee98;outline-offset:2px}
+@media(max-width:540px){.bar,.controls{gap:7px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}.controls input{flex:1}.controls output{min-width:42px}.controls button{font-size:12px;padding:4px 8px}.bar h1{font-size:16px}}
+@media(max-height:520px) and (orientation:landscape){.bar,.controls{min-height:32px;padding-top:1px;padding-bottom:1px}.bar button,.controls button{min-height:28px}}
