@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>资源分享专区 · 234宠物之家</title>
+  <link rel="stylesheet" href="../style.css?v=peer1">
+  <link rel="stylesheet" href="../account.css?v=forum1">
+  <link rel="stylesheet" href="./resources.css?v=1">
+  <link rel="preconnect" href="https://111.228.4.20" crossorigin>
+  <script defer src="../account.js?v=study2"></script>
+  <script type="module" src="./resources.js?v=1"></script>
+</head>
+<body class="resources-page">
+  <header>
+    <a class="brand" href="../"><span class="paw" aria-hidden="true">🐾</span>234宠物之家</a>
+    <a class="back-home" href="../study.html">← 学习页面</a>
+  </header>
+  <main class="resource-main">
+    <div class="resource-heading">
+      <h1>资源分享专区</h1>
+      <a class="primary-action" id="resource-login" href="../account.html?from=resources">登录后发布</a>
+      <button type="button" class="primary-action" id="resource-new" hidden>发布资源</button>
+    </div>
+    <form id="search-form" class="find-panel" role="search">
+      <label for="resource-q">搜索标题</label>
+      <div class="search-row">
+        <input type="search" id="resource-q" name="q" maxlength="100" placeholder="输入资源标题或关键词" autocomplete="off">
+        <button type="submit" class="primary-action">搜索</button>
+      </div>
+      <fieldset class="filter-set"><legend>按标签筛选</legend><div id="filter-tags" class="tags"></div></fieldset>
+      <p id="filter-note" class="muted filter-note" hidden>包含任一所选标签的资源都会显示。</p>
+    </form>
+    <section aria-labelledby="list-title" class="results-section">
+      <div class="section-heading"><h2 id="list-title">全部资源</h2><button class="text-action" type="button" id="clear-filters" hidden>清除筛选</button></div>
+      <p id="resource-notice" class="notice" role="status" aria-live="polite"></p>
+      <div id="resources-list" aria-busy="true"></div>
+      <div id="resource-empty" class="empty-state" hidden><h3></h3><p></p></div>
+      <div class="list-tools"><span id="list-status" role="status" aria-live="polite">正在读取资源…</span>
+        <button type="button" id="resource-retry" class="secondary-action" hidden>重新读取</button>
+        <button type="button" id="resource-more" class="secondary-action" hidden>加载更多</button>
+      </div>
+    </section>
+    <noscript>请启用 JavaScript 以读取资源、使用搜索或发布资源。</noscript>
+  </main>
+  <dialog id="publish-dialog" aria-labelledby="publish-heading">
+    <form id="publish-form">
+      <h2 id="publish-heading">发布资源</h2>
+      <fieldset id="publish-fields" class="edit-fields">
+        <label for="resource-title">标题</label>
+        <input type="text" id="resource-title" name="title" maxlength="80" required autofocus>
+        <label for="resource-description">简介</label>
+        <textarea id="resource-description" name="description" maxlength="1000" rows="3" required></textarea>
+        <fieldset class="edit-tags"><legend>标签 <small>至少选一个，可多选</small></legend><div id="publish-tags" class="tags"></div></fieldset>
+        <label for="resource-url">网盘链接</label>
+        <input type="url" inputmode="url" id="resource-url" name="url" maxlength="2048" placeholder="https://…" autocomplete="off" spellcheck="false" required>
+        <p class="link-hint">粘贴网盘的分享链接。需要提取码时，可以写在简介里。</p>
+      </fieldset>
+      <p id="publish-feedback" role="alert"></p>
+      <div class="dialog-actions"><button type="button" id="publish-cancel" class="secondary-action">取消</button><button type="submit" id="publish-submit" class="primary-action">发布</button></div>
+    </form>
+  </dialog>
+  <dialog id="delete-dialog" aria-labelledby="delete-heading">
+    <h2 id="delete-heading">删除这份资源？</h2><p id="delete-title"></p><p class="muted">删除后，大家将无法再从专区找到它。</p>
+    <p id="delete-feedback" role="alert"></p>
+    <div class="dialog-actions"><button type="button" id="delete-cancel" class="secondary-action" autofocus>取消</button><button type="button" id="delete-confirm" class="danger-action">确认删除</button></div>
+  </dialog>
+</body>
+</html>

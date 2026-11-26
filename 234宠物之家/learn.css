@@ -5,6 +5,7 @@
 .course-card h2 {font-size:27px;margin-bottom:10px}
 .course-card p {margin:8px 0}
 .course-card strong {display:inline-block;margin-top:12px}
+.study-index .resource-entry {margin-bottom:16px;background:#e4eeea;border-color:#afc8c0}
 .study-index .plot-entry {margin-top:16px;background:#e6eff0;border-color:#b9cdd0}
 
 .study-index .vocab-entry {margin-top:16px;background:#f5ecd9;border-color:#d9c9aa}

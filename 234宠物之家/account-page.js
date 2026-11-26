@@ -59,17 +59,23 @@ document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>{
   $('password').autocomplete=mode==='login'?'current-password':'new-password';
   $('recovery-label').hidden=mode!=='recover';$('recovery').required=mode==='recover';
 });
+const fromResourceShare=new URLSearchParams(location.search).get('from')==='resources';
+function finishSignIn(){
+  if(fromResourceShare) location.replace('./resources/#publish');
+  else location.reload();
+}
+if(fromResourceShare) $('continue-account').textContent='我已保存，继续发布资源';
 $('auth-form').onsubmit=async e=>{
   e.preventDefault();$('auth-submit').disabled=true;message('正在连接…');
   try {
     const result=await A.authenticate(mode,{username:$('username').value.trim(),password:$('password').value,...(mode==='recover'?{code:$('recovery').value.trim()}:{})});
     $('password').value='';$('recovery').value='';
     if(result.recoveryCode){recoveryResult=result;$('auth-panel').hidden=true;$('recovery-panel').hidden=false;$('new-recovery').textContent=result.recoveryCode;message('账号已准备好，请保存恢复码。');}
-    else location.reload();
+    else finishSignIn();
   }catch(error){message(error.message);}finally{$('auth-submit').disabled=false;}
 };
 $('download-recovery').onclick=()=>download('234宠物之家-账号恢复码.txt','用户名：'+recoveryResult.user.username+'\n恢复码：'+recoveryResult.recoveryCode+'\n请勿分享此文件。');
-$('continue-account').onclick=()=>location.reload();
+$('continue-account').onclick=finishSignIn;
 $('sync-now').onclick=async()=>{
   const button=$('sync-now');button.disabled=true;button.textContent='同步中…';
   try{
