@@ -13,6 +13,7 @@
 .solo-page button[aria-pressed="true"]{background:#2d5b44;color:#fff}
 .wide-button{width:100%;margin-top:12px}
 .mine-scroll{overflow:auto;max-width:100%;border:1px solid #adbaa6;border-radius:5px;background:#b4bfae;padding:4px}
+.mine-scroll,.mine-board,.mine-cell{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .mine-board{display:grid;grid-template-columns:repeat(var(--mine-cols),32px);gap:2px;width:max-content;color-scheme:only light}
 .mine-cell{width:32px;height:32px;padding:0;border:1px solid #a9b6a0;border-top-color:#fff;border-left-color:#fff;background:#e4eadb;font:700 18px/1 system-ui;touch-action:manipulation;color:#785621;border-radius:3px}
 .mine-cell.open{background:#f5f5ed;border-color:#c9d2c0}

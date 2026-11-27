@@ -5,6 +5,67 @@ const levelSelect=document.getElementById("difficulty");
 const statusLine=document.getElementById("solo-status");
 let game,flagMode=false,startedAt=0,elapsed=0;
 const cells=[];
+const holdDelay=450;
+const moveTolerance=10;
+const boardRegion=gameBoard.parentElement;
+let touchPress=null;
+
+function cancelTouchPress() {
+  if (!touchPress) return;
+  clearTimeout(touchPress.timer);
+  touchPress=null;
+}
+
+function stillOnCell(touch,press) {
+  return touch.identifier===press.id
+    && Math.hypot(touch.clientX-press.x,touch.clientY-press.y)<=moveTolerance
+    && document.elementFromPoint(touch.clientX,touch.clientY)===cells[press.index];
+}
+
+// Let a swipe scroll the board. Only a completed single-finger gesture plays a cell.
+gameBoard.addEventListener("touchstart",event=>{
+  if (event.touches.length!==1) return;
+  cancelTouchPress();
+  const index=cells.indexOf(event.target);
+  if (index<0) return;
+  const touch=event.touches[0];
+  const press={id:touch.identifier,x:touch.clientX,y:touch.clientY,index,held:false};
+  touchPress=press;
+  press.timer=setTimeout(()=>{
+    press.held=true;
+    act(index,true);
+  },holdDelay);
+},{passive:true});
+document.addEventListener("touchstart",event=>{
+  if (event.touches.length>1) cancelTouchPress();
+},{capture:true,passive:true});
+gameBoard.addEventListener("touchmove",event=>{
+  if (touchPress && !stillOnCell(event.touches[0],touchPress)) cancelTouchPress();
+},{passive:true});
+gameBoard.addEventListener("touchend",event=>{
+  if (!event.target.classList.contains("mine-cell")) return;
+  // Suppress the browser's follow-up click, including after removing a flag.
+  if (event.cancelable) event.preventDefault();
+  const press=touchPress;
+  cancelTouchPress();
+  if (press && !press.held && !event.touches.length && stillOnCell(event.changedTouches[0],press)) act(press.index);
+},{passive:false});
+gameBoard.addEventListener("touchcancel",cancelTouchPress);
+document.addEventListener("scroll",cancelTouchPress,true);
+window.addEventListener("blur",cancelTouchPress);
+window.addEventListener("pagehide",cancelTouchPress);
+document.addEventListener("visibilitychange",()=>{if (document.hidden) cancelTouchPress();});
+
+// Mobile browsers can dispatch contextmenu during a hold. Only a real secondary
+// button press should perform the mouse shortcut.
+boardRegion.addEventListener("contextmenu",event=>event.preventDefault());
+boardRegion.addEventListener("selectstart",event=>event.preventDefault());
+gameBoard.addEventListener("pointerdown",event=>{
+  if (event.button!==2 || event.pointerType==="touch") return;
+  const index=cells.indexOf(event.target);
+  if (index>=0) act(index,true);
+});
+
 function clockText(seconds){return Math.floor(seconds/60).toString().padStart(2,"0")+":"+(seconds%60).toString().padStart(2,"0");}
 function render() {
   document.getElementById("mine-left").textContent=game.mines-game.flags;
@@ -31,6 +92,7 @@ function act(i,flag=false) {
   render();
 }
 function reset(level) {
+  cancelTouchPress();
   game=new Minesweeper(level);flagMode=false;startedAt=0;elapsed=0;
   document.getElementById("flag-mode").setAttribute("aria-pressed","false");
   document.getElementById("timer").textContent="00:00";
@@ -41,9 +103,8 @@ function reset(level) {
     button.type="button";button.className="mine-cell";
     button.tabIndex=i===0?0:-1;
     button.onclick=()=>act(i);
-    button.oncontextmenu=event=>{event.preventDefault();act(i,true);};
     button.onkeydown=event=>{
-      if(event.key.toLowerCase()==="f"){event.preventDefault();act(i,true);return;}
+      if(event.key.toLowerCase()==="f" || event.key==="ContextMenu" || event.key==="F10" && event.shiftKey){event.preventDefault();act(i,true);return;}
       const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-game.cols,ArrowDown:game.cols}[event.key];
       if(!delta)return;
       event.preventDefault();
