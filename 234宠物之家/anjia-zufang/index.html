@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light">
+<title>【同城急租】两室一厅只要444元/月？房东急租拎包入住 - 安栖租房</title>
+<meta name="keywords" content="同城租房,租房网,房屋出租,整租,合租,个人房源,幸福里">
+<meta name="description" content="原租客临时搬走，家具家电全留，直降90%随时看房。关于网传幸福里404室失联传言系不实信息，已实地核验。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="【同城急租】两室一厅只要444元/月？房东急租拎包入住">
+<meta property="og:description" content="原租客急走，家具全送！关于网传幸福里404室传言系不实信息，已核验可正常入住。">
+<meta property="og:image" content="https://stuart-promise.github.io/234%E5%AE%A0%E7%89%A9%E4%B9%8B%E5%AE%B6/anjia-zufang/img/h1_living.jpg">
+<link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2313b16d'/%3E%3Cpath d='M6 16 16 7l10 9v9H19v-6h-6v6H6z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css?v=234-1">
+</head>
+<body class="lv0">
+<a id="game-lobby" href="../games.html">← 游戏大厅</a>
+
+<!-- 顶部细条 -->
+<div class="topbar">
+  <div class="wrap">
+    <span class="tb-left">您好，欢迎来到安栖租房！<a href="javascript:;" data-act="login">请登录</a><a href="javascript:;" data-act="login">免费注册</a></span>
+    <span class="tb-right">
+      <a href="javascript:;">我的收藏</a><i>|</i><a href="javascript:;">发布房源</a><i>|</i><a href="javascript:;">手机安栖</a><i>|</i><a href="javascript:;">企业服务</a><i>|</i><span class="hotline">客服热线 <b>400-878-0404</b></span>
+    </span>
+  </div>
+</div>
+
+<!-- 头部 -->
+<header class="header">
+  <div class="wrap header-in">
+    <a class="logo" href="#/">
+      <svg class="logo-ico" viewBox="0 0 40 40"><rect width="40" height="40" rx="8"/><path d="M8 20 20 9l12 11v11h-8v-7h-8v7H8z" fill="#fff"/></svg>
+      <span class="logo-txt"><b id="logoName">安栖</b><em id="logoSub">真房源 · 放心住</em></span>
+    </a>
+    <div class="city">
+      <b id="cityName">同城</b><span class="city-switch">[切换城市]</span>
+    </div>
+    <div class="search">
+      <div class="search-tabs"><span class="on">租房</span><span>二手房</span><span>新房</span><span>小区</span></div>
+      <div class="search-box">
+        <input id="searchInput" type="text" placeholder="请输入区域、商圈或小区名开始找房">
+        <button id="searchBtn">搜 索</button>
+      </div>
+      <div class="hotwords" id="hotwords">
+        热门搜索：<a>地铁房</a><a>整租一居</a><a>押一付一</a><a>拎包入住</a><a>免中介费</a><a class="bad" data-house="h404">幸福里 444元</a>
+      </div>
+    </div>
+    <div class="head-app">
+      <canvas class="qr" width="64" height="64"></canvas>
+      <span>扫码下载APP<br>新人领488红包</span>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="wrap">
+      <a href="#/" data-nav="home">首页</a>
+      <a href="#/list" data-nav="list">租房</a>
+      <a href="#/list" data-nav="list2">二手房</a>
+      <a href="#/list" data-nav="list3">新房</a>
+      <a href="#/list" data-nav="list4">品牌公寓</a>
+      <a href="javascript:;" data-act="soon">地图找房</a>
+      <a href="javascript:;" data-act="soon">租房攻略</a>
+      <a href="javascript:;" data-act="soon">业主委托</a>
+      <a href="javascript:;" data-act="soon" class="nav-hot">租房节<sup>HOT</sup></a>
+    </div>
+  </nav>
+  <div class="debunk" id="debunk" data-house="h404"><div class="wrap"><span class="db-tag">平台辟谣</span><span class="db-txt">网传“幸福里小区404室曾发生多起租客失联”系不实信息，该房源已由经纪人实地核验，可放心入住。</span><a class="db-go" data-house="h404">查看核验房源 &gt;</a></div></div>
+  <div class="ticker" id="ticker"><div class="wrap"><span class="ticker-ico">📢</span><div class="ticker-track" id="tickerTrack"></div></div></div>
+</header>
+
+<main id="app"></main>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="foot-cols">
+      <dl><dt>关于安栖</dt><dd>公司简介</dd><dd>加入我们</dd><dd>联系我们</dd><dd>媒体报道</dd></dl>
+      <dl><dt>租客服务</dt><dd>真房源承诺</dd><dd>先行赔付</dd><dd>租房合同范本</dd><dd>投诉建议</dd></dl>
+      <dl><dt>业主服务</dt><dd>业主委托</dd><dd>房屋托管</dd><dd>房价评估</dd><dd>经纪人入驻</dd></dl>
+      <dl><dt>帮助中心</dt><dd>常见问题</dd><dd>隐私政策</dd><dd>用户协议</dd><dd id="resetLink">清除浏览记录</dd></dl>
+      <div class="foot-qr"><canvas class="qr" width="88" height="88"></canvas><p>安栖租房APP</p></div>
+      <div class="foot-qr"><canvas class="qr" width="88" height="88"></canvas><p>官方微信公众号</p></div>
+    </div>
+    <div class="foot-links">友情链接：北京租房 上海租房 广州租房 深圳租房 杭州租房 成都租房 武汉租房 南京租房 天津租房 西安租房 重庆租房 苏州租房 <a id="qhLink" href="https://qinghuai-community.pages.dev" target="_blank" rel="noopener">青槐新村社区便民网</a></div>
+    <div class="foot-copy" id="footCopy">
+      <p>© 2014-2026 anqi.com 版权所有　安栖网络科技有限公司　<span id="icp">ICP备13044044号-1</span>　<span id="gongan">公网安备 11010502030404号</span></p>
+      <p>增值电信业务经营许可证：B2-20140404　营业执照　网络文化经营许可证　违法和不良信息举报电话：400-878-0404</p>
+    </div>
+  </div>
+</footer>
+
+<!-- 右侧悬浮栏 -->
+<div class="sidebar">
+  <a class="sb-item" data-act="chat"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg><span>在线客服</span></a>
+  <a class="sb-item"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/></svg><span>APP</span></a>
+  <a class="sb-item"><svg viewBox="0 0 24 24"><path d="M5 3h14v18l-7-4-7 4z"/></svg><span>收藏</span></a>
+  <a class="sb-item" data-act="top"><svg viewBox="0 0 24 24"><path d="M12 5l7 8h-4v6H9v-6H5z"/></svg><span>顶部</span></a>
+</div>
+
+<!-- 底部APP条 -->
+<div class="appbar" id="appbar">
+  <div class="wrap"><svg class="logo-ico sm" viewBox="0 0 40 40"><rect width="40" height="40" rx="8"/><path d="M8 20 20 9l12 11v11h-8v-7h-8v7H8z" fill="#fff"/></svg>
+    <span id="appbarTxt">下载安栖APP，看房更方便，新用户首单立减 <b>500元</b></span>
+    <a class="btn" href="javascript:;">立即下载</a><span class="appbar-x" id="appbarX">×</span></div>
+</div>
+
+<!-- 客服聊天窗 -->
+<div class="chat" id="chat">
+  <div class="chat-head"><img id="chatAvatar" src="img/agent.jpg" alt=""><div><b id="chatName">王秀芬</b><small id="chatStatus">安栖金牌经纪人 · 在线</small></div><span class="chat-x" id="chatX">—</span></div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-quick" id="chatQuick"></div>
+  <div class="chat-input"><input id="chatInput" placeholder="请输入您想咨询的问题…"><button id="chatSend">发送</button></div>
+</div>
+
+<!-- 通用弹窗容器 -->
+<div class="modal-mask" id="modalMask"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- 恐怖层 -->
+<canvas id="noise"></canvas>
+<div id="vignette"></div>
+<div id="lurker"><img src="img/face.jpg" alt=""></div>
+<div id="flash"></div>
+<div id="vr"></div>
+
+<script src="audio.js?v=22"></script>
+<script src="app.js?v=234-1"></script>
+</body>
+</html>
