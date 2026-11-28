@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#112a25">
+  <title>蜘蛛纸牌 · 234宠物之家</title>
+  <link rel="stylesheet" href="./spider.css?v=1">
+  <script defer src="../account.js?v=spider1"></script>
+  <script type="module" src="./spider.mjs?v=1"></script>
+</head>
+<body>
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <symbol id="spider-mark" viewBox="0 0 64 64">
+      <g fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M28 27 19 19 16 8m12 22L14 24 6 14m21 20L12 34 5 45m23-7L19 47 16 58m20-31 9-8 3-11m-12 22 14-6 8-10M37 34l15 0 7 11M36 38l9 9 3 11"/>
+      </g>
+      <g fill="currentColor"><path d="M32 31c-9 1-10 12-4 18l4 4 4-4c6-6 5-17-4-18Z"/><ellipse cx="32" cy="27" rx="5.6" ry="6.4"/></g>
+      <path d="m29 21-2-4m8 4 2-4" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icon-back" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol>
+    <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.4 9a2.8 2.8 0 0 1 5.5.6c0 2-2.9 2.3-2.9 4M12 17h.01"/></symbol>
+    <symbol id="icon-undo" viewBox="0 0 24 24"><path d="M9 5 4 10l5 5M5 10h8a6 6 0 1 1 0 12" transform="translate(0 -2)"/></symbol>
+    <symbol id="icon-hint" viewBox="0 0 24 24"><path d="M8.5 14.5a6 6 0 1 1 7 0c-1 .7-1.5 1.6-1.5 2.5h-4c0-.9-.5-1.8-1.5-2.5ZM10 20h4"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="icon-scale" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.2"/><path d="M12 8v8m-4-4h8"/></symbol>
+  </svg>
+  <main class="room">
+    <nav class="topline" aria-label="网站导航">
+      <a href="../games.html" class="back-link"><svg class="icon"><use href="#icon-back"/></svg>游戏大厅</a>
+      <div><span id="save-status" role="status"></span><a class="account-link" href="../account.html">网站账号</a></div>
+    </nav>
+    <div class="command-bar">
+      <div class="game-title">
+        <span class="crest"><svg aria-hidden="true"><use href="#spider-mark"/></svg></span>
+        <div><h1>蜘蛛纸牌</h1><p class="game-meta"><span id="difficulty-label">一色</span><i aria-hidden="true"></i><span id="moves">0 步</span></p></div>
+      </div>
+      <div class="actions" aria-label="游戏操作">
+        <button id="undo" disabled><svg class="icon"><use href="#icon-undo"/></svg>撤销</button>
+        <button id="hint" disabled><svg class="icon"><use href="#icon-hint"/></svg>提示</button>
+        <button id="new-game" class="gold-button" disabled><svg class="icon"><use href="#icon-plus"/></svg>新局</button>
+      </div>
+    </div>
+    <section class="table" aria-label="牌桌">
+      <div class="table-tools">
+        <button id="deal" class="stock" disabled aria-label="发一行牌">
+          <span class="stock-cards" aria-hidden="true"><i></i><i></i><i><svg><use href="#spider-mark"/></svg></i></span>
+          <span class="stock-copy"><strong>发一行</strong><small id="stock-left">剩余 5 行</small></span>
+        </button>
+        <div class="foundation" aria-label="收齐的牌组">
+          <div class="foundation-label">已收齐 <b id="completed-count">0 / 8</b></div>
+          <div id="foundation-slots" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div id="board-scroll" class="board-scroll" aria-label="纸牌区">
+        <div class="tableau" id="tableau" role="group" aria-label="十列蜘蛛纸牌"></div>
+      </div>
+      <div class="table-note">
+        <span id="notice" role="status" aria-live="polite">正在打开牌局…</span>
+        <div class="table-links">
+          <button id="scale" type="button" aria-pressed="false"><svg class="icon"><use href="#icon-scale"/></svg>大牌</button>
+          <button id="rules" type="button"><svg class="icon"><use href="#icon-help"/></svg>玩法</button>
+        </div>
+      </div>
+    </section>
+    <noscript>请启用 JavaScript 以开始蜘蛛纸牌。</noscript>
+  </main>
+  <dialog id="new-dialog" aria-labelledby="new-title">
+    <form id="new-form">
+      <h2 id="new-title">开始新局</h2>
+      <label for="suits">选择花色</label>
+      <select id="suits"><option value="1">一色 · 黑桃</option><option value="2">双色 · 黑桃、红心</option><option value="4">四色 · 全部花色</option></select>
+      <p>开始后将替换当前牌局。</p>
+      <div class="dialog-actions"><button type="button" data-close>取消</button><button id="start-game" type="submit" class="gold-button">开始</button></div>
+    </form>
+  </dialog>
+  <dialog id="rules-dialog" aria-labelledby="rules-title">
+    <h2 id="rules-title">蜘蛛纸牌玩法</h2>
+    <ul class="rules-list">
+      <li>把一张明牌，或一串<strong>同花色、点数连续递减</strong>的明牌，移到点数恰好大一的明牌上，例如把 7 放到 8 上。空列可以接任意可移动的牌组。</li>
+      <li>不同花色可以叠放。凑成同花色的 <strong>K 到 A</strong> 后会自动收走，收齐八组即获胜。</li>
+      <li>十列都有牌时，点「发一行」会给每列各发一张。点「撤销」可以收回上一步。</li>
+    </ul>
+    <p>点选一张牌，再点目标列。电脑可拖动，手机也可按住后拖动。键盘用左右键换列、上下键选牌、回车确认。</p>
+    <div class="dialog-actions"><button class="gold-button" data-close>知道了</button></div>
+  </dialog>
+  <dialog id="win-dialog" aria-labelledby="win-title">
+    <span class="win-seal" aria-hidden="true"><svg><use href="#spider-mark"/></svg></span>
+    <h2 id="win-title">八组收齐！</h2><p id="win-detail"></p>
+    <div class="dialog-actions"><button data-close>查看牌桌</button><button id="play-again" class="gold-button">再开一局</button></div>
+  </dialog>
+</body>
+</html>

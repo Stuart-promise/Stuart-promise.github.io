@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>游戏页面 · 234宠物之家</title>
   <style>
+    .game-cards .spider-card { background:#e5ede6 }
+    .spider-art { height:clamp(135px,20vw,180px); margin:14px 0 20px; border-radius:14px; overflow:hidden; display:grid; place-items:center; background:radial-gradient(ellipse at 50% 90%,#246953,#0c3b32) }
+    .spider-art span { grid-area:1/1; width:62px; height:86px; padding:5px 7px; border-radius:6px; background:#fffaf0; border:1px solid #d4c8a9; box-shadow:0 3px 7px #092d2880; color:#202b29; font:700 18px/1.04 Georgia,serif; transform:translate(-42px,5px) rotate(-17deg) }
+    .spider-art i { display:block; text-align:center; margin-top:2px; font:normal 39px/1 Georgia,serif }
+    .spider-art span:nth-child(2) { transform:translateY(-4px) }
+    .spider-art span:last-child { transform:translate(42px,5px) rotate(17deg) }
     .game-cards .atlas-card { background:#e8eee3 }
     .game-cards .light-card { background:#eae8f2 }
     .creative-art { height:clamp(135px,20vw,180px); margin:14px 0 20px; overflow:hidden; border-radius:14px; background:#8aa8c1 }
@@ -30,6 +36,11 @@
   <main class="home">
     <div class="intro"><span class="eyebrow">一起玩一局 <i></i> PLAY</span><h1>游戏页面</h1><p>和朋友下盘棋，挑战一款游戏，或翻开一本小说慢慢读。</p></div>
     <nav class="game-cards" aria-label="选择游戏或阅读">
+      <a class="game-card spider-card" href="./spider/">
+        <div class="spider-art" aria-hidden="true"><span>J<i>♠</i></span><span>10<i>♠</i></span><span>9<i>♠</i></span></div>
+        <h2>蜘蛛纸牌</h2><p>在十列牌之间腾挪，把同花色从 K 排到 A，收齐八组。</p>
+        <span class="card-footer"><span>单人 · 一色 / 双色 / 四色</span><b>开始牌局 ↗</b></span>
+      </a>
       <a class="game-card" href="./anjia-zufang/" style="background:#e5eee7">
         <div class="creative-art"><img src="./anjia-zufang/img/h1_living.jpg" alt="" draggable="false" decoding="async"></div>
         <h2>安栖租房</h2><p>一套月租 444 元的两居室。翻翻照片，再问问经纪人，这间房为什么这么便宜？</p>

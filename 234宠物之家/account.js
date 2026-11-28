@@ -10,10 +10,10 @@
   const PENDING_LOGOUT = 'pet234:logout-pending:v1';
   const modules = {
     'chinese-changsha':'长沙中考古诗文', 'chinese-gaokao':'高考古诗文', spanish:'西语学习', 'vocab-cet4':'四级单词', 'vocab-cet6':'六级单词', 'vocab-zhongkao':'长沙中考单词', 'vocab-gaokao':'高考单词',
-    fishing:'钓鱼模拟器', 'coin-tycoon':'金币大亨', 'zhaoyun-adou':'赵云与阿斗', animal2048:'动物 2048', blocks:'俄罗斯方块最高分', 'animal-drop':'动物合成最高分'
+    fishing:'钓鱼模拟器', 'coin-tycoon':'金币大亨', 'zhaoyun-adou':'赵云与阿斗', spider:'蜘蛛纸牌', animal2048:'动物 2048', blocks:'俄罗斯方块最高分', 'animal-drop':'动物合成最高分'
   };
   const prefixes = {'chinese-changsha':'pet234:chinese:v1:changsha:', 'chinese-gaokao':'pet234:chinese:v1:gaokao:', 'vocab-cet4':'pet234:vocab:v1:cet4:', 'vocab-cet6':'pet234:vocab:v1:cet6:', 'vocab-zhongkao':'pet234:vocab:v1:zhongkao:', 'vocab-gaokao':'pet234:vocab:v1:gaokao:'};
-  const singleKeys = {fishing:'pet234-fishing-v1','coin-tycoon':'pet234-coin-tycoon-v1',animal2048:'pet234-animal2048-v1',blocks:'pet234-blocks-best','animal-drop':'pet234-animal-drop-best'};
+  const singleKeys = {fishing:'pet234-fishing-v1','coin-tycoon':'pet234-coin-tycoon-v1',spider:'pet234-spider-v1',animal2048:'pet234-animal2048-v1',blocks:'pet234-blocks-best','animal-drop':'pet234-animal-drop-best'};
   prefixes.spanish = 'pet234:spanish:v1:';
   const zhaoKeys = new Set(['zyad.learning.profile.v1','zyad.learning.profile.v1.backup','zyad.friend.history.v1']);
   let session = null, stale = false, message = '', timer, running, syncing, signingIn, signingOut, revoking;
