@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="zh-CN">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>扫雷 · 234宠物之家</title><link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./solo.css?v=touchflag1">
-<script defer src="./mines-engine.js?v=solo1"></script><script defer src="./mines.js?v=touchflag1"></script><link rel="stylesheet" href="./account.css?v=forum1"><script src="./account.js?v=session2"></script><link rel="preconnect" href="https://111.228.4.20" crossorigin></head>
+<title>扫雷 · 234宠物之家</title><link rel="stylesheet" href="./style.css?v=peer1"><link rel="stylesheet" href="./solo.css?v=deduction2">
+<script defer src="./mines-engine.js?v=deduction2"></script><script defer src="./mines.js?v=deduction2"></script><link rel="stylesheet" href="./account.css?v=forum1"><script src="./account.js?v=session2"></script><link rel="preconnect" href="https://111.228.4.20" crossorigin></head>
 <body class="solo-page mines-page"><header><a class="brand" href="./?v=portal1"><span class="paw">🐾</span>234宠物之家</a><a class="back-home" href="./games.html?v=portal1">← 游戏列表</a></header><main>
-<div class="intro"><span class="eyebrow">一个人的挑战 <i></i> 05</span><h1>扫雷</h1><p>从第一格开始，仔细推理每一颗地雷。</p></div>
+<div class="intro"><span class="eyebrow">一个人的挑战 <i></i> 05</span><h1>扫雷</h1><p>任选一格开始。三个难度的每一局都可以靠线索推理通关。</p></div>
 <section class="solo-toolbar"><label>难度 <select id="difficulty"><option value="easy">简单</option><option value="medium">中等</option><option value="hard">困难</option></select></label><button id="new-game">重新开始</button><span class="badge">单人游戏</span></section>
 <div class="solo-layout">
 <section class="solo-panel">
@@ -13,5 +13,5 @@
   <p class="subtext">手机轻点开格，长按插旗，再长按一次可拔旗。左右滑动可查看大棋盘。</p>
 </section>
 <aside><h2>排雷记录</h2><p class="status" id="solo-status" role="status"></p><p id="mine-size"></p><button id="flag-mode" class="wide-button" aria-pressed="false">⚑ 标旗模式</button>
-<section class="rules"><h2>玩法</h2><p>数字表示周围八格的地雷数量。打开所有安全格即可获胜，踩中地雷则本局结束。首次打开的格子及其周围八格安全。</p><p>电脑右键或键盘 F 可插旗、拔旗。开启「标旗模式」后也可以轻点标旗。标旗数量与已展开数字相同时，点击该数字可快速展开周围格，错误标旗可能触雷。</p><p>简单 9 × 9，10 雷；中等 16 × 16，40 雷；困难 16 × 30，99 雷。棋盘随机生成，可能需要猜测。</p></section>
+<section class="rules"><h2>玩法</h2><p>数字表示周围八格的地雷数量。首格及其周围安全。结合已展开的数字和全盘总雷数，可以推出其余安全格。打开所有安全格即获胜。</p><p>电脑右键或键盘 F 可插旗、拔旗。开启「标旗模式」后也可以轻点标旗。标旗数量与已展开数字相同时，点击该数字可快速展开周围格，错误标旗可能触雷。</p><p>简单 9 × 9，10 雷；中等 16 × 16，40 雷；困难 16 × 30，99 雷。</p></section>
 </aside></div></main></body></html>
