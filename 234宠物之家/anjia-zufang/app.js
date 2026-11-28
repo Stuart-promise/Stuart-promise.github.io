@@ -629,7 +629,8 @@ function route() {
 window.addEventListener('hashchange', () => { act(); route(); });
 
 /* ---------- 全局点击 ---------- */
-document.addEventListener('click', e => {
+// Mobile WebKit dispatches taps on non-link cards when their body ancestor handles clicks.
+body.addEventListener('click', e => {
   SFX.init();
   const t = e.target.closest('[data-house],[data-go],[data-act]');
   if (!t) return;
